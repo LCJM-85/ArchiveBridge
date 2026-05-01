@@ -5,6 +5,7 @@ import edu.scau.scauarchiveinsight.service.PdfToImageService;
 import edu.scau.scauarchiveinsight.service.StorageService;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +60,13 @@ public class PDFProcessor {
             try {
                 storageService.moveArchiveFile(Paths.get(pdfPath).getFileName().toString());
             } catch (Exception ignored) {
+            }
+            // 删除 PDF 转换生成的临时图片
+            for (String imagePath : imagePaths) {
+                try {
+                    Files.deleteIfExists(Paths.get(imagePath));
+                } catch (Exception ignored) {
+                }
             }
         }
 
