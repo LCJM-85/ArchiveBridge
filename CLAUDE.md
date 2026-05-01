@@ -4,76 +4,81 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-SCAU Archive Insight is a full-stack student archive management system for South China Agricultural University. It consists of:
+SCAU Archive Insight is a full-stack student archive management system for South China Agricultural University.
 
-- **Backend**: Spring Boot 3.5 application (`scau-archive-insight/`)
-- **Frontend**: Vue 3 SPA (`scau_archive-frontend/`)
+- **Backend**: Spring Boot 3.5 (Java 17) + MyBatis-Plus + PostgreSQL/PostGIS
+- **Frontend**: Vue 3 SPA (Vite 8, Element Plus, Pinia, ECharts, Axios)
+- **Python scripts**: OCR (PaddleOCR), PDF-to-image (PyMuPDF), image enhancement (OpenCV)
 
 ## Commands
 
-### Backend (Spring Boot)
+### Backend (Spring Boot, port 8080)
 ```bash
 cd scau-archive-insight
-
-# Build
-./mvnw clean package
-
-# Run (default port 8080)
-./mvnw spring-boot:run
-
-# Run tests
-./mvnw test
+./mvnw clean package          # Build
+./mvnw spring-boot:run        # Run
+./mvnw test                   # Run tests
 ```
 
-### Frontend (Vue 3)
+### Frontend (Vue 3, port 5173)
 ```bash
 cd scau_archive-frontend
+npm install                   # Install dependencies
+npm run dev                   # Dev server
+npm run build                 # Production build
+npm run preview               # Preview production build
+```
 
-# Install dependencies
-npm install
-
-# Dev server (default port 5173)
-npm run dev
-
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+### Python (Windows venv)
+```bash
+cd scau-archive-insight
+.venv/Scripts/python.exe src/main/python/ocr/ocr.py <image_path>
+.venv/Scripts/python.exe src/main/python/pdf2image/pdf2image.py <pdf_path>
+.venv/Scripts/python.exe src/main/python/opencv/opencv.py <image_path>
 ```
 
 ## Architecture
 
-### Backend Structure
-- `config/` - Security configuration, CORS, exception handlers
-- `controller/` - REST API endpoints
-- `service/` - Business logic layer
-- `mapper/` - MyBatis-Plus data access interfaces
-- `pojo/` - Entity classes (dimension and fact tables)
-- `dto/` - Data transfer objects
-- `filter/` - JWT authentication filter
-- `util/` - Utilities (JWT, etc.)
+### Backend Layers
+- **controller/** — REST endpoints (`/api/upload`, `/api/login`, `/api/captcha`, `/api/change-password`)
+- **service/** — Business logic: `UserService`, `StorageService`, `OCRService`, `PdfToImageService`, `OpenCVService`
+- **processor/** — File parsing: `CSVProcessor`, `ExcelProcessor`, `PDFProcessor`, `WaxProcessor` (image)
+- **mapper/** — MyBatis-Plus data access interfaces
+- **pojo/** — Entity classes (dimension/fact tables + `SysUser`)
+- **config/** — `SecurityConfig` (Spring Security + CORS), `GlobalExceptionHandler`, `JsonAuthenticationEntryPoint`
+- **filter/** — `JwtAuthenticationFilter` (OncePerRequestFilter)
+- **util/** — `JwtUtils`
 
-### Frontend Structure
-- `src/views/` - Page components organized by feature (dashboard, login, analysis, archive, charts, data, governance, ocr, prediction, report, system)
-- `src/components/` - Reusable UI components (common, layout)
-- `src/api/` - API modules for backend communication
-- `src/store/` - Pinia state management
-- `src/router/` - Vue Router with auth guards
-- `src/utils/` - Request wrapper, auth helpers
+### File Upload Pipeline
+1. `ArchiveUploadController` receives multipart files + type param
+2. `StorageService.saveFiles()` saves to `storage/temp/{yyyyMMdd}/{type}/`
+3. Based on file extension, dispatches to processor:
+   - **CSV/Excel** → parsed into `List<Map>` rows → auto-archived to `storage/archive/`
+   - **PDF** → `PdfToImageService` (Python PyMuPDF) → `OCRService` (Python PaddleOCR) → structured JSON
+   - **Images** → `OpenCVService` (Python enhance) → `OCRService` → structured JSON
 
-### Data Model
-The system uses a dimensional data model with:
-- **Dimension tables**: `student_dim`, `college_dim`, `major_dim`, `class_dim`, `province_dim`, `nation_dim`, `political_dim`, `date_dim`, etc.
-- **Fact tables**: `student_fact`, `admission_fact`, `graduation_fact`, etc.
+### Authentication
+- `GET /api/captcha` → session-based captcha (Hutool LineCaptcha, 2min TTL)
+- `POST /api/login` → validates captcha + BCrypt password → returns JWT
+- Subsequent requests: `Authorization: Bearer <token>` header
+- Rate limiting: 8 attempts/10min per IP+user, 30 captcha requests/min per IP
+- SessionCreationPolicy.ALWAYS (captcha stored in HttpSession)
 
-### Authentication Flow
-1. Frontend requests captcha from `GET /api/captcha` (session-based)
-2. User submits login with captcha to `POST /api/login`
-3. Backend validates credentials and returns JWT token
-4. Frontend stores token in localStorage and sends it in `Authorization: Bearer <token>` header
-5. `JwtAuthenticationFilter` validates token on protected routes
+### Python Scripts
+All called via `ProcessBuilder` from Java services, Python venv at `.venv/Scripts/python.exe`:
+- **ocr.py**: PaddleOCR → regex extraction of student fields (学号, 姓名, 院系, 专业, 毕业证号) → JSON
+- **pdf2image.py**: PyMuPDF (fitz) → 200dpi PNG per page → prints paths to stdout
+- **opencv.py**: OpenCV → grayscale → Gaussian blur → adaptive threshold → sharpen
 
-### Key Dependencies
-- Backend: Spring Security, MyBatis-Plus, PostgreSQL with PostGIS, JWT (jjwt), Apache POI/PDFBox, Hutool captcha
-- Frontend: Vue 3, Vite, Element Plus, Pinia, Vue Router, Axios, ECharts
+### Database (PostgreSQL + PostGIS)
+- **Dimension tables**: student_dim, college_dim, major_dim, class_dim, province_dim, nation_dim, political_dim, date_dim, degree_dim, destination_dim, source_type_dim, archive_file_dim, ocr_log_dim
+- **Fact tables**: student_fact, admission_fact, graduation_fact
+- Connection pool: Druid (initial 5, min 10, max 20)
+
+### Frontend Layout
+- **views/** — dashboard, login, archive, analysis, charts, data, governance, ocr, prediction, report, system
+- **components/common/** — TableView, UploadPanel, Loading, Empty
+- **components/layout/** — AppLayout, Header, Sidebar, Content
+- **api/** — auth.js, archive.js, analysis.js, report.js
+- **store/** — user.js (Pinia), archive.js, menu.js
+- **router/** — Auth guard via localStorage JWT + client-side expiry check

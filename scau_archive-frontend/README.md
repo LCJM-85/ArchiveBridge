@@ -1,5 +1,12 @@
-# Vue 3 + Vite
+# SCAU 档案洞察系统 - 前端
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+基于 Vue 3 + Vite 8 + Element Plus 的后台管理界面。
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## 启动
+
+```bash
+npm install
+npm run dev      # 开发服务器 (端口 5173)
+npm run build    # 生产构建
+npm run preview  # 预览生产构建
+```
