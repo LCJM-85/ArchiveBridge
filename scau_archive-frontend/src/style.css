@@ -1,0 +1,635 @@
+/* ============================================
+   SCAU Archive Insight - Global Theme System
+   Light & Dark Mode with CSS Custom Properties
+   ============================================ */
+
+/* --- Smooth Theme Transition --- */
+*,
+*::before,
+*::after {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* ===================== LIGHT THEME (Default) ===================== */
+:root {
+  /* ---- Background Colors ---- */
+  --bg-primary: #f5f6fa;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f0f2f5;
+  --bg-elevated: #ffffff;
+
+  /* ---- Text Colors ---- */
+  --text-primary: #1d1e26;
+  --text-secondary: #5a5d6e;
+  --text-tertiary: #9ea0ad;
+  --text-placeholder: #c0c2cc;
+
+  /* ---- Border Colors ---- */
+  --border-color: #e4e6ed;
+  --border-light: #eef0f4;
+
+  /* ---- Brand / Accent Colors ---- */
+  --color-primary: #1a7a4e;
+  --color-primary-light: #e8f5ed;
+  --color-primary-dark: #14603d;
+  --color-accent: #409eff;
+  --color-warning: #e6a23c;
+  --color-danger: #f56c6c;
+  --color-success: #67c23a;
+  --color-info: #909399;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.1);
+
+  /* ---- Layout Specific ---- */
+  --sidebar-bg: #1a2e22;
+  --sidebar-text: #b8c5bc;
+  --sidebar-active-text: #ffffff;
+  --sidebar-active-bg: rgba(255, 255, 255, 0.1);
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-logo-border: rgba(255, 255, 255, 0.1);
+
+  --header-bg: #ffffff;
+  --header-border: #e4e6ed;
+  --header-text: #1d1e26;
+  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  --content-bg: #f5f6fa;
+  --app-bg: #f5f6fa;
+
+  /* ---- Card ---- */
+  --card-bg: #ffffff;
+  --card-border: #e4e6ed;
+  --card-header-bg: #ffffff;
+  --card-header-border: #eef0f4;
+
+  /* ---- Table ---- */
+  --table-bg: #ffffff;
+  --table-tr-bg: #ffffff;
+  --table-header-bg: #f5f6fa;
+  --table-row-hover-bg: #f0f2f5;
+  --table-border-color: #e4e6ed;
+
+  /* ---- Input / Form ---- */
+  --input-bg: #ffffff;
+  --input-border: #d0d2da;
+  --input-focus-border: var(--color-primary);
+  --input-text-color: var(--text-primary);
+  --input-placeholder-color: var(--text-placeholder);
+
+  /* ---- Dialog / Overlay ---- */
+  --dialog-bg: #ffffff;
+  --dialog-overlay: rgba(0, 0, 0, 0.35);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-thumb: #c0c2cc;
+  --scrollbar-track: transparent;
+
+  /* ---- Element Plus Override (Light) ---- */
+  --el-bg-color: var(--bg-secondary);
+  --el-bg-color-page: var(--bg-primary);
+  --el-bg-color-overlay: var(--bg-elevated);
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-secondary);
+  --el-text-color-secondary: var(--text-tertiary);
+  --el-text-color-placeholder: var(--text-placeholder);
+  --el-border-color: var(--border-color);
+  --el-border-color-light: var(--border-light);
+  --el-border-color-lighter: var(--border-light);
+  --el-border-color-extra-light: #f2f4f8;
+  --el-color-primary: var(--color-accent);
+  --el-color-primary-light-3: #79bbff;
+  --el-color-primary-light-5: #a8d4ff;
+  --el-color-primary-light-7: #cce5ff;
+  --el-color-primary-light-8: #d9edff;
+  --el-color-primary-light-9: #e6f3ff;
+  --el-color-primary-dark-2: #337ecc;
+  --el-color-success: var(--color-success);
+  --el-color-warning: var(--color-warning);
+  --el-color-danger: var(--color-danger);
+  --el-color-info: var(--color-info);
+  --el-fill-color: var(--bg-tertiary);
+  --el-fill-color-light: #f5f7fa;
+  --el-fill-color-lighter: #fafafa;
+  --el-mask-color: rgba(255, 255, 255, 0.8);
+  --el-card-bg-color: var(--card-bg);
+  --el-dialog-bg-color: var(--dialog-bg);
+  --el-table-bg-color: var(--table-bg);
+  --el-table-tr-bg-color: var(--table-tr-bg);
+  --el-table-header-bg-color: var(--table-header-bg);
+  --el-table-row-hover-bg-color: var(--table-row-hover-bg);
+  --el-table-border-color: var(--table-border-color);
+  --el-input-bg-color: var(--input-bg);
+  --el-input-border-color: var(--input-border);
+  --el-input-text-color: var(--input-text-color);
+  --el-input-placeholder-color: var(--input-placeholder-color);
+  --el-input-focus-border-color: var(--color-primary);
+  --el-scrollbar-bg-color: var(--scrollbar-thumb);
+  --el-menu-bg-color: transparent;
+  --el-menu-text-color: var(--sidebar-text);
+  --el-menu-active-color: var(--sidebar-active-text);
+  --el-menu-hover-bg-color: var(--sidebar-hover-bg);
+  --el-menu-hover-text-color: var(--sidebar-active-text);
+  --el-popper-bg-color: var(--bg-elevated);
+  --el-popper-border-color: var(--border-color);
+}
+
+/* ===================== DARK THEME ===================== */
+.dark {
+  /* ---- Background Colors ---- */
+  --bg-primary: #111316;
+  --bg-secondary: #1a1d21;
+  --bg-tertiary: #23262b;
+  --bg-elevated: #23262b;
+
+  /* ---- Text Colors ---- */
+  --text-primary: #e4e7ed;
+  --text-secondary: #9ca0aa;
+  --text-tertiary: #6b6f7a;
+  --text-placeholder: #4a4d56;
+
+  /* ---- Border Colors ---- */
+  --border-color: #2d3138;
+  --border-light: #25292f;
+
+  /* ---- Brand / Accent Colors ---- */
+  --color-primary: #2d9d6e;
+  --color-primary-light: #1a2e24;
+  --color-primary-dark: #238a5f;
+  --color-accent: #55b0ff;
+  --color-warning: #e6a23c;
+  --color-danger: #f56c6c;
+  --color-success: #67c23a;
+  --color-info: #63666e;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.4);
+
+  /* ---- Layout Specific ---- */
+  --sidebar-bg: #0d1115;
+  --sidebar-text: #8b8f99;
+  --sidebar-active-text: #ffffff;
+  --sidebar-active-bg: rgba(45, 157, 110, 0.25);
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
+  --sidebar-border: rgba(255, 255, 255, 0.06);
+  --sidebar-logo-border: rgba(255, 255, 255, 0.08);
+
+  --header-bg: #1a1d21;
+  --header-border: #2d3138;
+  --header-text: #e4e7ed;
+  --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+  --content-bg: #111316;
+  --app-bg: #111316;
+
+  /* ---- Card ---- */
+  --card-bg: #1a1d21;
+  --card-border: #2d3138;
+  --card-header-bg: #1a1d21;
+  --card-header-border: #25292f;
+
+  /* ---- Table ---- */
+  --table-bg: #1a1d21;
+  --table-tr-bg: #1a1d21;
+  --table-header-bg: #23262b;
+  --table-row-hover-bg: #23262b;
+  --table-border-color: #2d3138;
+
+  /* ---- Input / Form ---- */
+  --input-bg: #23262b;
+  --input-border: #3a3e46;
+  --input-focus-border: var(--color-primary);
+  --input-text-color: var(--text-primary);
+  --input-placeholder-color: var(--text-placeholder);
+
+  /* ---- Dialog / Overlay ---- */
+  --dialog-bg: #1a1d21;
+  --dialog-overlay: rgba(0, 0, 0, 0.6);
+
+  /* ---- Scrollbar ---- */
+  --scrollbar-thumb: #3a3e46;
+  --scrollbar-track: transparent;
+
+  /* ---- Element Plus Override (Dark) ---- */
+  --el-bg-color: var(--bg-secondary);
+  --el-bg-color-page: var(--bg-primary);
+  --el-bg-color-overlay: var(--bg-elevated);
+  --el-text-color-primary: var(--text-primary);
+  --el-text-color-regular: var(--text-secondary);
+  --el-text-color-secondary: var(--text-tertiary);
+  --el-text-color-placeholder: var(--text-placeholder);
+  --el-border-color: var(--border-color);
+  --el-border-color-light: var(--border-light);
+  --el-border-color-lighter: var(--border-light);
+  --el-border-color-extra-light: #202328;
+  --el-color-primary: #55b0ff;
+  --el-color-primary-light-3: #4a8fd4;
+  --el-color-primary-light-5: #3d70a8;
+  --el-color-primary-light-7: #2c5078;
+  --el-color-primary-light-8: #244161;
+  --el-color-primary-light-9: #1c324a;
+  --el-color-primary-dark-2: #88c4ff;
+  --el-color-success: var(--color-success);
+  --el-color-warning: var(--color-warning);
+  --el-color-danger: var(--color-danger);
+  --el-color-info: var(--color-info);
+  --el-fill-color: var(--bg-tertiary);
+  --el-fill-color-light: #1e2126;
+  --el-fill-color-lighter: #191b20;
+  --el-mask-color: rgba(0, 0, 0, 0.6);
+  --el-card-bg-color: var(--card-bg);
+  --el-dialog-bg-color: var(--dialog-bg);
+  --el-table-bg-color: var(--table-bg);
+  --el-table-tr-bg-color: var(--table-tr-bg);
+  --el-table-header-bg-color: var(--table-header-bg);
+  --el-table-row-hover-bg-color: var(--table-row-hover-bg);
+  --el-table-border-color: var(--table-border-color);
+  --el-input-bg-color: var(--input-bg);
+  --el-input-border-color: var(--input-border);
+  --el-input-text-color: var(--input-text-color);
+  --el-input-placeholder-color: var(--input-placeholder-color);
+  --el-input-focus-border-color: var(--color-primary);
+  --el-scrollbar-bg-color: var(--scrollbar-thumb);
+  --el-menu-bg-color: transparent;
+  --el-menu-text-color: var(--sidebar-text);
+  --el-menu-active-color: var(--sidebar-active-text);
+  --el-menu-hover-bg-color: var(--sidebar-hover-bg);
+  --el-menu-hover-text-color: #ffffff;
+  --el-popper-bg-color: var(--bg-elevated);
+  --el-popper-border-color: var(--border-color);
+
+  /* ---- Dropdown / Popover Menu Specific ---- */
+  --el-menu-item-hover-fill: var(--sidebar-hover-bg);
+}
+
+/* ===================== GLOBAL STYLES ===================== */
+
+html {
+  color-scheme: light;
+}
+
+.dark html,
+.dark {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  margin: 0;
+  padding: 0;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* Selection */
+::selection {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+/* ===================== LAYOUT STYLES ===================== */
+
+.app-layout {
+  background: var(--app-bg) !important;
+}
+
+.header {
+  background: var(--header-bg) !important;
+  border-bottom: 1px solid var(--header-border) !important;
+  box-shadow: var(--header-shadow) !important;
+}
+
+.header .title {
+  color: var(--header-text) !important;
+}
+
+.header .breadcrumb {
+  color: var(--text-secondary) !important;
+}
+
+.header .breadcrumb .el-breadcrumb__inner {
+  color: var(--text-secondary) !important;
+}
+
+.header .breadcrumb .el-breadcrumb__item:last-child .el-breadcrumb__inner {
+  color: var(--text-primary) !important;
+}
+
+.header .user-info:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+.sidebar {
+  background: var(--sidebar-bg) !important;
+  border-right: 1px solid var(--sidebar-border) !important;
+}
+
+.sidebar .logo {
+  color: var(--sidebar-active-text);
+  border-bottom-color: var(--sidebar-logo-border) !important;
+}
+
+.sidebar .el-menu {
+  background: transparent !important;
+  border-right: none;
+}
+
+/* Sidebar menu item styling */
+.sidebar .el-menu-item {
+  color: var(--sidebar-text) !important;
+  margin: 2px 8px;
+  border-radius: 6px;
+  width: auto;
+}
+
+.sidebar .el-menu-item:hover {
+  background: var(--sidebar-hover-bg) !important;
+  color: var(--sidebar-active-text) !important;
+}
+
+.sidebar .el-menu-item.is-active {
+  background: var(--sidebar-active-bg) !important;
+  color: var(--sidebar-active-text) !important;
+  font-weight: 500;
+}
+
+.sidebar .el-sub-menu__title {
+  color: var(--sidebar-text) !important;
+  margin: 2px 8px;
+  border-radius: 6px;
+  width: auto;
+}
+
+.sidebar .el-sub-menu__title:hover {
+  background: var(--sidebar-hover-bg) !important;
+  color: var(--sidebar-active-text) !important;
+}
+
+.sidebar .el-sub-menu .el-menu {
+  background: transparent !important;
+}
+
+.sidebar .el-sub-menu .el-menu .el-menu-item {
+  padding-left: 50px !important;
+  margin: 1px 8px;
+  border-radius: 6px;
+}
+
+/* Sub-menu arrow color */
+.sidebar .el-sub-menu .el-sub-menu__title .el-sub-menu__icon-arrow {
+  color: var(--sidebar-text) !important;
+}
+
+.content {
+  background: var(--content-bg) !important;
+}
+
+/* ===================== COMPONENT STYLES ===================== */
+
+/* Card */
+.el-card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  box-shadow: var(--shadow-sm) !important;
+  border-radius: 10px !important;
+  transition: all 0.25s ease !important;
+}
+
+.el-card:hover {
+  box-shadow: var(--shadow-md) !important;
+}
+
+.el-card__header {
+  background: var(--card-header-bg) !important;
+  border-bottom: 1px solid var(--card-header-border) !important;
+  padding: 16px 20px !important;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-radius: 10px 10px 0 0 !important;
+}
+
+.el-card__body {
+  padding: 20px !important;
+}
+
+/* Table */
+.el-table {
+  --el-table-header-text-color: var(--text-secondary);
+}
+
+.el-table th.el-table__cell {
+  font-weight: 600 !important;
+  font-size: 13px !important;
+}
+
+.el-table__empty-text {
+  color: var(--text-tertiary) !important;
+}
+
+/* Dialog */
+.el-dialog {
+  --el-dialog-bg-color: var(--dialog-bg) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-xl) !important;
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 16px 20px !important;
+  margin-right: 0 !important;
+}
+
+.el-dialog__title {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+.el-dialog__body {
+  padding: 20px !important;
+}
+
+.el-dialog__footer {
+  border-top: 1px solid var(--border-color) !important;
+  padding: 12px 20px !important;
+}
+
+/* Form Labels */
+.el-form-item__label {
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+}
+
+/* Statistic */
+.el-statistic {
+  --el-statistic-content-color: var(--text-primary) !important;
+}
+
+.el-statistic__head {
+  color: var(--text-secondary) !important;
+}
+
+/* Dropdown */
+.el-dropdown-menu {
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+.el-dropdown-menu__item {
+  color: var(--text-primary) !important;
+}
+
+.el-dropdown-menu__item:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+.el-dropdown-menu__item--divided {
+  border-top-color: var(--border-color) !important;
+}
+
+/* Alert */
+.el-alert {
+  border-radius: 8px !important;
+}
+
+.el-alert--error {
+  --el-alert-bg-color: rgba(245, 108, 108, 0.1) !important;
+}
+
+/* Checkbox */
+.el-checkbox__label {
+  color: var(--text-secondary) !important;
+}
+
+/* Badge */
+.el-badge__content {
+  border-color: var(--header-bg) !important;
+}
+
+/* Button text in header */
+.header .el-button--text {
+  color: var(--text-secondary) !important;
+}
+
+.header .el-button--text:hover {
+  color: var(--color-accent) !important;
+  background: transparent !important;
+}
+
+/* Notification/Message */
+.el-message {
+  border-radius: 8px !important;
+}
+
+/* Empty state */
+.el-empty__description p {
+  color: var(--text-tertiary) !important;
+}
+
+/* Breadcrumb separator */
+.el-breadcrumb__separator {
+  color: var(--text-tertiary) !important;
+}
+
+/* El popper / dropdown */
+.el-popper {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border-color) !important;
+}
+
+.el-popper .el-popper__arrow::before {
+  background: var(--bg-elevated) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* ===================== SIDEBAR POPUP MENU STYLES ===================== */
+
+/* Fix for sub-menu popup in dark mode */
+.dark .el-popper {
+  background: #1a1d21 !important;
+  border: 1px solid #2d3138 !important;
+}
+
+.dark .el-popper .el-menu--popup {
+  background: transparent !important;
+}
+
+.dark .el-popper .el-menu-item {
+  background: transparent !important;
+  color: #9ca0aa !important;
+}
+
+.dark .el-popper .el-menu-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #ffffff !important;
+}
+
+.dark .el-popper .el-menu-item.is-active {
+  background: rgba(45, 157, 110, 0.25) !important;
+  color: #ffffff !important;
+}
+
+/* Light mode popup menu */
+.el-popper .el-menu--popup {
+  background: transparent !important;
+}
+
+.el-popper .el-menu-item {
+  background: transparent !important;
+  color: var(--text-secondary) !important;
+}
+
+.el-popper .el-menu-item:hover {
+  background: var(--bg-tertiary) !important;
+  color: var(--text-primary) !important;
+}
+
+.el-popper .el-menu-item.is-active {
+  background: var(--color-primary-light) !important;
+  color: var(--color-primary) !important;
+  font-weight: 500;
+}
+
+/* ===================== UTILITY ===================== */
+
+/* Glass card effect (used on login) */
+.glass-card {
+  background: rgba(255, 255, 255, 0.12) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
+}
+
+.dark .glass-card {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
