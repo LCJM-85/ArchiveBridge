@@ -1,0 +1,25 @@
+# IDE配置
+.idea/
+.vscode/
+*.iml
+
+# 前端Vue
+node_modules/
+dist/
+build/
+
+# 后端Java
+target/
+*.log
+*.class
+*.jar
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 业务无关文件
+uploads/
+models/
+logs/
+temp/
