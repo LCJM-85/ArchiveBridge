@@ -1,5 +1,7 @@
 package edu.scau.scauarchiveinsight.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -95,6 +97,13 @@ public class StorageService {
      * 将 storage/temp 下的文件转移到 storage/failed
      */
     public String failedFile(String fileName) throws IOException {
+        return failedFile(fileName, null);
+    }
+
+    /**
+     * 将文件转移到 failed 并写入错误原因
+     */
+    public String failedFile(String fileName, String errorMessage) throws IOException {
         try (var stream = Files.walk(STORAGE_ROOT)) {
             Optional<Path> matched = stream
                     .filter(Files::isRegularFile)
@@ -115,7 +124,22 @@ public class StorageService {
             }
 
             Files.move(source, target);
+
+            if (errorMessage != null && !errorMessage.isEmpty()) {
+                Path errorFile = target.resolveSibling(target.getFileName() + ".error.json");
+                String errorJson = "{\"message\":" + jsonEncode(errorMessage) + "}";
+                Files.writeString(errorFile, errorJson);
+            }
+
             return target.toString();
+        }
+    }
+
+    private String jsonEncode(String s) {
+        try {
+            return new ObjectMapper().writeValueAsString(s);
+        } catch (JsonProcessingException e) {
+            return "\"" + s.replace("\"", "\\\"") + "\"";
         }
     }
 }

@@ -3,8 +3,9 @@ from paddleocr import PaddleOCR
 import sys
 import re
 import json
+import os
+import math
 
-# 你原来的模型配置（完全保留，不动）
 import logging
 logging.getLogger("ppocr").setLevel(logging.ERROR)
 
@@ -17,71 +18,135 @@ ocr = PaddleOCR(
     show_log=False
 )
 
-# 你原来的 OCR 逻辑（完全保留）
 def run_ocr(img_path):
     result = ocr.ocr(img_path)
-    texts = []
-
+    boxes = []
+    # ===================== 过滤干扰文本 =====================
+    ignore_keywords = ["学院", "专业", "第", "页", "制表", "名册", "学习年限", "延长"]
+    # =========================================================
     for line in result:
         for word in line:
-            texts.append(word[1][0])
+            text = word[1][0].strip()
+            if not text:
+                continue
+            # 跳过干扰行
+            if any(k in text for k in ignore_keywords):
+                continue
+            x1 = word[0][0][0]
+            y1 = word[0][0][1]
+            x2 = word[0][2][0]
+            y2 = word[0][2][1]
+            cx = (x1 + x2) / 2
+            cy = (y1 + y2) / 2
+            boxes.append({
+                "text": text,
+                "cx": cx,
+                "cy": cy,
+                "x1": x1, "y1": y1, "x2": x2, "y2": y2
+            })
+    return boxes
 
-    return "\n".join(texts)
+def group_by_columns(boxes):
+    if not boxes:
+        return []
+    boxes_sorted = sorted(boxes, key=lambda x: x["cx"])
+    groups = []
+    current_group = [boxes_sorted[0]]
+    # ===================== 关键：阈值从 25 → 70 =====================
+    threshold = 70
+    # ===============================================================
+    for b in boxes_sorted[1:]:
+        last_cx = current_group[-1]["cx"]
+        if b["cx"] - last_cx < threshold:
+            current_group.append(b)
+        else:
+            groups.append(current_group)
+            current_group = [b]
+    if current_group:
+        groups.append(current_group)
+    cols = []
+    for g in groups:
+        g_sorted = sorted(g, key=lambda x: x["cy"])
+        col = [x["text"] for x in g_sorted]
+        if col:
+            cols.append(col)
+    return cols
 
-# ======================
-# 新增：清洗 + 结构化（针对你的毕业生表格）
-# ======================
-def parse_student_info(text):
-    # 1. 空白规范化
-    text = re.sub(r'\s+', ' ', text.strip())
+def extract_table_data(columns, rules):
+    rows = []
+    errors = []
 
-    # 2. 提取字段（精准匹配你的表格）
-    data = {}
+    # ================= 字段映射 =================
+    field_map = {}
 
-    # 学号
-    match_xuehao = re.search(r'学号\s*[:：\s]?([\dA-Za-z]+)', text)
-    if match_xuehao:
-        data['xuehao'] = match_xuehao.group(1).strip()
+    for r in rules:
+        fn = r.get("fieldName", "").strip()
 
-    # 姓名
-    match_xingming = re.search(r'姓名\s*[:：\s]?([\u4e00-\u9fa5]+)', text)
-    if match_xingming:
-        data['xingming'] = match_xingming.group(1).strip()
+        field_map[fn] = {
+            "field": r.get("fieldCode") or r.get("sourceField"),
+            "required": r.get("isRequired", False)
+        }
 
-    # 院系
-    match_yuanxi = re.search(r'院系\s*[:：\s]?([\u4e00-\u9fa5]+)', text)
-    if match_yuanxi:
-        data['yuanxi'] = match_yuanxi.group(1).strip()
+    # ================= 提取列 =================
+    table_columns = {}
 
-    # 学生类别
-    match_leibie = re.search(r'学生类别\s*[:：\s]?([\u4e00-\u9fa5]+)', text)
-    if match_leibie:
-        data['leibie'] = match_leibie.group(1).strip()
+    max_row_count = 0
 
-    # 专业名称
-    match_zhuanye = re.search(r'专业名称\s*[:：\s]?([\u4e00-\u9fa5]+)', text)
-    if match_zhuanye:
-        data['zhuanye'] = match_zhuanye.group(1).strip()
+    for col in columns:
 
-    # 毕业证号
-    match_biye = re.search(r'毕业证号\s*[:：\s]?([\dA-Za-z]+)', text)
-    if match_biye:
-        data['biyezheng'] = match_biye.group(1).strip()
+        if not col:
+            continue
 
-    return data
+        header = col[0].strip()
 
-# ======================
-# 主入口（Java调用）
-# ======================
+        if header not in field_map:
+            continue
+
+        values = [v.strip() for v in col[1:] if v.strip()]
+
+        table_columns[header] = values
+
+        max_row_count = max(max_row_count, len(values))
+
+    # ================= 转为行数据 =================
+
+    for i in range(max_row_count):
+
+        row_data = {}
+
+        for header, values in table_columns.items():
+
+            info = field_map[header]
+
+            value = values[i] if i < len(values) else ""
+
+            row_data[info["field"]] = value
+
+            # 必填校验
+            if info["required"] and not value:
+                errors.append({
+                    "row": i + 1,
+                    "field": info["field"],
+                    "message": f"第{i+1}行字段 '{header}' 为空"
+                })
+
+        # 空行过滤
+        if any(v.strip() for v in row_data.values()):
+            rows.append(row_data)
+
+    return {
+        "data": rows,
+        "errors": errors
+    }
+
 if __name__ == "__main__":
-    # 获取Java传入的图片路径
     img_path = sys.argv[1]
-
-    # 1. OCR识别（你原来的逻辑）
-    raw_text = run_ocr(img_path)
-
-    # 2. 解析成结构化数据
-    student_data = parse_student_info(raw_text)
-
-    # 3. 输出JSON给Java（重点！Java直接接收）
-    print(json.dumps(student_data, ensure_ascii=False))
+    boxes = run_ocr(img_path)
+    columns = group_by_columns(boxes)
+    rules_file = sys.argv[2] if len(sys.argv) >= 3 else None
+    rules = []
+    if rules_file and os.path.isfile(rules_file):
+        with open(rules_file, "r", encoding="utf-8") as f:
+            rules = json.load(f)
+    result = extract_table_data(columns, rules)
+    print(json.dumps(result, ensure_ascii=False, indent=2))

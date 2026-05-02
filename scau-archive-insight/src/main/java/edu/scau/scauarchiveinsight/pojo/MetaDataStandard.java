@@ -7,28 +7,27 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 @Data
-@TableName("metadata_standard") // 绑定数据库表名
+@TableName("metadata_standard")
 public class MetaDataStandard {
 
-    // 主键：字段编码
     @TableId(value = "field_code", type = IdType.INPUT)
     private String fieldCode;
 
-    // 字段名称
+    @TableField("field_name")
     private String fieldName;
 
-    // 字段类型
+    @TableField("field_type")
     private String fieldType;
 
-    // 来源字段
+    @TableField("source_field")
     private String sourceField;
 
-    // 转换类型
+    @TableField("transform_type")
     private String transformType;
 
-    // 转换规则
+    @TableField("transform_rule")
     private String transformRule;
 
-    // 是否必填
+    @TableField("is_required")
     private Boolean isRequired;
 }

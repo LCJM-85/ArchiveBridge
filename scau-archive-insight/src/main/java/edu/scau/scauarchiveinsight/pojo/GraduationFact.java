@@ -1,24 +1,27 @@
 package edu.scau.scauarchiveinsight.pojo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import java.time.LocalDate;
 
 @Data
-@TableName("graduation_fact") // 改成你实际的表名
+@TableName("graduation_fact")
 public class GraduationFact {
 
     @TableId(type = IdType.AUTO)
-    private Long id;// 主键,毕业id
+    private Long id;
 
-    private String studentNo;// 学号
+    private String studentNo;
 
-    private Integer degreeId;// 学历ID
+    private Integer degreeId;
 
-    private Integer destId;// 去向ID
+    private Integer destId;
 
-    private Integer graduationDateId;// 毕业年份ID
+    @TableField("graduation_date")
+    private LocalDate graduationDate;
 
-    private Integer fileId;// 文件ID
+    private Integer fileId;
 }

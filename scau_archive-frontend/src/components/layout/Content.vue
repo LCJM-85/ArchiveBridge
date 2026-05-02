@@ -1,6 +1,8 @@
 <template>
   <el-main class="content">
-    <component :is="currentComponent" />
+    <keep-alive :include="['ArchiveUpload']">
+      <component :is="currentComponent" />
+    </keep-alive>
   </el-main>
 </template>
 

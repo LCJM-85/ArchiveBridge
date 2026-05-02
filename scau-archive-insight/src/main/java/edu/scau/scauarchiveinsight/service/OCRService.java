@@ -1,22 +1,41 @@
 package edu.scau.scauarchiveinsight.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.scau.scauarchiveinsight.pojo.MetaDataStandard;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class OCRService {
 
+    @Autowired
+    private MetaDataService metaDataService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     public String recognizeText(String imagePath) {
         try {
+            // 从数据库获取元数据规则
+            List<MetaDataStandard> rules = metaDataService.list();
+
+            // 写规则到临时文件
+            Path rulesFile = Files.createTempFile("ocr_rules_", ".json");
+            objectMapper.writeValue(rulesFile.toFile(), rules);
+
             String python = ".venv/Scripts/python.exe";
             String scriptPath = "src/main/python/ocr/ocr.py";
 
             ProcessBuilder pb = new ProcessBuilder(
                     python,
                     scriptPath,
-                    imagePath
+                    imagePath,
+                    rulesFile.toAbsolutePath().toString()
             );
             pb.environment().put("PYTHONIOENCODING", "utf-8");
             pb.redirectErrorStream(true);
@@ -31,7 +50,10 @@ public class OCRService {
 
             int exitCode = process.waitFor();
 
-            // 提取输出中的 JSON（兼容 PaddleOCR 日志混入 stdout 的情况）
+            // 删除临时文件
+            Files.deleteIfExists(rulesFile);
+
+            // 提取输出中的 JSON
             int jsonStart = output.indexOf('{');
             String jsonPart = jsonStart >= 0 ? output.substring(jsonStart) : output;
 
@@ -39,7 +61,6 @@ public class OCRService {
                 return jsonPart;
             }
 
-            // 非正常退出或输出非 JSON，说明识别异常
             String errorMsg = output.isEmpty() ? "Python 脚本无输出" : output;
             return "OCR 识别出错：" + errorMsg;
 

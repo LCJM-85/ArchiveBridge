@@ -1,5 +1,7 @@
 package edu.scau.scauarchiveinsight.processor;
 
+import edu.scau.scauarchiveinsight.service.DataPersistenceService;
+import edu.scau.scauarchiveinsight.service.MetaDataMappingService;
 import edu.scau.scauarchiveinsight.service.StorageService;
 import org.springframework.stereotype.Component;
 
@@ -12,12 +14,17 @@ import java.util.*;
 public class CSVProcessor {
 
     private final StorageService storageService;
+    private final MetaDataMappingService metaDataMappingService;
+    private final DataPersistenceService dataPersistenceService;
 
-    public CSVProcessor(StorageService storageService) {
+    public CSVProcessor(StorageService storageService, MetaDataMappingService metaDataMappingService,
+                        DataPersistenceService dataPersistenceService) {
         this.storageService = storageService;
+        this.metaDataMappingService = metaDataMappingService;
+        this.dataPersistenceService = dataPersistenceService;
     }
 
-    public List<Map<String, String>> process(String filePath) {
+    public Map<String, Object> process(String filePath, String archiveType) {
         List<Map<String, String>> rows = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(
@@ -26,13 +33,13 @@ public class CSVProcessor {
             String headerLine = reader.readLine();
             if (headerLine == null || headerLine.trim().isEmpty()) {
                 storageService.failedFile(Paths.get(filePath).getFileName().toString());
-                return rows;
+                return Map.of("data", List.of(), "errors", List.of());
             }
 
             List<String> headers = parseCsvLine(headerLine);
             if (headers.isEmpty()) {
                 storageService.failedFile(Paths.get(filePath).getFileName().toString());
-                return rows;
+                return Map.of("data", List.of(), "errors", List.of());
             }
 
             String line;
@@ -56,19 +63,36 @@ public class CSVProcessor {
 
         } catch (Exception e) {
             try {
-                storageService.failedFile(Paths.get(filePath).getFileName().toString());
+                storageService.failedFile(Paths.get(filePath).getFileName().toString(), e.getMessage());
             } catch (IOException ignored) {
             }
         }
 
-        if (!rows.isEmpty()) {
+        Map<String, Object> mapped = metaDataMappingService.process(rows);
+        String fileName = Paths.get(filePath).getFileName().toString();
+
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> errors = (List<Map<String, Object>>) mapped.get("errors");
+        if (errors != null && !errors.isEmpty()) {
             try {
-                storageService.moveArchiveFile(Paths.get(filePath).getFileName().toString());
+                storageService.failedFile(fileName, errors.toString());
+            } catch (IOException ignored) {
+            }
+        } else if (!rows.isEmpty()) {
+            @SuppressWarnings("unchecked")
+            List<Map<String, String>> mappedData = (List<Map<String, String>>) mapped.get("data");
+            if (mappedData != null) {
+                for (Map<String, String> record : mappedData) {
+                    dataPersistenceService.saveExtractedData(archiveType, record);
+                }
+            }
+            try {
+                storageService.moveArchiveFile(fileName);
             } catch (Exception ignored) {
             }
         }
 
-        return rows;
+        return mapped;
     }
 
     private List<String> parseCsvLine(String line) {

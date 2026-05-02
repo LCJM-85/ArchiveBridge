@@ -4,30 +4,191 @@
       <template #header>
         <div class="card-header">
           <div class="card-header-left">
-            <el-icon size="18" color="var(--color-primary)"><Document /></el-icon>
-            <span>OCR识别进程</span>
+            <el-icon size="18" color="var(--color-primary)"><Monitor /></el-icon>
+            <span>OCR 文件监控</span>
+          </div>
+          <div class="card-header-right">
+            <el-button :icon="Refresh" @click="syncAndRefresh" :loading="loading">同步刷新</el-button>
+            <el-button :icon="Timer" @click="openHistory">历史记录</el-button>
           </div>
         </div>
       </template>
-      <div class="empty-state">
-        <el-empty :image-size="160" description="OCR识别进程模块建设中">
-          <template #image>
-            <div class="empty-img">
-              <svg viewBox="0 0 80 80" width="120" height="120" fill="none">
-                <rect x="10" y="15" width="60" height="55" rx="4" stroke="currentColor" stroke-width="2" opacity="0.3"/>
-                <path d="M25 30l10 10-10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
-                <path d="M42 45h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.3"/>
-              </svg>
+
+      <div class="stat-cards">
+        <el-card shadow="never" class="stat-card">
+          <div class="stat-value warning">{{ stats.processing }}</div>
+          <div class="stat-label">处理中</div>
+        </el-card>
+        <el-card shadow="never" class="stat-card">
+          <div class="stat-value success">{{ stats.success }}</div>
+          <div class="stat-label">已完成</div>
+        </el-card>
+        <el-card shadow="never" class="stat-card">
+          <div class="stat-value danger">{{ stats.error }}</div>
+          <div class="stat-label">失败</div>
+        </el-card>
+      </div>
+
+      <el-table :data="todayLogs" v-loading="loading" stripe border style="width: 100%" empty-text="今日暂无处理记录">
+        <el-table-column prop="fileName" label="文件名" min-width="240" />
+        <el-table-column prop="fileType" label="类型" width="80" align="center">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.fileType }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="recognizeTime" label="处理时间" width="170" align="center" />
+        <el-table-column prop="recognizeStatus" label="状态" width="110" align="center">
+          <template #default="{ row }">
+            <el-tag :type="statusTag(row.recognizeStatus)" size="small" effect="dark">
+              {{ statusText(row.recognizeStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="失败原因" min-width="300">
+          <template #default="{ row }">
+            <span v-if="row.recognizeStatus === 'failed' && row.errorMessage" style="color:#f56c6c">{{ row.errorMessage }}</span>
+            <span v-else style="color:var(--text-secondary)">-</span>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <el-dialog v-model="historyVisible" title="历史记录" width="900px" :close-on-click-modal="false">
+      <el-table :data="historyRecords" v-loading="historyLoading" stripe border style="width: 100%" empty-text="暂无历史记录">
+        <el-table-column prop="fileName" label="文件名" min-width="200" />
+        <el-table-column prop="fileType" label="类型" width="70" align="center">
+          <template #default="{ row }">
+            <el-tag size="small">{{ row.fileType }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="recognizeTime" label="处理时间" width="160" align="center" />
+        <el-table-column prop="recognizeStatus" label="状态" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag :type="statusTag(row.recognizeStatus)" size="small" effect="dark">
+              {{ statusText(row.recognizeStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="失败原因" min-width="250">
+          <template #default="{ row }">
+            <span v-if="row.recognizeStatus === 'failed' && row.errorMessage" style="color:#f56c6c">{{ row.errorMessage }}</span>
+            <span v-else style="color:var(--text-secondary)">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="80" align="center">
+          <template #default="{ row }">
+            <div style="display:flex;justify-content:center">
+              <el-button size="small" type="danger" :icon="Delete" circle @click="handleDeleteLog(row.logId)" />
             </div>
           </template>
-        </el-empty>
+        </el-table-column>
+      </el-table>
+      <div class="pagination-wrap">
+        <el-pagination
+          v-model:current-page="historyPage"
+          v-model:page-size="historyPageSize"
+          :total="historyTotal"
+          layout="total, prev, pager, next"
+          background
+          @current-change="fetchHistory"
+        />
       </div>
-    </el-card>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { Document } from '@element-plus/icons-vue'
+import { ref, computed, onMounted } from 'vue'
+import { Refresh, Monitor, Timer, Delete } from '@element-plus/icons-vue'
+import request from '../../utils/request'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+const loading = ref(false)
+const todayLogs = ref([])
+
+const historyVisible = ref(false)
+const historyLoading = ref(false)
+const historyRecords = ref([])
+const historyPage = ref(1)
+const historyPageSize = ref(15)
+const historyTotal = ref(0)
+
+const stats = computed(() => ({
+  processing: 0,
+  success: todayLogs.value.filter(f => f.recognizeStatus === 'success').length,
+  error: todayLogs.value.filter(f => f.recognizeStatus === 'failed').length,
+}))
+
+function statusTag(status) {
+  return status === 'processing' ? 'warning'
+       : status === 'success'   ? 'success'
+       : 'danger'
+}
+
+function statusText(status) {
+  return status === 'processing' ? '处理中'
+       : status === 'success'   ? '已完成'
+       : '处理失败'
+}
+
+async function syncAndRefresh() {
+  loading.value = true
+  try {
+    await request.post('/ocr/log/sync')
+    const res = await request.get('/ocr/log/today')
+    todayLogs.value = res.data.data || []
+    ElMessage.success('同步完成')
+  } catch {
+    todayLogs.value = []
+    ElMessage.error('同步失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchToday() {
+  try {
+    const res = await request.get('/ocr/log/today')
+    todayLogs.value = res.data.data || []
+  } catch {
+    todayLogs.value = []
+  }
+}
+
+async function openHistory() {
+  historyVisible.value = true
+  historyPage.value = 1
+  await fetchHistory()
+}
+
+async function fetchHistory() {
+  historyLoading.value = true
+  try {
+    const res = await request.get('/ocr/log/history', {
+      params: { current: historyPage.value, size: historyPageSize.value }
+    })
+    const d = res.data.data || {}
+    historyRecords.value = d.records || []
+    historyTotal.value = d.total || 0
+  } catch {
+    historyRecords.value = []
+  } finally {
+    historyLoading.value = false
+  }
+}
+
+async function handleDeleteLog(logId) {
+  try {
+    await ElMessageBox.confirm('确定删除该日志吗？', '提示', { type: 'warning' })
+    await request.delete(`/ocr/log/delete/${logId}`)
+    ElMessage.success('删除成功')
+    await fetchHistory()
+  } catch {
+    // cancelled or error
+  }
+}
+
+onMounted(fetchToday)
 </script>
 
 <style scoped>
@@ -52,14 +213,43 @@ import { Document } from '@element-plus/icons-vue'
   color: var(--text-primary);
 }
 
-.empty-state {
+.card-header-right {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 300px;
+  gap: 8px;
 }
 
-.empty-img {
-  opacity: 0.6;
+.stat-cards {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 8px;
 }
+
+.stat-card {
+  flex: 1;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.stat-value.warning { color: #e6a23c; }
+.stat-value.success { color: #67c23a; }
+.stat-value.danger  { color: #f56c6c; }
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
 </style>

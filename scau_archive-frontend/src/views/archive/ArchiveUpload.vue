@@ -10,6 +10,15 @@
         </div>
       </template>
 
+      <!-- Archive Type Selector -->
+      <div class="archive-type-selector">
+        <span class="archive-type-label">档案类型：</span>
+        <el-radio-group v-model="archiveType" :disabled="isUploading">
+          <el-radio value="admission">招生档案</el-radio>
+          <el-radio value="graduation">毕业档案</el-radio>
+        </el-radio-group>
+      </div>
+
       <!-- File Type Selector -->
       <div class="type-selector">
         <div
@@ -85,7 +94,7 @@
               <el-progress
                 v-if="f.status === 'uploading'"
                 :percentage="f.progress"
-                :width="28"
+                :width="36"
                 type="circle"
                 :stroke-width="3"
               />
@@ -122,6 +131,9 @@
 
 <script setup>
 import { ref, reactive, computed } from 'vue'
+import { defineOptions } from 'vue'
+
+defineOptions({ name: 'ArchiveUpload' })
 import { useRouter } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
 import { uploadFiles } from '../../api/archive'
@@ -148,7 +160,8 @@ const fileTypes = [
   { key: 'csv', label: 'CSV', hint: '.csv', icon: List, accept: '.csv', acceptLabel: '.csv 文件', bg: 'rgba(64, 158, 255, 0.1)', color: '#7232dd' },
 ]
 
-const activeType = ref('pdf')
+const activeType = ref('wax')
+const archiveType = ref('admission')
 const fileInput = ref(null)
 const isDragOver = ref(false)
 const isUploading = ref(false)
@@ -246,7 +259,8 @@ async function handleUpload() {
   try {
     const { data } = await uploadFiles(
       pending.map((f) => f.raw),
-      activeType.value
+      activeType.value,
+      archiveType.value
     )
 
     pending.forEach((f) => {
@@ -308,6 +322,25 @@ async function handleUpload() {
   font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
+}
+
+/* Archive Type Selector */
+.archive-type-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.archive-type-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
 }
 
 /* Type Selector */
@@ -493,6 +526,15 @@ async function handleUpload() {
   flex-shrink: 0;
   display: flex;
   align-items: center;
+}
+
+.file-item-status .el-progress__text {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px !important;
+  line-height: 1;
 }
 
 /* Actions */

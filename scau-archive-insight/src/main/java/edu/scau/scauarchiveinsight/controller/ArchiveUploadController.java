@@ -34,7 +34,8 @@ public class ArchiveUploadController {
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> uploadFiles(
             @RequestParam("files") List<MultipartFile> files,
-            @RequestParam("type") String type) {
+            @RequestParam("type") String type,
+            @RequestParam("archiveType") String archiveType) {
 
         Map<String, Object> result = storageService.saveFiles(files, type);
 
@@ -57,15 +58,25 @@ public class ArchiveUploadController {
 
             switch (ext) {
                 case "csv" -> {
-                    List<Map<String, String>> rows = csvProcessor.process(path);
-                    allResults.add(Map.of("file", name, "type", "csv", "data", rows));
+                    Map<String, Object> csvResult = csvProcessor.process(path, archiveType);
+                    Map<String, Object> entry = new LinkedHashMap<>();
+                    entry.put("file", name);
+                    entry.put("type", "csv");
+                    entry.put("data", csvResult.get("data"));
+                    entry.put("errors", csvResult.get("errors"));
+                    allResults.add(entry);
                 }
                 case "xls", "xlsx" -> {
-                    List<Map<String, String>> rows = excelProcessor.process(path);
-                    allResults.add(Map.of("file", name, "type", "excel", "data", rows));
+                    Map<String, Object> excelResult = excelProcessor.process(path, archiveType);
+                    Map<String, Object> entry = new LinkedHashMap<>();
+                    entry.put("file", name);
+                    entry.put("type", "excel");
+                    entry.put("data", excelResult.get("data"));
+                    entry.put("errors", excelResult.get("errors"));
+                    allResults.add(entry);
                 }
                 case "pdf" -> {
-                    List<Map<String, Object>> pages = pdfProcessor.process(path);
+                    List<Map<String, Object>> pages = pdfProcessor.process(path, archiveType);
                     allResults.add(Map.of("file", name, "type", "pdf", "data", pages));
                 }
                 case "jpg", "jpeg", "png", "bmp", "gif", "tiff", "webp" -> {
@@ -75,8 +86,22 @@ public class ArchiveUploadController {
         }
 
         if (!imageBatch.isEmpty()) {
-            List<Map<String, Object>> waxResults = waxProcessor.process(imageBatch);
-            allResults.add(Map.of("type", "image", "data", waxResults));
+            List<Map<String, Object>> waxResults = waxProcessor.process(imageBatch, archiveType);
+            List<Map<String, Object>> allErrors = new ArrayList<>();
+            for (Map<String, Object> wr : waxResults) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> errs = (List<Map<String, Object>>) wr.get("errors");
+                if (errs != null && !errs.isEmpty()) {
+                    allErrors.addAll(errs);
+                }
+            }
+            Map<String, Object> entry = new LinkedHashMap<>();
+            entry.put("type", "image");
+            entry.put("data", waxResults);
+            if (!allErrors.isEmpty()) {
+                entry.put("errors", allErrors);
+            }
+            allResults.add(entry);
         }
 
         result.put("processed", allResults);
