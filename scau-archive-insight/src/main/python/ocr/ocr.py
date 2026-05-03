@@ -1,12 +1,13 @@
 # noinspection PyUnresolvedReferences
-from paddleocr import PaddleOCR
 import sys
 import re
 import json
 import os
 import math
-
 import logging
+from paddleocr import PaddleOCR
+
+
 logging.getLogger("ppocr").setLevel(logging.ERROR)
 
 ocr = PaddleOCR(
