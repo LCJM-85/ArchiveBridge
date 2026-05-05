@@ -24,6 +24,8 @@ public class AdmissionFact {
 
     private String idCard;
 
+    private String gender;
+
     private Integer provinceId;
 
     private Integer majorId;

@@ -21,6 +21,8 @@ public class GraduationFact {
 
     private String idCard;
 
+    private String gender;
+
     private Integer degreeId;
 
     private Integer destId;
