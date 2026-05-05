@@ -17,7 +17,5 @@ public class ArchiveFileDim {
 
     private String fileType; // 文件类型
 
-    private String filePath; // 文件存储路径
-
     private LocalDateTime uploadTime; // 上传时间
 }

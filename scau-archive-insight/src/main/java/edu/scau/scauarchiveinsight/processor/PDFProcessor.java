@@ -34,6 +34,7 @@ public class PDFProcessor {
 
     public List<Map<String, Object>> process(String pdfPath, String archiveType) {
         List<Map<String, Object>> results = new ArrayList<>();
+        String fileType = "PDF";
 
         List<String> imagePaths = pdfToImageService.convertPdfToImages(pdfPath);
 
@@ -63,8 +64,7 @@ public class PDFProcessor {
         String fileName = Paths.get(pdfPath).getFileName().toString();
         ObjectMapper objectMapper = new ObjectMapper();
         List<String> allErrors = new ArrayList<>();
-        boolean hasSuccess = false;
-        Map<String, String> extractedData = new LinkedHashMap<>();
+        List<Map<String, String>> allData = new ArrayList<>();
 
         for (Map<String, Object> page : results) {
             String ocrResult = (String) page.get("ocrResult");
@@ -86,25 +86,27 @@ public class PDFProcessor {
                 if (rawData instanceof List) {
                     for (Object rec : (List<?>) rawData) {
                         if (rec instanceof Map) {
+                            Map<String, String> row = new LinkedHashMap<>();
                             for (Map.Entry<?, ?> e : ((Map<?, ?>) rec).entrySet()) {
                                 if (e.getValue() != null && !e.getValue().toString().isEmpty()) {
-                                    extractedData.put(e.getKey().toString(), e.getValue().toString());
+                                    row.put(e.getKey().toString(), e.getValue().toString());
                                 }
+                            }
+                            if (!row.isEmpty()) {
+                                allData.add(row);
                             }
                         }
                     }
                 } else if (rawData instanceof Map) {
+                    Map<String, String> single = new LinkedHashMap<>();
                     for (Map.Entry<?, ?> e : ((Map<?, ?>) rawData).entrySet()) {
                         if (e.getValue() != null && !e.getValue().toString().isEmpty()) {
-                            extractedData.put(e.getKey().toString(), e.getValue().toString());
+                            single.put(e.getKey().toString(), e.getValue().toString());
                         }
                     }
-                }
-                boolean hasData = !extractedData.isEmpty();
-                if (hasData) {
-                    hasSuccess = true;
-                } else if (errs == null || errs.isEmpty()) {
-                    allErrors.add("未匹配到任何元数据字段");
+                    if (!single.isEmpty()) {
+                        allData.add(single);
+                    }
                 }
 
             } catch (Exception ignored) {}
@@ -115,9 +117,14 @@ public class PDFProcessor {
                 storageService.failedFile(fileName, String.join("; ", allErrors));
             } catch (Exception ignored) {
             }
-        } else if (hasSuccess) {
+        } else if (!allData.isEmpty()) {
             try {
-                dataPersistenceService.saveExtractedData(archiveType, extractedData);
+                Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
+
+                for (Map<String, String> record : allData) {
+                    dataPersistenceService.saveExtractedData(archiveType, record, fileId);
+                }
+
                 storageService.moveArchiveFile(fileName);
             } catch (Exception ignored) {
             }

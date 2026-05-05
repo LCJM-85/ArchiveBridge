@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @TableName("student_fact")
@@ -30,4 +31,8 @@ public class StudentFact {
 
     @TableField("admission_date")
     private LocalDate admissionDate;
+
+    private LocalDateTime createTime;
+
+    private LocalDateTime updateTime;
 }

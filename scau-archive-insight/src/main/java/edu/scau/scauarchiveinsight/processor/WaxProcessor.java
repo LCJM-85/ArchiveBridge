@@ -35,6 +35,7 @@ public class WaxProcessor {
 
     public List<Map<String, Object>> process(List<String> imagePaths, String archiveType) {
         List<Map<String, Object>> results = new ArrayList<>();
+        String fileType = "picture";
 
         for (String imagePath : imagePaths) {
             Map<String, Object> item = new LinkedHashMap<>();
@@ -54,7 +55,6 @@ public class WaxProcessor {
 
             try {
                 String text = ocrService.recognizeText(ocrPath);
-                // ====================== 打印 OCR 返回结果 ======================
 
                 if (text != null && text.startsWith("OCR 识别出错")) {
                     // OCR 调用失败
@@ -70,38 +70,53 @@ public class WaxProcessor {
                                 new TypeReference<Map<String, Object>>() {});
                         @SuppressWarnings("unchecked")
                         List<Map<String, Object>> errs = (List<Map<String, Object>>) parsed.getOrDefault("errors", List.of());
-                        @SuppressWarnings("unchecked")
-                        Map<String, String> data;
+
                         Object rawData = parsed.get("data");
+                        @SuppressWarnings("unchecked")
+                        List<Map<String, String>> dataList = new ArrayList<>();
                         if (rawData instanceof List) {
-                            // 新格式：data 是列表 [{...}, ...]，合并为单条
-                            data = new LinkedHashMap<>();
                             for (Object rec : (List<?>) rawData) {
                                 if (rec instanceof Map) {
+                                    Map<String, String> row = new LinkedHashMap<>();
                                     for (Map.Entry<?, ?> e : ((Map<?, ?>) rec).entrySet()) {
                                         if (e.getValue() != null && !e.getValue().toString().isEmpty()) {
-                                            data.put(e.getKey().toString(), e.getValue().toString());
+                                            row.put(e.getKey().toString(), e.getValue().toString());
                                         }
+                                    }
+                                    if (!row.isEmpty()) {
+                                        dataList.add(row);
                                     }
                                 }
                             }
-                        } else {
-                            data = (Map<String, String>) (rawData instanceof Map ? rawData : Map.of());
+                        } else if (rawData instanceof Map) {
+                            Map<String, String> single = new LinkedHashMap<>();
+                            for (Map.Entry<?, ?> e : ((Map<?, ?>) rawData).entrySet()) {
+                                if (e.getValue() != null && !e.getValue().toString().isEmpty()) {
+                                    single.put(e.getKey().toString(), e.getValue().toString());
+                                }
+                            }
+                            if (!single.isEmpty()) {
+                                dataList.add(single);
+                            }
                         }
-                        item.put("data", data);
+                        item.put("data", dataList);
                         item.put("errors", errs);
 
-                        boolean hasData = data.values().stream().anyMatch(v -> v != null && !v.isEmpty());
                         if (!errs.isEmpty()) {
                             StringBuilder sb = new StringBuilder("字段校验警告: ");
                             for (Map<String, Object> e : errs) {
                                 sb.append(e.get("message")).append("; ");
                             }
                             storageService.failedFile(fileName, sb.toString());
-                        } else if (!hasData) {
+                        } else if (dataList.isEmpty()) {
                             storageService.failedFile(fileName, "未匹配到任何元数据字段");
                         } else {
-                            dataPersistenceService.saveExtractedData(archiveType, data);
+                            Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
+
+                            for (Map<String, String> record : dataList) {
+                                dataPersistenceService.saveExtractedData(archiveType, record, fileId);
+                            }
+
                             storageService.moveArchiveFile(fileName);
                         }
                     } catch (Exception e) {

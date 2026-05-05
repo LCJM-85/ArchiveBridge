@@ -26,6 +26,7 @@ public class CSVProcessor {
 
     public Map<String, Object> process(String filePath, String archiveType) {
         List<Map<String, String>> rows = new ArrayList<>();
+        String fileType = "CSV";
 
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(new FileInputStream(filePath), StandardCharsets.UTF_8))) {
@@ -82,8 +83,9 @@ public class CSVProcessor {
             @SuppressWarnings("unchecked")
             List<Map<String, String>> mappedData = (List<Map<String, String>>) mapped.get("data");
             if (mappedData != null) {
+                Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);//保存文件识别日志
                 for (Map<String, String> record : mappedData) {
-                    dataPersistenceService.saveExtractedData(archiveType, record);
+                    dataPersistenceService.saveExtractedData(archiveType, record, fileId);
                 }
             }
             try {

@@ -6,6 +6,9 @@
     </content>
   </component>
   <component name="FacetManager">
+    <facet type="spring" name="Spring">
+      <configuration />
+    </facet>
     <facet type="Python" name="Python">
       <configuration sdkName="Python 3.10 (scau-archive-insight)" />
     </facet>
