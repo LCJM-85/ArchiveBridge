@@ -18,8 +18,8 @@ SCAU Archive Insight is a full-stack student archive management system for South
 cd scau-archive-insight
 JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw clean package   # Build
 JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw spring-boot:run  # Run
-JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw test             # Run tests
 ```
+Note: No automated tests exist in the project.
 
 ### Frontend (Vue 3, port 5173)
 ```bash
@@ -41,6 +41,7 @@ cd scau-archive-insight
 ## Architecture
 
 ### Backend Layers
+Base package: `edu.scau.scauarchiveinsight`
 - **controller/** — REST endpoints:
   - `ArchiveUploadController` (`/api/upload`) — multipart file upload + type/archiveType params
   - `LoginController` (`/api/login`, `/api/captcha`) — captcha + JWT auth
@@ -48,6 +49,7 @@ cd scau-archive-insight
   - `MetaDataController` (`/metadata/**`) — CRUD + page query for metadata_standard table
   - `StorageController` (`/storage/status`) — scans temp/archive/failed dirs for monitoring
   - `OCRLogController` (`/ocr/log/**`) — sync today's logs, query history, delete
+- **dto/** — `LoginDTO`, `ChangePasswordDTO`
 - **service/** — Business logic:
   - `UserService` — login, password change
   - `StorageService` — `saveFiles()`, `moveArchiveFile()`, `failedFile()` with `.error.json` sidecar
@@ -63,11 +65,11 @@ cd scau-archive-insight
   - `ExcelProcessor` — Apache POI (both .xls and .xlsx)
   - `PDFProcessor` — pdf2image → OCR per page → collect errors → persist
   - `WaxProcessor` — image (蜡纸) → OpenCV enhance → OCR → persist
-- **mapper/** — MyBatis-Plus interfaces for all 19 entities: `StudentDimMapper`, `StudentFactMapper`, `AdmissionFactMapper`, `GraduationFactMapper`, `CollegeDimMapper`, `MajorDimMapper`, `ClassDimMapper`, `ProvinceDimMapper`, `NationDimMapper`, `PoliticalDimMapper`, `DegreeDimMapper`, `DestinationDimMapper`, `SourceTypeDimMapper`, `ArchiveFileDimMapper`, `OCRLogDimMapper`, `QualityScoreDimMapper`, `MetaDataStandardMapper`, `UserMapper`, `DateDimMapper`
+- **mapper/** — MyBatis-Plus interfaces for all entities: `StudentDimMapper`, `StudentFactMapper`, `AdmissionFactMapper`, `GraduationFactMapper`, `CollegeDimMapper`, `MajorDimMapper`, `ClassDimMapper`, `ProvinceDimMapper`, `NationDimMapper`, `PoliticalDimMapper`, `DegreeDimMapper`, `DestinationDimMapper`, `SourceTypeDimMapper`, `ArchiveFileDimMapper`, `OCRLogDimMapper`, `QualityScoreDimMapper`, `MetaDataStandardMapper`, `UserMapper`, `DateDimMapper`
 - **pojo/** — Entity classes: dimension tables, fact tables (`StudentFact`, `AdmissionFact`, `GraduationFact`), `MetaDataStandard`, `OCRLogDim`, `SysUser`
 - **config/** — `SecurityConfig` (Spring Security + CORS), `MyBatisPlusConfig` (PaginationInnerInterceptor), `GlobalExceptionHandler`, `JsonAuthenticationEntryPoint`
 - **filter/** — `JwtAuthenticationFilter` (OncePerRequestFilter)
-- **util/** — `JwtUtils`
+- **util/** — `JwtUtils`, `DateUtil`
 
 ### File Upload Pipeline
 1. `ArchiveUploadController` receives multipart files + `type` (pdf/wax/ocr/excel/csv) + `archiveType` (admission/graduation)
@@ -91,6 +93,7 @@ cd scau-archive-insight
 - Subsequent requests: `Authorization: Bearer <token>` header
 - Rate limiting: 8 attempts/10min per IP+user, 30 captcha requests/min per IP
 - `SessionCreationPolicy.ALWAYS` (captcha stored in HttpSession)
+- Frontend axios instance (`utils/request.js`) auto-attaches JWT and handles 401 redirects
 
 ### Python Scripts
 All called via `ProcessBuilder` from Java services, Python venv at `.venv/Scripts/python.exe`:
@@ -105,11 +108,28 @@ All called via `ProcessBuilder` from Java services, Python venv at `.venv/Script
 - `date_dim` table was removed; all `xxx_date_id` FK columns replaced with direct `xxx_date date` columns
 - Connection pool: Druid (initial 5, min 10, max 20)
 - All entity fields use `@TableField("snake_case_name")` for explicit column mapping
+- Config: `src/main/resources/application.yaml`
 
 ### Frontend Structure
-- **views/** — dashboard, login, archive (ArchiveUpload.vue), analysis, charts, data, governance, ocr (OCRProcess.vue), prediction, report, system (MetaDataManage.vue)
-- **components/common/** — TableView, UploadPanel, Loading, Empty
-- **components/layout/** — AppLayout, Header, Sidebar, Content
-- **api/** — auth.js, archive.js, analysis.js, report.js (all use `utils/request.js` axios instance)
-- **store/** — user.js (Pinia), archive.js, menu.js, metadata.js — auto-sync with localStorage
+- **api/** — Axios instance + modular API layer:
+  - `request.js` — axios instance with JWT interceptor and 401 handling
+  - `modules/` — API modules per domain: `auth.js`, `archive.js`, `metadata.js`, `ocr.js`, `analysis.js`, `report.js`
+- **layouts/** — `AppLayout.vue`, `Header.vue`, `Sidebar.vue`, `Content.vue`
+- **components/common/** — `TableView`, `UploadPanel`, `Loading`, `Empty`
+- **composables/** — `useTheme.js`, `useFullscreen.js`, `usePasswordChange.js`
+- **config/** — `index.js` (APP_CONFIG, JWT_CONFIG, PAGE_CONFIG)
+- **styles/** — `index.css` (full CSS variable theme system: light + dark mode)
+- **store/** — Pinia stores (auto-sync with localStorage): `user.js`, `menu.js`, `archive.js`, `metadata.js`
+- **utils/** — `auth.js` (token/remember-me helpers), `format.js`
 - **router/index.js** — Auth guard via localStorage JWT + client-side expiry check
+- **views/** — All page views:
+  - `login/Login.vue`, `dashboard/Dashboard.vue`
+  - `archive/ArchiveUpload.vue`
+  - `data/AdmissionData.vue`, `GraduationData.vue`, `StudentStatusData.vue`
+  - `charts/AddmissionTrend.vue`, `Geographic.vue`, `MajorTrainingPath.vue`, `AIPrediction.vue`
+  - `analysis/ReportGenerate.vue`, `report/ReportGenerate.vue`
+  - `ocr/OCRProcess.vue`
+  - `governance/DataClean.vue`, `DataQuality.vue`
+  - `prediction/PredictionView.vue`
+  - `system/MetaDataManage.vue`, `UserManage.vue`
+- All imports use `@/` path alias (e.g., `@/store/user`, `@/api/modules/auth`)

@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { fetchMetaDataPage, addMetaData, updateMetaData, deleteMetaData } from '@/api/modules/metadata'
+import { fetchAdmissionPage, addAdmission, updateAdmission, deleteAdmission, fetchProvinces, fetchMajors } from '@/api/modules/admission'
 
-export const useMetaDataStore = defineStore('metadata', () => {
+export const useAdmissionStore = defineStore('admission', () => {
   const tableData = ref([])
   const loading = ref(false)
   const current = ref(1)
@@ -11,6 +11,9 @@ export const useMetaDataStore = defineStore('metadata', () => {
   const pages = ref(0)
   const keyword = ref('')
 
+  const provinces = ref([])
+  const majors = ref([])
+
   async function fetchPage() {
     loading.value = true
     try {
@@ -18,7 +21,7 @@ export const useMetaDataStore = defineStore('metadata', () => {
       if (keyword.value) {
         params.keyword = keyword.value
       }
-      const res = await fetchMetaDataPage(params)
+      const res = await fetchAdmissionPage(params)
       const d = res.data.data || {}
       tableData.value = d.records || []
       total.value = d.total || 0
@@ -30,18 +33,36 @@ export const useMetaDataStore = defineStore('metadata', () => {
     }
   }
 
+  async function fetchProvincesList() {
+    try {
+      const res = await fetchProvinces()
+      provinces.value = res.data.data || []
+    } catch {
+      provinces.value = []
+    }
+  }
+
+  async function fetchMajorsList() {
+    try {
+      const res = await fetchMajors()
+      majors.value = res.data.data || []
+    } catch {
+      majors.value = []
+    }
+  }
+
   async function add(data) {
-    const res = await addMetaData(data)
+    const res = await addAdmission(data)
     return res.data
   }
 
   async function update(data) {
-    const res = await updateMetaData(data)
+    const res = await updateAdmission(data)
     return res.data
   }
 
-  async function remove(fieldCode) {
-    const res = await deleteMetaData(fieldCode)
+  async function remove(id) {
+    const res = await deleteAdmission(id)
     return res.data
   }
 
@@ -57,6 +78,8 @@ export const useMetaDataStore = defineStore('metadata', () => {
 
   return {
     tableData, loading, current, pageSize, total, pages, keyword,
-    fetchPage, add, update, remove, setPage, search
+    provinces, majors,
+    fetchPage, fetchProvincesList, fetchMajorsList,
+    add, update, remove, setPage, search
   }
 })

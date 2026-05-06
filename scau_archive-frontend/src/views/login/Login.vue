@@ -125,7 +125,7 @@ import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
-import { useUserStore } from '../../store/user'
+import { useUserStore } from '@/store/user'
 
 const router = useRouter()
 const route = useRoute()

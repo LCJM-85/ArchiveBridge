@@ -100,7 +100,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Refresh, Monitor, Timer, Delete } from '@element-plus/icons-vue'
-import request from '../../utils/request'
+import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog } from '@/api/modules/ocr'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
@@ -134,8 +134,8 @@ function statusText(status) {
 async function syncAndRefresh() {
   loading.value = true
   try {
-    await request.post('/ocr/log/sync')
-    const res = await request.get('/ocr/log/today')
+    await syncOcrLogs()
+    const res = await fetchTodayOcrLogs()
     todayLogs.value = res.data.data || []
     ElMessage.success('同步完成')
   } catch {
@@ -148,7 +148,7 @@ async function syncAndRefresh() {
 
 async function fetchToday() {
   try {
-    const res = await request.get('/ocr/log/today')
+    const res = await fetchTodayOcrLogs()
     todayLogs.value = res.data.data || []
   } catch {
     todayLogs.value = []
@@ -164,9 +164,7 @@ async function openHistory() {
 async function fetchHistory() {
   historyLoading.value = true
   try {
-    const res = await request.get('/ocr/log/history', {
-      params: { current: historyPage.value, size: historyPageSize.value }
-    })
+    const res = await fetchOcrLogHistory({ current: historyPage.value, size: historyPageSize.value })
     const d = res.data.data || {}
     historyRecords.value = d.records || []
     historyTotal.value = d.total || 0
@@ -180,7 +178,7 @@ async function fetchHistory() {
 async function handleDeleteLog(logId) {
   try {
     await ElMessageBox.confirm('确定删除该日志吗？', '提示', { type: 'warning' })
-    await request.delete(`/ocr/log/delete/${logId}`)
+    await deleteOcrLog(logId)
     ElMessage.success('删除成功')
     await fetchHistory()
   } catch {

@@ -96,7 +96,7 @@
 import { ref, onMounted } from 'vue'
 import { Plus, Edit, Delete, Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useMetaDataStore } from '../../store/metadata.js'
+import { useMetaDataStore } from '@/store/metadata.js'
 
 const store = useMetaDataStore()
 

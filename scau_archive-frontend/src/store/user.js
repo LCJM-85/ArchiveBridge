@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getCaptchaUrl, getCaptchaUrlWithTimestamp, loginRequest } from '../api/auth'
+import { getCaptchaUrl, getCaptchaUrlWithTimestamp, loginRequest } from '@/api/modules/auth'
 import {
   clearAuthInfo,
   clearRememberedUser,
@@ -11,7 +11,7 @@ import {
   getSafeRedirectPath,
   saveAuthInfo,
   saveRememberedUser,
-} from '../utils/auth'
+} from '@/utils/auth'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref(getStoredToken())

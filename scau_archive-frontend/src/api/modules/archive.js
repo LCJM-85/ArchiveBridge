@@ -1,4 +1,4 @@
-import request from '../utils/request'
+import request from '../request'
 
 export function uploadFiles(files, type, archiveType) {
   const formData = new FormData()

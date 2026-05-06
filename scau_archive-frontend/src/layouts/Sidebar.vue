@@ -94,7 +94,7 @@
 <script setup>
 import { storeToRefs } from 'pinia'
 import { DataLine, Files, House, Upload, Setting, DataBoard, Document } from '@element-plus/icons-vue'
-import { useMenuStore } from '../../store/menu'
+import { useMenuStore } from '@/store/menu'
 
 const menuStore = useMenuStore()
 const { activeMenu } = storeToRefs(menuStore)

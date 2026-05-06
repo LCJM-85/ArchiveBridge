@@ -136,7 +136,7 @@ import { defineOptions } from 'vue'
 defineOptions({ name: 'ArchiveUpload' })
 import { useRouter } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
-import { uploadFiles } from '../../api/archive'
+import { uploadFiles } from '@/api/modules/archive'
 import {
   Upload,
   UploadFilled,

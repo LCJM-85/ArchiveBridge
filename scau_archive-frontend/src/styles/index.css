@@ -362,7 +362,6 @@ body {
   border-right: none;
 }
 
-/* Sidebar menu item styling */
 .sidebar .el-menu-item {
   color: var(--sidebar-text) !important;
   margin: 2px 8px;
@@ -403,7 +402,6 @@ body {
   border-radius: 6px;
 }
 
-/* Sub-menu arrow color */
 .sidebar .el-sub-menu .el-sub-menu__title .el-sub-menu__icon-arrow {
   color: var(--sidebar-text) !important;
 }
@@ -414,7 +412,6 @@ body {
 
 /* ===================== COMPONENT STYLES ===================== */
 
-/* Card */
 .el-card {
   background: var(--card-bg) !important;
   border: 1px solid var(--card-border) !important;
@@ -440,7 +437,6 @@ body {
   padding: 20px !important;
 }
 
-/* Table */
 .el-table {
   --el-table-header-text-color: var(--text-secondary);
 }
@@ -454,7 +450,6 @@ body {
   color: var(--text-tertiary) !important;
 }
 
-/* Dialog */
 .el-dialog {
   --el-dialog-bg-color: var(--dialog-bg) !important;
   border-radius: 12px !important;
@@ -481,13 +476,11 @@ body {
   padding: 12px 20px !important;
 }
 
-/* Form Labels */
 .el-form-item__label {
   color: var(--text-primary) !important;
   font-weight: 500 !important;
 }
 
-/* Statistic */
 .el-statistic {
   --el-statistic-content-color: var(--text-primary) !important;
 }
@@ -496,7 +489,6 @@ body {
   color: var(--text-secondary) !important;
 }
 
-/* Dropdown */
 .el-dropdown-menu {
   background: var(--bg-elevated) !important;
   border: 1px solid var(--border-color) !important;
@@ -515,7 +507,6 @@ body {
   border-top-color: var(--border-color) !important;
 }
 
-/* Alert */
 .el-alert {
   border-radius: 8px !important;
 }
@@ -524,17 +515,14 @@ body {
   --el-alert-bg-color: rgba(245, 108, 108, 0.1) !important;
 }
 
-/* Checkbox */
 .el-checkbox__label {
   color: var(--text-secondary) !important;
 }
 
-/* Badge */
 .el-badge__content {
   border-color: var(--header-bg) !important;
 }
 
-/* Button text in header */
 .header .el-button--text {
   color: var(--text-secondary) !important;
 }
@@ -544,22 +532,18 @@ body {
   background: transparent !important;
 }
 
-/* Notification/Message */
 .el-message {
   border-radius: 8px !important;
 }
 
-/* Empty state */
 .el-empty__description p {
   color: var(--text-tertiary) !important;
 }
 
-/* Breadcrumb separator */
 .el-breadcrumb__separator {
   color: var(--text-tertiary) !important;
 }
 
-/* El popper / dropdown */
 .el-popper {
   background: var(--bg-elevated) !important;
   border-color: var(--border-color) !important;
@@ -572,7 +556,6 @@ body {
 
 /* ===================== SIDEBAR POPUP MENU STYLES ===================== */
 
-/* Fix for sub-menu popup in dark mode */
 .dark .el-popper {
   background: #1a1d21 !important;
   border: 1px solid #2d3138 !important;
@@ -597,7 +580,6 @@ body {
   color: #ffffff !important;
 }
 
-/* Light mode popup menu */
 .el-popper .el-menu--popup {
   background: transparent !important;
 }
@@ -620,7 +602,6 @@ body {
 
 /* ===================== UTILITY ===================== */
 
-/* Glass card effect (used on login) */
 .glass-card {
   background: rgba(255, 255, 255, 0.12) !important;
   backdrop-filter: blur(20px) !important;
