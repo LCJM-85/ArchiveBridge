@@ -2,7 +2,7 @@ package edu.scau.scauarchiveinsight.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.ResponseEntity;
+import edu.scau.scauarchiveinsight.dto.R;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,20 +22,13 @@ public class StorageController {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping("/status")
-    public ResponseEntity<Map<String, Object>> getStatus() {
+    public R<List<Map<String, Object>>> getStatus() {
         List<Map<String, Object>> files = new ArrayList<>();
-
         files.addAll(scanDir(STORAGE_ROOT.resolve("temp"), "processing"));
         files.addAll(scanDir(STORAGE_ROOT.resolve("archive"), "success"));
         files.addAll(scanDir(STORAGE_ROOT.resolve("failed"), "error"));
-
-        // 按日期倒序排列
         files.sort((a, b) -> String.valueOf(b.get("date")).compareTo(String.valueOf(a.get("date"))));
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("code", 200);
-        result.put("data", files);
-        return ResponseEntity.ok(result);
+        return R.ok(files);
     }
 
     private List<Map<String, Object>> scanDir(Path root, String status) {
@@ -58,7 +51,6 @@ public class StorageController {
                       item.put("type", typePart);
                       item.put("status", status);
 
-                      // 失败文件读取错误详情
                       if ("error".equals(status)) {
                           Path errorFile = path.resolveSibling(path.getFileName() + ".error.json");
                           if (Files.exists(errorFile)) {
@@ -76,7 +68,6 @@ public class StorageController {
                   });
         } catch (IOException ignored) {
         }
-
         return files;
     }
 }

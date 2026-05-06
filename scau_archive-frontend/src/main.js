@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
+import zhCn from 'element-plus/dist/locale/zh-cn.mjs'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/dark/css-vars.css'
 import '@/styles/index.css'
@@ -19,7 +20,7 @@ if (savedTheme === 'dark') {
 // 创建并挂载 Vue 实例
 const app = createApp(App)
 const pinia = createPinia()
-app.use(ElementPlus)
+app.use(ElementPlus, { locale: zhCn })
 app.use(pinia)
 app.use(router) // 注册路由
 app.mount('#app')

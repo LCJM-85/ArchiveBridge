@@ -1,13 +1,15 @@
 package edu.scau.scauarchiveinsight.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import edu.scau.scauarchiveinsight.dto.MetaDataDTO;
+import edu.scau.scauarchiveinsight.dto.R;
 import edu.scau.scauarchiveinsight.pojo.MetaDataStandard;
 import edu.scau.scauarchiveinsight.service.MetaDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,15 +20,12 @@ public class MetaDataController {
     private MetaDataService metaDataService;
 
     @GetMapping("/list")
-    public ResponseEntity<Map<String, Object>> list() {
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("data", metaDataService.list());
-        return ResponseEntity.ok(result);
+    public R<List<MetaDataStandard>> list() {
+        return R.ok(metaDataService.list());
     }
 
     @GetMapping("/page")
-    public ResponseEntity<Map<String, Object>> page(
+    public R<Map<String, Object>> page(
             @RequestParam(defaultValue = "1") int current,
             @RequestParam(defaultValue = "15") int size,
             @RequestParam(required = false) String keyword) {
@@ -37,66 +36,49 @@ public class MetaDataController {
         data.put("current", page.getCurrent());
         data.put("size", page.getSize());
         data.put("pages", page.getPages());
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("code", 200);
-        result.put("data", data);
-        return ResponseEntity.ok(result);
+        return R.ok(data);
     }
 
     @GetMapping("/get/{fieldCode}")
-    public ResponseEntity<Map<String, Object>> getById(@PathVariable String fieldCode) {
-        Map<String, Object> result = new HashMap<>();
+    public R<MetaDataStandard> getById(@PathVariable String fieldCode) {
         MetaDataStandard item = metaDataService.getById(fieldCode);
-        if (item != null) {
-            result.put("code", 200);
-            result.put("data", item);
-        } else {
-            result.put("code", 404);
-            result.put("msg", "字段编码不存在");
+        if (item == null) {
+            return R.error("字段编码不存在");
         }
-        return ResponseEntity.ok(result);
+        return R.ok(item);
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Map<String, Object>> add(@RequestBody MetaDataStandard metaDataStandard) {
-        Map<String, Object> result = new HashMap<>();
-        boolean saved = metaDataService.add(metaDataStandard);
-        if (saved) {
-            result.put("code", 200);
-            result.put("msg", "添加成功");
-            return ResponseEntity.ok(result);
-        }
-        result.put("code", 500);
-        result.put("msg", "添加失败");
-        return ResponseEntity.ok(result);
-    }
-
-    @DeleteMapping("/delete")
-    public ResponseEntity<Map<String, Object>> delete(@RequestParam String fieldCode) {
-        Map<String, Object> result = new HashMap<>();
-        boolean removed = metaDataService.delete(fieldCode);
-        if (removed) {
-            result.put("code", 200);
-            result.put("msg", "删除成功");
-            return ResponseEntity.ok(result);
-        }
-        result.put("code", 500);
-        result.put("msg", "删除失败，字段编码不存在");
-        return ResponseEntity.ok(result);
+    public R<Void> add(@RequestBody MetaDataDTO dto) {
+        MetaDataStandard entity = new MetaDataStandard();
+        entity.setFieldCode(dto.getFieldCode());
+        entity.setFieldName(dto.getFieldName());
+        entity.setFieldType(dto.getFieldType());
+        entity.setSourceField(dto.getSourceField());
+        entity.setTransformType(dto.getTransformType());
+        entity.setTransformRule(dto.getTransformRule());
+        entity.setIsRequired(dto.getIsRequired());
+        boolean saved = metaDataService.add(entity);
+        return saved ? R.ok(null, "添加成功") : R.error("添加失败");
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Map<String, Object>> update(@RequestBody MetaDataStandard metaDataStandard) {
-        Map<String, Object> result = new HashMap<>();
-        boolean updated = metaDataService.update(metaDataStandard);
-        if (updated) {
-            result.put("code", 200);
-            result.put("msg", "更新成功");
-            return ResponseEntity.ok(result);
-        }
-        result.put("code", 500);
-        result.put("msg", "更新失败，字段编码不存在");
-        return ResponseEntity.ok(result);
+    public R<Void> update(@RequestBody MetaDataDTO dto) {
+        MetaDataStandard entity = new MetaDataStandard();
+        entity.setFieldCode(dto.getFieldCode());
+        entity.setFieldName(dto.getFieldName());
+        entity.setFieldType(dto.getFieldType());
+        entity.setSourceField(dto.getSourceField());
+        entity.setTransformType(dto.getTransformType());
+        entity.setTransformRule(dto.getTransformRule());
+        entity.setIsRequired(dto.getIsRequired());
+        boolean updated = metaDataService.update(entity);
+        return updated ? R.ok(null, "更新成功") : R.error("更新失败，字段编码不存在");
+    }
+
+    @DeleteMapping("/delete")
+    public R<Void> delete(@RequestParam String fieldCode) {
+        boolean removed = metaDataService.delete(fieldCode);
+        return removed ? R.ok(null, "删除成功") : R.error("删除失败，字段编码不存在");
     }
 }

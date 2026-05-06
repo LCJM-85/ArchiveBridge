@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { fetchAdmissionPage, addAdmission, updateAdmission, deleteAdmission, fetchProvinces, fetchMajors } from '@/api/modules/admission'
+import { fetchStudentPage, addStudent, updateStudent, deleteStudent, fetchProvinces, fetchMajors, fetchClasses } from '@/api/modules/student'
 
-export const useAdmissionStore = defineStore('admission', () => {
+export const useStudentStore = defineStore('student', () => {
   const tableData = ref([])
   const loading = ref(false)
   const current = ref(1)
@@ -15,14 +15,13 @@ export const useAdmissionStore = defineStore('admission', () => {
 
   const provinces = ref([])
   const majors = ref([])
+  const classes = ref([])
 
   async function fetchPage() {
     loading.value = true
     try {
       const params = { current: current.value, size: pageSize.value }
-      if (keyword.value) {
-        params.keyword = keyword.value
-      }
+      if (keyword.value) params.keyword = keyword.value
       if (createTimeRange.value && createTimeRange.value.length === 2) {
         params.createTimeStart = createTimeRange.value[0]
         params.createTimeEnd = createTimeRange.value[1]
@@ -31,7 +30,7 @@ export const useAdmissionStore = defineStore('admission', () => {
         params.updateTimeStart = updateTimeRange.value[0]
         params.updateTimeEnd = updateTimeRange.value[1]
       }
-      const res = await fetchAdmissionPage(params)
+      const res = await fetchStudentPage(params)
       const d = res.data.data || {}
       tableData.value = d.records || []
       total.value = d.total || 0
@@ -43,47 +42,43 @@ export const useAdmissionStore = defineStore('admission', () => {
     }
   }
 
-  function clearTimeRanges() {
-    createTimeRange.value = []
-    updateTimeRange.value = []
-  }
-
   async function fetchProvincesList() {
     try {
       const res = await fetchProvinces()
       provinces.value = res.data.data || []
-    } catch {
-      provinces.value = []
-    }
+    } catch { provinces.value = [] }
   }
 
   async function fetchMajorsList() {
     try {
       const res = await fetchMajors()
       majors.value = res.data.data || []
-    } catch {
-      majors.value = []
-    }
+    } catch { majors.value = [] }
+  }
+
+  async function fetchClassesList() {
+    try {
+      const res = await fetchClasses()
+      classes.value = res.data.data || []
+    } catch { classes.value = [] }
   }
 
   async function add(data) {
-    const res = await addAdmission(data)
+    const res = await addStudent(data)
     return res.data
   }
 
   async function update(data) {
-    const res = await updateAdmission(data)
+    const res = await updateStudent(data)
     return res.data
   }
 
   async function remove(id) {
-    const res = await deleteAdmission(id)
+    const res = await deleteStudent(id)
     return res.data
   }
 
-  function setPage(p) {
-    current.value = p
-  }
+  function setPage(p) { current.value = p }
 
   function search(val) {
     keyword.value = val
@@ -91,11 +86,15 @@ export const useAdmissionStore = defineStore('admission', () => {
     fetchPage()
   }
 
+  function clearTimeRanges() {
+    createTimeRange.value = []
+    updateTimeRange.value = []
+  }
+
   return {
     tableData, loading, current, pageSize, total, pages, keyword,
-    createTimeRange, updateTimeRange,
-    provinces, majors,
-    fetchPage, fetchProvincesList, fetchMajorsList,
+    createTimeRange, updateTimeRange, provinces, majors, classes,
+    fetchPage, fetchProvincesList, fetchMajorsList, fetchClassesList,
     add, update, remove, setPage, search, clearTimeRanges
   }
 })
