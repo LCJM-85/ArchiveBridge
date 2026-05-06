@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.scau.scauarchiveinsight.dto.GraduationDTO;
+import edu.scau.scauarchiveinsight.mapper.ArchiveFileDimMapper;
 import edu.scau.scauarchiveinsight.mapper.*;
 import edu.scau.scauarchiveinsight.pojo.*;
 import edu.scau.scauarchiveinsight.vo.GraduationVO;
@@ -27,6 +28,9 @@ public class GraduationService {
 
     @Autowired
     private DestinationDimMapper destinationDimMapper;
+
+    @Autowired
+    private ArchiveFileDimMapper archiveFileDimMapper;
 
     public IPage<GraduationVO> page(int current, int size, String keyword,
                                     String createTimeStart, String createTimeEnd,
@@ -86,6 +90,14 @@ public class GraduationService {
                     w.or().in(GraduationFact::getDestId,
                             dests.stream().map(DestinationDim::getDestId).collect(Collectors.toList()));
                 }
+
+                // 按来源文件名搜索
+                List<Integer> matchedFiles = archiveFileDimMapper.selectList(
+                        new LambdaQueryWrapper<ArchiveFileDim>().like(ArchiveFileDim::getFileName, keyword))
+                        .stream().map(ArchiveFileDim::getFileId).collect(Collectors.toList());
+                if (!matchedFiles.isEmpty()) {
+                    w.or().in(GraduationFact::getFileId, matchedFiles);
+                }
             });
         }
         if (createTimeStart != null && !createTimeStart.isBlank()) {
@@ -113,6 +125,12 @@ public class GraduationService {
         vo.setGraduationDate(fact.getGraduationDate());
         vo.setCreateTime(fact.getCreateTime());
         vo.setUpdateTime(fact.getUpdateTime());
+
+        vo.setFileId(fact.getFileId());
+        if (fact.getFileId() != null) {
+            ArchiveFileDim file = archiveFileDimMapper.selectById(fact.getFileId());
+            vo.setFileName(file != null ? file.getFileName() : null);
+        }
 
         if (fact.getDegreeId() != null) {
             vo.setDegreeId(fact.getDegreeId());

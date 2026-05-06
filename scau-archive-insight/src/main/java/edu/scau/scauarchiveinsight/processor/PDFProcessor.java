@@ -1,10 +1,14 @@
 package edu.scau.scauarchiveinsight.processor;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.scau.scauarchiveinsight.service.DataPersistenceService;
-import edu.scau.scauarchiveinsight.service.OCRService;
+import edu.scau.scauarchiveinsight.service.OCRLogService;
+import edu.scau.scauarchiveinsight.service.OpenCVService;
+import edu.scau.scauarchiveinsight.service.PPStructureService;
 import edu.scau.scauarchiveinsight.service.PdfToImageService;
+import edu.scau.scauarchiveinsight.service.QualityScoreService;
 import edu.scau.scauarchiveinsight.service.StorageService;
 import org.springframework.stereotype.Component;
 
@@ -20,14 +24,22 @@ import java.util.Map;
 public class PDFProcessor {
 
     private final PdfToImageService pdfToImageService;
-    private final OCRService ocrService;
+    private final OpenCVService openCVService;
+    private final PPStructureService ppStructureService;
+    private final OCRLogService ocrLogService;
+    private final QualityScoreService qualityScoreService;
     private final StorageService storageService;
     private final DataPersistenceService dataPersistenceService;
 
-    public PDFProcessor(PdfToImageService pdfToImageService, OCRService ocrService,
+    public PDFProcessor(PdfToImageService pdfToImageService, OpenCVService openCVService,
+                        PPStructureService ppStructureService, OCRLogService ocrLogService,
+                        QualityScoreService qualityScoreService,
                         StorageService storageService, DataPersistenceService dataPersistenceService) {
         this.pdfToImageService = pdfToImageService;
-        this.ocrService = ocrService;
+        this.openCVService = openCVService;
+        this.ppStructureService = ppStructureService;
+        this.ocrLogService = ocrLogService;
+        this.qualityScoreService = qualityScoreService;
         this.storageService = storageService;
         this.dataPersistenceService = dataPersistenceService;
     }
@@ -50,8 +62,17 @@ public class PDFProcessor {
             Map<String, Object> pageResult = new HashMap<>();
             pageResult.put("imagePath", imagePath);
 
+            // OpenCV 增强
+            String enhancedPath = null;
             try {
-                String ocrResult = ocrService.recognizeText(imagePath);
+                enhancedPath = openCVService.enhanceImage(imagePath);
+            } catch (Exception ignored) {}
+            String ocrPath = (enhancedPath != null && !enhancedPath.startsWith("ERROR")
+                    && !enhancedPath.startsWith("图片增强失败")) ? enhancedPath : imagePath;
+            pageResult.put("enhancedPath", ocrPath);
+
+            try {
+                String ocrResult = ppStructureService.parseTable(ocrPath);
                 pageResult.put("ocrResult", ocrResult);
             } catch (Exception e) {
                 pageResult.put("ocrResult", null);
@@ -63,13 +84,14 @@ public class PDFProcessor {
 
         String fileName = Paths.get(pdfPath).getFileName().toString();
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         List<String> allErrors = new ArrayList<>();
         List<Map<String, String>> allData = new ArrayList<>();
 
         for (Map<String, Object> page : results) {
             String ocrResult = (String) page.get("ocrResult");
-            if (ocrResult == null || ocrResult.startsWith("OCR 识别出错")) {
-                allErrors.add(ocrResult != null ? ocrResult : "OCR 识别出错");
+            if (ocrResult == null || ocrResult.isEmpty()) {
+                allErrors.add("表格识别无返回");
                 continue;
             }
             try {
@@ -112,12 +134,7 @@ public class PDFProcessor {
             } catch (Exception ignored) {}
         }
 
-        if (!allErrors.isEmpty()) {
-            try {
-                storageService.failedFile(fileName, String.join("; ", allErrors));
-            } catch (Exception ignored) {
-            }
-        } else if (!allData.isEmpty()) {
+        if (!allData.isEmpty()) {
             try {
                 Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
 
@@ -126,20 +143,35 @@ public class PDFProcessor {
                 }
 
                 storageService.moveArchiveFile(fileName);
+
+                // 质量评分
+                qualityScoreService.scoreFile(fileId, archiveType, allData, allErrors.size());
+
+                // 有警告仍归档，仅记录到数据库
+                if (!allErrors.isEmpty()) {
+                    ocrLogService.addLog(fileId, fileName, fileType, "warning", String.join("; ", allErrors));
+                }
             } catch (Exception ignored) {
             }
         } else {
             try {
-                storageService.failedFile(fileName, "PDF 所有页面 OCR 识别失败");
+                storageService.failedFile(fileName, "PDF 所有页面表格识别失败");
             } catch (Exception ignored) {
             }
         }
 
-        // 删除 PDF 转换生成的临时图片
+        // 删除 PDF 转换生成的临时图片及增强图片
         for (String imagePath : imagePaths) {
             try {
                 Files.deleteIfExists(Paths.get(imagePath));
-            } catch (Exception ignored) {
+            } catch (Exception ignored) {}
+        }
+        for (Map<String, Object> page : results) {
+            String enhancedPath = (String) page.get("enhancedPath");
+            if (enhancedPath != null && !enhancedPath.equals(page.get("imagePath"))) {
+                try {
+                    Files.deleteIfExists(Paths.get(enhancedPath));
+                } catch (Exception ignored) {}
             }
         }
 

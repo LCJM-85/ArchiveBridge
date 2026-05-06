@@ -17,6 +17,8 @@ public class StudentVO {
     private String majorName;
     private Integer classId;
     private String className;
+    private Integer fileId;
+    private String fileName;
     private LocalDate admissionDate;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

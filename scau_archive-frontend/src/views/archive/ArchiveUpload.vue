@@ -153,14 +153,13 @@ import {
 const router = useRouter()
 
 const fileTypes = [
-  { key: 'wax', label: '蜡纸', hint: '.jpg / .png / .tiff', icon: Picture, accept: '.jpg,.jpeg,.png,.tif,.tiff,.bmp', acceptLabel: '.jpg / .png / .tiff 等图片文件', bg: 'rgba(64, 158, 255, 0.1)', color: '#409eff' },
-  { key: 'pdf', label: '扫描PDF', hint: '.pdf', icon: DocumentCopy, accept: '.pdf', acceptLabel: '.pdf 文件', bg: 'rgba(230, 162, 60, 0.1)', color: '#e6a23c' },
-  { key: 'ocr', label: 'OCR', hint: '.jpg / .png / .tiff', icon: Picture, accept: '.jpg,.jpeg,.png,.tif,.tiff,.bmp', acceptLabel: '.jpg / .png / .tiff 等图片文件', bg: 'rgba(103, 194, 58, 0.1)', color: '#67c23a' },
+  { key: 'image', label: '图片文件', hint: '.jpg / .png / .tiff', icon: Picture, accept: '.jpg,.jpeg,.png,.tif,.tiff,.bmp', acceptLabel: '.jpg / .png / .tiff 等图片文件', bg: 'rgba(64, 158, 255, 0.1)', color: '#409eff' },
+  { key: 'pdf', label: 'PDF文件', hint: '.pdf', icon: DocumentCopy, accept: '.pdf', acceptLabel: '.pdf 文件', bg: 'rgba(230, 162, 60, 0.1)', color: '#e6a23c' },
   { key: 'excel', label: 'Excel', hint: '.xls / .xlsx', icon: Grid, accept: '.xls,.xlsx', acceptLabel: '.xls / .xlsx 文件', bg: 'rgba(26, 122, 78, 0.1)', color: '#1a7a4e' },
   { key: 'csv', label: 'CSV', hint: '.csv', icon: List, accept: '.csv', acceptLabel: '.csv 文件', bg: 'rgba(64, 158, 255, 0.1)', color: '#7232dd' },
 ]
 
-const activeType = ref('wax')
+const activeType = ref('image')
 const archiveType = ref('admission')
 const fileInput = ref(null)
 const isDragOver = ref(false)
@@ -346,7 +345,7 @@ async function handleUpload() {
 /* Type Selector */
 .type-selector {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 10px;
   margin-bottom: 4px;
 }

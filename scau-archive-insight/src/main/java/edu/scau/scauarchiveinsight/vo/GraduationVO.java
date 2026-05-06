@@ -15,6 +15,8 @@ public class GraduationVO {
     private String degreeName;
     private Integer destId;
     private String destName;
+    private Integer fileId;
+    private String fileName;
     private LocalDate graduationDate;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

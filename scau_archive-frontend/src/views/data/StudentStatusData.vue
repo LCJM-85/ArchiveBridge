@@ -28,6 +28,7 @@
               style="width:200px"
             />
             <el-button :icon="Search" @click="handleSearch">查询</el-button>
+            <el-button :icon="Refresh" @click="handleSearch">刷新</el-button>
             <el-button @click="resetFilters">重置</el-button>
             <el-button type="primary" :icon="Plus" @click="openAddDialog">新增</el-button>
           </div>
@@ -42,11 +43,17 @@
             <span :style="{ color: row.gender === '男' ? 'var(--color-primary)' : '#e84393' }">{{ row.gender }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="idCard" label="身份证号" min-width="160" />
+        <el-table-column prop="idCard" label="身份证号" min-width="190" show-overflow-tooltip />
         <el-table-column prop="provinceName" label="生源省份" min-width="100" />
         <el-table-column prop="majorName" label="专业" min-width="120" />
-        <el-table-column prop="className" label="班级" min-width="120" />
+        <el-table-column prop="className" label="班级" min-width="200" />
+
         <el-table-column prop="admissionDate" label="入学日期" width="110" align="center" />
+        <el-table-column label="来源文件" min-width="140">
+          <template #default="{ row }">
+            <span style="font-size:12px;color:var(--text-secondary)">{{ row.fileName || '-' }}</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="createTime" label="录入时间" width="155" align="center">
           <template #default="{ row }">
             <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ row.createTime ? row.createTime.replace('T', ' ').split('.')[0] : '-' }}</span>
@@ -57,10 +64,18 @@
             <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ row.updateTime ? row.updateTime.replace('T', ' ').split('.')[0] : '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column label="操作" width="100" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" :icon="Edit" @click="openEditDialog(row)">编辑</el-button>
-            <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)">删除</el-button>
+            <el-tooltip content="编辑" placement="top">
+              <el-button size="small" circle :icon="Edit" @click="openEditDialog(row)" />
+            </el-tooltip>
+            <el-popconfirm title="确定删除该记录吗？" @confirm="handleDelete(row.id)">
+              <template #reference>
+                <el-tooltip content="删除" placement="top">
+                  <el-button size="small" circle type="danger" :icon="Delete" />
+                </el-tooltip>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -152,7 +167,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Plus, Edit, Delete, Search, UserFilled } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Search, UserFilled, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useStudentStore } from '@/store/student'
 

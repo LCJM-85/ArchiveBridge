@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.scau.scauarchiveinsight.dto.AdmissionDTO;
 import edu.scau.scauarchiveinsight.mapper.AdmissionFactMapper;
+import edu.scau.scauarchiveinsight.mapper.ArchiveFileDimMapper;
 import edu.scau.scauarchiveinsight.mapper.MajorDimMapper;
 import edu.scau.scauarchiveinsight.mapper.ProvinceDimMapper;
 import edu.scau.scauarchiveinsight.pojo.AdmissionFact;
+import edu.scau.scauarchiveinsight.pojo.ArchiveFileDim;
 import edu.scau.scauarchiveinsight.pojo.MajorDim;
 import edu.scau.scauarchiveinsight.pojo.ProvinceDim;
 import edu.scau.scauarchiveinsight.vo.AdmissionVO;
@@ -31,6 +33,9 @@ public class AdmissionService {
 
     @Autowired
     private MajorDimMapper majorDimMapper;
+
+    @Autowired
+    private ArchiveFileDimMapper archiveFileDimMapper;
 
     public IPage<AdmissionVO> page(int current, int size, String keyword,
                                    String createTimeStart, String createTimeEnd,
@@ -91,6 +96,14 @@ public class AdmissionService {
                     w.or().in(AdmissionFact::getMajorId,
                             majors.stream().map(MajorDim::getMajorId).collect(Collectors.toList()));
                 }
+
+                // 按来源文件名搜索
+                List<Integer> matchedFiles = archiveFileDimMapper.selectList(
+                        new LambdaQueryWrapper<ArchiveFileDim>().like(ArchiveFileDim::getFileName, keyword))
+                        .stream().map(ArchiveFileDim::getFileId).collect(Collectors.toList());
+                if (!matchedFiles.isEmpty()) {
+                    w.or().in(AdmissionFact::getFileId, matchedFiles);
+                }
             });
         }
         if (createTimeStart != null && !createTimeStart.isBlank()) {
@@ -119,6 +132,12 @@ public class AdmissionService {
         vo.setAdmissionDate(fact.getAdmissionDate());
         vo.setCreateTime(fact.getCreateTime());
         vo.setUpdateTime(fact.getUpdateTime());
+
+        vo.setFileId(fact.getFileId());
+        if (fact.getFileId() != null) {
+            ArchiveFileDim file = archiveFileDimMapper.selectById(fact.getFileId());
+            vo.setFileName(file != null ? file.getFileName() : null);
+        }
 
         if (fact.getProvinceId() != null) {
             vo.setProvinceId(fact.getProvinceId());

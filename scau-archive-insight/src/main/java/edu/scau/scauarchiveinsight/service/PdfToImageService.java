@@ -10,7 +10,7 @@ import java.util.List;
 public class PdfToImageService {
 
     // ====================== 固定配置（你的项目相对路径）======================
-    private static final String PYTHON_PATH = ".venv/Scripts/python.exe";
+    private static final String PYTHON_PATH = "src/main/python/.venv/Scripts/python.exe";
     private static final String SCRIPT_PATH = "src/main/python/pdf2image/pdf2image.py";
 
     /**

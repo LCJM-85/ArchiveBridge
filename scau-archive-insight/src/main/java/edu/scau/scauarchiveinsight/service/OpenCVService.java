@@ -14,7 +14,7 @@ public class OpenCVService {
      */
     public String enhanceImage(String imagePath) {
         try {
-            String python = ".venv/Scripts/python.exe";
+            String python = "src/main/python/.venv/Scripts/python.exe";
 
             String scriptPath = "src/main/python/opencv/opencv.py";
 

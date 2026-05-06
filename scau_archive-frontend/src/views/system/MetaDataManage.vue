@@ -10,6 +10,7 @@
           <div class="card-header-right">
             <el-input v-model="searchText" placeholder="字段编码 / 字段名称 / 来源字段" clearable style="width:280px" @keyup.enter="handleSearch" @clear="handleClear" />
             <el-button :icon="Search" @click="handleSearch">查询</el-button>
+            <el-button :icon="Refresh" @click="handleSearch">刷新</el-button>
             <el-button type="primary" :icon="Plus" @click="openAddDialog">新增</el-button>
           </div>
         </div>
@@ -94,7 +95,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Plus, Edit, Delete, Search } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Search, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useMetaDataStore } from '@/store/metadata.js'
 

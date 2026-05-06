@@ -3,7 +3,7 @@ package edu.scau.scauarchiveinsight.controller;
 import edu.scau.scauarchiveinsight.processor.CSVProcessor;
 import edu.scau.scauarchiveinsight.processor.ExcelProcessor;
 import edu.scau.scauarchiveinsight.processor.PDFProcessor;
-import edu.scau.scauarchiveinsight.processor.WaxProcessor;
+import edu.scau.scauarchiveinsight.processor.ImageProcessor;
 import edu.scau.scauarchiveinsight.service.StorageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,16 +19,16 @@ public class ArchiveUploadController {
     private final CSVProcessor csvProcessor;
     private final ExcelProcessor excelProcessor;
     private final PDFProcessor pdfProcessor;
-    private final WaxProcessor waxProcessor;
+    private final ImageProcessor imageProcessor;
 
     public ArchiveUploadController(StorageService storageService, CSVProcessor csvProcessor,
                                    ExcelProcessor excelProcessor, PDFProcessor pdfProcessor,
-                                   WaxProcessor waxProcessor) {
+                                   ImageProcessor imageProcessor) {
         this.storageService = storageService;
         this.csvProcessor = csvProcessor;
         this.excelProcessor = excelProcessor;
         this.pdfProcessor = pdfProcessor;
-        this.waxProcessor = waxProcessor;
+        this.imageProcessor = imageProcessor;
     }
 
     @PostMapping("/upload")
@@ -86,9 +86,9 @@ public class ArchiveUploadController {
         }
 
         if (!imageBatch.isEmpty()) {
-            List<Map<String, Object>> waxResults = waxProcessor.process(imageBatch, archiveType);
+            List<Map<String, Object>> imageResults = imageProcessor.process(imageBatch, archiveType);
             List<Map<String, Object>> allErrors = new ArrayList<>();
-            for (Map<String, Object> wr : waxResults) {
+            for (Map<String, Object> wr : imageResults) {
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> errs = (List<Map<String, Object>>) wr.get("errors");
                 if (errs != null && !errs.isEmpty()) {
@@ -97,7 +97,7 @@ public class ArchiveUploadController {
             }
             Map<String, Object> entry = new LinkedHashMap<>();
             entry.put("type", "image");
-            entry.put("data", waxResults);
+            entry.put("data", imageResults);
             if (!allErrors.isEmpty()) {
                 entry.put("errors", allErrors);
             }

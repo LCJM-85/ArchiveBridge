@@ -2,6 +2,8 @@ package edu.scau.scauarchiveinsight.processor;
 
 import edu.scau.scauarchiveinsight.service.DataPersistenceService;
 import edu.scau.scauarchiveinsight.service.MetaDataMappingService;
+import edu.scau.scauarchiveinsight.service.OCRLogService;
+import edu.scau.scauarchiveinsight.service.QualityScoreService;
 import edu.scau.scauarchiveinsight.service.StorageService;
 import org.springframework.stereotype.Component;
 
@@ -15,12 +17,17 @@ public class CSVProcessor {
 
     private final StorageService storageService;
     private final MetaDataMappingService metaDataMappingService;
+    private final OCRLogService ocrLogService;
+    private final QualityScoreService qualityScoreService;
     private final DataPersistenceService dataPersistenceService;
 
     public CSVProcessor(StorageService storageService, MetaDataMappingService metaDataMappingService,
+                        OCRLogService ocrLogService, QualityScoreService qualityScoreService,
                         DataPersistenceService dataPersistenceService) {
         this.storageService = storageService;
         this.metaDataMappingService = metaDataMappingService;
+        this.ocrLogService = ocrLogService;
+        this.qualityScoreService = qualityScoreService;
         this.dataPersistenceService = dataPersistenceService;
     }
 
@@ -74,24 +81,35 @@ public class CSVProcessor {
 
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> errors = (List<Map<String, Object>>) mapped.get("errors");
-        if (errors != null && !errors.isEmpty()) {
+
+        if (rows.isEmpty()) {
             try {
-                storageService.failedFile(fileName, errors.toString());
-            } catch (IOException ignored) {
-            }
-        } else if (!rows.isEmpty()) {
+                storageService.failedFile(fileName, "无法解析到任何数据行");
+            } catch (IOException ignored) {}
+        } else {
             @SuppressWarnings("unchecked")
             List<Map<String, String>> mappedData = (List<Map<String, String>>) mapped.get("data");
+            Integer fileId = null;
             if (mappedData != null) {
-                Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);//保存文件识别日志
+                fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
                 for (Map<String, String> record : mappedData) {
                     dataPersistenceService.saveExtractedData(archiveType, record, fileId);
                 }
             }
             try {
                 storageService.moveArchiveFile(fileName);
-            } catch (Exception ignored) {
-            }
+
+                // 质量评分
+                int errCount = errors != null ? errors.size() : 0;
+                if (mappedData != null) {
+                    qualityScoreService.scoreFile(fileId, archiveType, mappedData, errCount);
+                }
+
+                // 有校验警告仍归档，仅记录到数据库
+                if (errors != null && !errors.isEmpty() && fileId != null) {
+                    ocrLogService.addLog(fileId, fileName, fileType, "warning", errors.toString());
+                }
+            } catch (Exception ignored) {}
         }
 
         return mapped;

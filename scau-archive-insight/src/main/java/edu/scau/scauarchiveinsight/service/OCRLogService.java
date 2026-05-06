@@ -3,7 +3,9 @@ package edu.scau.scauarchiveinsight.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import edu.scau.scauarchiveinsight.mapper.ArchiveFileDimMapper;
 import edu.scau.scauarchiveinsight.mapper.OCRLogDimMapper;
+import edu.scau.scauarchiveinsight.pojo.ArchiveFileDim;
 import edu.scau.scauarchiveinsight.pojo.OCRLogDim;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,9 @@ public class OCRLogService {
 
     @Autowired
     private OCRLogDimMapper ocrLogDimMapper;
+
+    @Autowired
+    private ArchiveFileDimMapper archiveFileDimMapper;
 
     private static final Path STORAGE_ROOT = Paths.get(System.getProperty("user.dir"), "storage");
 
@@ -56,7 +61,17 @@ public class OCRLogService {
                            .eq(OCRLogDim::getRecognizeStatus, status);
                       if (ocrLogDimMapper.selectCount(check) > 0) return;
 
+                      // 从 archive_file_dim 查找 fileId
+                      Integer fileId = null;
+                      ArchiveFileDim archiveFile = archiveFileDimMapper.selectOne(
+                              new LambdaQueryWrapper<ArchiveFileDim>()
+                                      .eq(ArchiveFileDim::getFileName, fileName));
+                      if (archiveFile != null) {
+                          fileId = archiveFile.getFileId();
+                      }
+
                       OCRLogDim log = new OCRLogDim();
+                      log.setFileId(fileId);
                       log.setFileName(fileName);
                       log.setFileType(typePart);
                       log.setRecognizeStatus(status);
@@ -79,8 +94,9 @@ public class OCRLogService {
     /**
      * 手动写入一条日志
      */
-    public void addLog(String fileName, String fileType, String status, String errorMessage) {
+    public void addLog(Integer fileId, String fileName, String fileType, String status, String errorMessage) {
         OCRLogDim log = new OCRLogDim();
+        log.setFileId(fileId);
         log.setFileName(fileName);
         log.setFileType(fileType);
         log.setRecognizeStatus(status);
@@ -90,7 +106,30 @@ public class OCRLogService {
     }
 
     public void removeById(Integer logId) {
+        // 查出日志记录，获取文件名
+        OCRLogDim log = ocrLogDimMapper.selectById(logId);
+        if (log != null && log.getFileName() != null) {
+            deleteStorageFile(log.getFileName());
+        }
         ocrLogDimMapper.deleteById(logId);
+    }
+
+    /**
+     * 在 storage 目录中递归查找并删除文件及侧边文件
+     */
+    private void deleteStorageFile(String fileName) {
+        Path storageDir = Paths.get(System.getProperty("user.dir"), "storage");
+        try (Stream<Path> stream = Files.walk(storageDir)) {
+            stream.filter(Files::isRegularFile)
+                  .filter(p -> p.getFileName().toString().equals(fileName)
+                          || p.getFileName().toString().equals(fileName + ".error.json")
+                          || p.getFileName().toString().equals(fileName + ".warn.json"))
+                  .forEach(p -> {
+                      try {
+                          Files.deleteIfExists(p);
+                      } catch (IOException ignored) {}
+                  });
+        } catch (IOException ignored) {}
     }
 
     /**

@@ -15,3 +15,7 @@ export function fetchOcrLogHistory(params) {
 export function deleteOcrLog(logId) {
   return request.delete(`/ocr/log/delete/${logId}`)
 }
+
+export function fetchQualityScores(fileIds) {
+  return request.get('/quality-score/list', { params: { fileIds: fileIds.join(',') } })
+}

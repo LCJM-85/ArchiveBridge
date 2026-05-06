@@ -8,7 +8,7 @@ SCAU Archive Insight is a full-stack student archive management system for South
 
 - **Backend**: Spring Boot 3.5.13 (Java 17) + MyBatis-Plus 3.5.13 + PostgreSQL/PostGIS + Druid
 - **Frontend**: Vue 3 SPA (Vite 8, Element Plus, Pinia, ECharts, Axios)
-- **Python scripts**: OCR (PaddleOCR), PDF-to-image (PyMuPDF), image enhancement (OpenCV)
+- **Python scripts**: PPStructure (PaddleOCR table recognition), PDF-to-image (PyMuPDF), image enhancement (OpenCV)
 
 ## Commands
 
@@ -33,9 +33,22 @@ npm run preview    # Preview production build
 ### Python (Windows venv)
 ```bash
 cd scau-archive-insight
-.venv/Scripts/python.exe src/main/python/ocr/ocr.py <image_path>
-.venv/Scripts/python.exe src/main/python/pdf2image/pdf2image.py <pdf_path>
-.venv/Scripts/python.exe src/main/python/openCV/opencv.py <image_path>
+src/main/python/.venv/Scripts/python.exe src/main/python/ppstructure/ppstructure.py <image_path> [rules_path]
+src/main/python/.venv/Scripts/python.exe src/main/python/pdf2image/pdf2image.py <pdf_path>
+src/main/python/.venv/Scripts/python.exe src/main/python/openCV/opencv.py <image_path>
+```
+
+### Model Download (PP-OCRv4 Server Models)
+```powershell
+cd scau-archive-insight
+mkdir models\server -Force
+cd models\server
+curl -O https://paddleocr.bj.bcebos.com/PP-OCRv4/chinese/ch_PP-OCRv4_det_server_infer.tar
+tar -xf ch_PP-OCRv4_det_server_infer.tar
+curl -O https://paddleocr.bj.bcebos.com/PP-OCRv4/chinese/ch_PP-OCRv4_rec_server_infer.tar
+tar -xf ch_PP-OCRv4_rec_server_infer.tar
+curl -O https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar
+tar -xf ch_ppocr_mobile_v2.0_cls_infer.tar
 ```
 
 ## Architecture
@@ -55,37 +68,43 @@ Base package: `edu.scau.scauarchiveinsight`
   - `StorageService` — `saveFiles()`, `moveArchiveFile()`, `failedFile()` with `.error.json` sidecar
   - `MetaDataService` — CRUD + keyword search page for metadata_standard
   - `MetaDataMappingService` — field mapping + validation for CSV/Excel (uses `metadata_standard` rules)
-  - `OCRService` — calls Python PaddleOCR via ProcessBuilder, passes metadata rules as temp JSON
+  - `PPStructureService` — calls Python PPStructure via ProcessBuilder, passes metadata rules as temp JSON
   - `OCRLogService` — syncTodayLogs (scans archive/failed dirs), getTodayLogs, getHistory, delete
   - `PdfToImageService` — calls pdf2image.py via ProcessBuilder
   - `OpenCVService` — calls opencv.py via ProcessBuilder
-  - `DataPersistenceService` — **stub** (`saveExtractedData(archiveType, data)`) — user implements custom persistence
+  - `DataPersistenceService` — saveExtractedData with fuzzy dimension matching + deduplication
+  - `TextUtil` — Levenshtein distance fuzzy matching for OCR error correction
 - **processor/** — File parsing (each follows same pattern: extract → map → persist → archive/failed):
   - `CSVProcessor` — standard CSV parsing with quote handling
   - `ExcelProcessor` — Apache POI (both .xls and .xlsx)
-  - `PDFProcessor` — pdf2image → OCR per page → collect errors → persist
-  - `WaxProcessor` — image (蜡纸) → OpenCV enhance → OCR → persist
+  - `PDFProcessor` — pdf2image → OpenCV enhance → PPStructure table recognition → persist
+  - `ImageProcessor` — image → OpenCV enhance → PPStructure table recognition → persist
 - **mapper/** — MyBatis-Plus interfaces for all entities: `StudentDimMapper`, `StudentFactMapper`, `AdmissionFactMapper`, `GraduationFactMapper`, `CollegeDimMapper`, `MajorDimMapper`, `ClassDimMapper`, `ProvinceDimMapper`, `NationDimMapper`, `PoliticalDimMapper`, `DegreeDimMapper`, `DestinationDimMapper`, `SourceTypeDimMapper`, `ArchiveFileDimMapper`, `OCRLogDimMapper`, `QualityScoreDimMapper`, `MetaDataStandardMapper`, `UserMapper`, `DateDimMapper`
 - **pojo/** — Entity classes: dimension tables, fact tables (`StudentFact`, `AdmissionFact`, `GraduationFact`), `MetaDataStandard`, `OCRLogDim`, `SysUser`
 - **config/** — `SecurityConfig` (Spring Security + CORS), `MyBatisPlusConfig` (PaginationInnerInterceptor), `GlobalExceptionHandler`, `JsonAuthenticationEntryPoint`
 - **filter/** — `JwtAuthenticationFilter` (OncePerRequestFilter)
-- **util/** — `JwtUtils`, `DateUtil`
+- **util/** — `JwtUtils`, `DateUtil`, `TextUtil`
 
 ### File Upload Pipeline
-1. `ArchiveUploadController` receives multipart files + `type` (pdf/wax/ocr/excel/csv) + `archiveType` (admission/graduation)
+1. `ArchiveUploadController` receives multipart files + `type` (image/pdf/excel/csv) + `archiveType` (admission/graduation)
 2. `StorageService.saveFiles()` saves to `storage/temp/{yyyyMMdd}/{type}/`
 3. Based on file extension, dispatches to processor:
    - **CSV/Excel** → parsed into `List<Map>` → `MetaDataMappingService` maps fields + validates → `DataPersistenceService.saveExtractedData()` per record → archive to `storage/archive/`
-   - **PDF** → `PdfToImageService` (Python PyMuPDF) → `OCRService` (Python PaddleOCR) → structured JSON → persist → archive
-   - **Images (wax/ocr)** → `OpenCVService` (Python enhance) → `OCRService` (Python PaddleOCR) → persist → archive
+   - **PDF** → `PdfToImageService` (Python PyMuPDF) → `OpenCVService` → `PPStructureService` (table recognition) → structured JSON → persist → archive
+   - **Images** → `OpenCVService` (Python enhance) → `PPStructureService` (table recognition) → persist → archive
 4. On failure: `StorageService.failedFile()` moves to `storage/failed/` + writes `.error.json` sidecar
 5. `OCRLogService.syncTodayLogs()` scans `archive/` and `failed/` dirs daily to populate `ocr_log_dim` table
 
 ### Metadata-Driven Data Cleaning
 - All processors use `metadata_standard` table rules for field mapping and validation
 - `MetaDataMappingService`: maps source fields → `fieldCode`, validates types (int/decimal/boolean/date), checks required fields
-- For OCR pipelines: `OCRService` passes metadata rules as a temp JSON file to Python; OCR returns JSON with `fieldCode` as keys
+- For image/PDF pipelines: `PPStructureService` passes metadata rules as a temp JSON file to Python; PPStructure returns JSON with `fieldCode` as keys
 - Field matching priority: `fieldCode` > `fieldName` > `sourceField`
+
+### Data Deduplication
+- **admission**: match by `student_no` → `id_card` → `exam_no`, UPDATE existing or INSERT new for both `admission_fact` and `student_fact`
+- **graduation**: match by `student_no` → `id_card`, UPDATE existing or INSERT new for `graduation_fact`, mark `student_fact.graduated = true`
+- **Fuzzy dimension matching**: exact match fails → Levenshtein distance auto-correct (e.g. "广冬" → "广东") for province/major/class/degree/destination lookups
 
 ### Authentication
 - `GET /api/captcha` → session-based captcha (Hutool LineCaptcha, 2min TTL)
@@ -97,7 +116,7 @@ Base package: `edu.scau.scauarchiveinsight`
 
 ### Python Scripts
 All called via `ProcessBuilder` from Java services, Python venv at `.venv/Scripts/python.exe`:
-- **ocr.py**: PaddleOCR → column-based table extraction with position grouping → uses `fieldCode` as output key → returns `{"data": [{...}], "errors": [...]}`
+- **ppstructure.py**: PaddleOCR PPStructure → table structure recognition → returns `{"data": [{...}], "errors": [...]}`
 - **pdf2image.py**: PyMuPDF (fitz) → 200dpi PNG per page → prints paths to stdout
 - **opencv.py**: OpenCV → grayscale → Gaussian blur → adaptive threshold → sharpen
 

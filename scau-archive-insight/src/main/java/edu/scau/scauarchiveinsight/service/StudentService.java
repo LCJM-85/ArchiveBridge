@@ -31,6 +31,9 @@ public class StudentService {
     @Autowired
     private ClassDimMapper classDimMapper;
 
+    @Autowired
+    private ArchiveFileDimMapper archiveFileDimMapper;
+
     public IPage<StudentVO> page(int current, int size, String keyword,
                                  String createTimeStart, String createTimeEnd,
                                  String updateTimeStart, String updateTimeEnd) {
@@ -99,6 +102,14 @@ public class StudentService {
                     w.or().in(StudentFact::getClassId,
                             classes.stream().map(ClassDim::getClassId).collect(Collectors.toList()));
                 }
+
+                // 按来源文件名搜索
+                List<Integer> matchedFiles = archiveFileDimMapper.selectList(
+                        new LambdaQueryWrapper<ArchiveFileDim>().like(ArchiveFileDim::getFileName, keyword))
+                        .stream().map(ArchiveFileDim::getFileId).collect(Collectors.toList());
+                if (!matchedFiles.isEmpty()) {
+                    w.or().in(StudentFact::getFileId, matchedFiles);
+                }
             });
         }
         if (createTimeStart != null && !createTimeStart.isBlank()) {
@@ -126,6 +137,12 @@ public class StudentService {
         vo.setAdmissionDate(fact.getAdmissionDate());
         vo.setCreateTime(fact.getCreateTime());
         vo.setUpdateTime(fact.getUpdateTime());
+
+        vo.setFileId(fact.getFileId());
+        if (fact.getFileId() != null) {
+            ArchiveFileDim file = archiveFileDimMapper.selectById(fact.getFileId());
+            vo.setFileName(file != null ? file.getFileName() : null);
+        }
 
         if (fact.getProvinceId() != null) {
             vo.setProvinceId(fact.getProvinceId());

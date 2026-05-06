@@ -32,6 +32,10 @@ public class StudentFact {
     @TableField("admission_date")
     private LocalDate admissionDate;
 
+    private Integer fileId;
+
+    private Boolean graduated;
+
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;

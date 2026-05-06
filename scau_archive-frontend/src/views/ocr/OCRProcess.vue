@@ -20,6 +20,10 @@
           <div class="stat-label">处理中</div>
         </el-card>
         <el-card shadow="never" class="stat-card">
+          <div class="stat-value warning">{{ stats.warning }}</div>
+          <div class="stat-label">警告</div>
+        </el-card>
+        <el-card shadow="never" class="stat-card">
           <div class="stat-value success">{{ stats.success }}</div>
           <div class="stat-label">已完成</div>
         </el-card>
@@ -44,9 +48,18 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="失败原因" min-width="300">
+        <el-table-column label="质量评分" width="90" align="center">
+          <template #default="{ row }">
+            <el-tag v-if="scoresMap[row.fileId]" :type="scoreTag(scoresMap[row.fileId].totalScore)" size="small">
+              {{ scoresMap[row.fileId].totalScore }}
+            </el-tag>
+            <span v-else style="color:var(--text-tertiary)">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="提示信息" min-width="300">
           <template #default="{ row }">
             <span v-if="row.recognizeStatus === 'failed' && row.errorMessage" style="color:#f56c6c">{{ row.errorMessage }}</span>
+            <span v-else-if="row.recognizeStatus === 'warning' && row.errorMessage" style="color:#e6a23c">{{ row.errorMessage }}</span>
             <span v-else style="color:var(--text-secondary)">-</span>
           </template>
         </el-table-column>
@@ -69,9 +82,18 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="失败原因" min-width="250">
+        <el-table-column label="质量评分" width="80" align="center">
+          <template #default="{ row }">
+            <el-tag v-if="scoresMap[row.fileId]" :type="scoreTag(scoresMap[row.fileId].totalScore)" size="small">
+              {{ scoresMap[row.fileId].totalScore }}
+            </el-tag>
+            <span v-else style="color:var(--text-tertiary)">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="提示信息" min-width="250">
           <template #default="{ row }">
             <span v-if="row.recognizeStatus === 'failed' && row.errorMessage" style="color:#f56c6c">{{ row.errorMessage }}</span>
+            <span v-else-if="row.recognizeStatus === 'warning' && row.errorMessage" style="color:#e6a23c">{{ row.errorMessage }}</span>
             <span v-else style="color:var(--text-secondary)">-</span>
           </template>
         </el-table-column>
@@ -100,11 +122,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Refresh, Monitor, Timer, Delete } from '@element-plus/icons-vue'
-import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog } from '@/api/modules/ocr'
+import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog, fetchQualityScores } from '@/api/modules/ocr'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
 const todayLogs = ref([])
+const scoresMap = ref({})
 
 const historyVisible = ref(false)
 const historyLoading = ref(false)
@@ -115,20 +138,29 @@ const historyTotal = ref(0)
 
 const stats = computed(() => ({
   processing: 0,
+  warning: todayLogs.value.filter(f => f.recognizeStatus === 'warning').length,
   success: todayLogs.value.filter(f => f.recognizeStatus === 'success').length,
   error: todayLogs.value.filter(f => f.recognizeStatus === 'failed').length,
 }))
 
 function statusTag(status) {
   return status === 'processing' ? 'warning'
+       : status === 'warning'   ? 'warning'
        : status === 'success'   ? 'success'
        : 'danger'
 }
 
 function statusText(status) {
   return status === 'processing' ? '处理中'
+       : status === 'warning'   ? '有警告'
        : status === 'success'   ? '已完成'
        : '处理失败'
+}
+
+function scoreTag(score) {
+  return score >= 80 ? 'success'
+       : score >= 60 ? 'warning'
+       : 'danger'
 }
 
 async function syncAndRefresh() {
@@ -137,6 +169,7 @@ async function syncAndRefresh() {
     await syncOcrLogs()
     const res = await fetchTodayOcrLogs()
     todayLogs.value = res.data.data || []
+    await fetchQualityScoresForLogs(todayLogs.value)
     ElMessage.success('同步完成')
   } catch {
     todayLogs.value = []
@@ -146,10 +179,22 @@ async function syncAndRefresh() {
   }
 }
 
+async function fetchQualityScoresForLogs(logs) {
+  const fileIds = logs.filter(l => l.fileId != null).map(l => l.fileId)
+  if (fileIds.length === 0) { scoresMap.value = {}; return }
+  try {
+    const res = await fetchQualityScores(fileIds)
+    scoresMap.value = res.data.data || {}
+  } catch {
+    scoresMap.value = {}
+  }
+}
+
 async function fetchToday() {
   try {
     const res = await fetchTodayOcrLogs()
     todayLogs.value = res.data.data || []
+    await fetchQualityScoresForLogs(todayLogs.value)
   } catch {
     todayLogs.value = []
   }

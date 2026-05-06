@@ -1,10 +1,13 @@
 package edu.scau.scauarchiveinsight.processor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.scau.scauarchiveinsight.service.DataPersistenceService;
-import edu.scau.scauarchiveinsight.service.OCRService;
+import edu.scau.scauarchiveinsight.service.OCRLogService;
+import edu.scau.scauarchiveinsight.service.PPStructureService;
 import edu.scau.scauarchiveinsight.service.OpenCVService;
+import edu.scau.scauarchiveinsight.service.QualityScoreService;
 import edu.scau.scauarchiveinsight.service.StorageService;
 import org.springframework.stereotype.Component;
 
@@ -13,18 +16,24 @@ import java.nio.file.Paths;
 import java.util.*;
 
 @Component
-public class WaxProcessor {
+public class ImageProcessor {
 
     private final OpenCVService openCVService;
-    private final OCRService ocrService;
+    private final PPStructureService ppStructureService;
+    private final OCRLogService ocrLogService;
+    private final QualityScoreService qualityScoreService;
     private final StorageService storageService;
     private final DataPersistenceService dataPersistenceService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
-    public WaxProcessor(OpenCVService openCVService, OCRService ocrService,
+    public ImageProcessor(OpenCVService openCVService, PPStructureService ppStructureService,
+                          OCRLogService ocrLogService, QualityScoreService qualityScoreService,
                         StorageService storageService, DataPersistenceService dataPersistenceService) {
         this.openCVService = openCVService;
-        this.ocrService = ocrService;
+        this.ppStructureService = ppStructureService;
+        this.ocrLogService = ocrLogService;
+        this.qualityScoreService = qualityScoreService;
         this.storageService = storageService;
         this.dataPersistenceService = dataPersistenceService;
     }
@@ -54,17 +63,17 @@ public class WaxProcessor {
             String ocrPath = isEnhanceFailed(enhancedPath) ? imagePath : enhancedPath;
 
             try {
-                String text = ocrService.recognizeText(ocrPath);
+                String text = ppStructureService.parseTable(ocrPath);
 
-                if (text != null && text.startsWith("OCR 识别出错")) {
-                    // OCR 调用失败
+                if (text == null || text.isEmpty()) {
+                    // 表格识别调用失败
                     item.put("data", Map.of());
-                    item.put("errors", List.of(Maps("field", "", "message", text)));
+                    item.put("errors", List.of(Maps("field", "", "message", "表格识别无返回")));
                     try {
-                        storageService.failedFile(fileName, text);
+                        storageService.failedFile(fileName, "表格识别无返回");
                     } catch (Exception ignored) {}
                 } else {
-                    // OCR 成功，解析结果
+                    // 表格识别成功，解析结果
                     try {
                         Map<String, Object> parsed = objectMapper.readValue(text,
                                 new TypeReference<Map<String, Object>>() {});
@@ -102,13 +111,7 @@ public class WaxProcessor {
                         item.put("data", dataList);
                         item.put("errors", errs);
 
-                        if (!errs.isEmpty()) {
-                            StringBuilder sb = new StringBuilder("字段校验警告: ");
-                            for (Map<String, Object> e : errs) {
-                                sb.append(e.get("message")).append("; ");
-                            }
-                            storageService.failedFile(fileName, sb.toString());
-                        } else if (dataList.isEmpty()) {
+                        if (dataList.isEmpty()) {
                             storageService.failedFile(fileName, "未匹配到任何元数据字段");
                         } else {
                             Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
@@ -118,11 +121,23 @@ public class WaxProcessor {
                             }
 
                             storageService.moveArchiveFile(fileName);
+
+                            // 质量评分
+                            qualityScoreService.scoreFile(fileId, archiveType, dataList, errs.size());
+
+                            // 有校验警告仍归档，仅记录到数据库
+                            if (!errs.isEmpty()) {
+                                StringBuilder sb = new StringBuilder("字段校验警告: ");
+                                for (Map<String, Object> e : errs) {
+                                    sb.append(e.get("message")).append("; ");
+                                }
+                                ocrLogService.addLog(fileId, fileName, fileType, "warning", sb.toString());
+                            }
                         }
                     } catch (Exception e) {
                         item.put("data", Map.of());
                         item.put("errors", List.of(Maps("field", "", "message", "JSON解析失败: " + e.getMessage())));
-                        storageService.failedFile(fileName, "OCR结果解析失败: " + e.getMessage());
+                        storageService.failedFile(fileName, "表格识别结果解析失败: " + e.getMessage());
                     }
                 }
             } catch (Exception e) {
@@ -130,7 +145,7 @@ public class WaxProcessor {
                 item.put("errors", List.of());
                 item.put("ocrError", e.getMessage());
                 try {
-                    storageService.failedFile(fileName, "OCR处理异常: " + e.getMessage());
+                    storageService.failedFile(fileName, "表格识别异常: " + e.getMessage());
                 } catch (Exception ignored) {}
             }
 
