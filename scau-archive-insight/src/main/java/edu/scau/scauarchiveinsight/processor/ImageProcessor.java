@@ -3,6 +3,8 @@ package edu.scau.scauarchiveinsight.processor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import edu.scau.scauarchiveinsight.service.DataPersistenceService;
 import edu.scau.scauarchiveinsight.service.OCRLogService;
 import edu.scau.scauarchiveinsight.service.PPStructureService;
@@ -24,8 +26,10 @@ public class ImageProcessor {
     private final QualityScoreService qualityScoreService;
     private final StorageService storageService;
     private final DataPersistenceService dataPersistenceService;
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+    private final ObjectMapper objectMapper = JsonMapper.builder()
+            .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
+            .enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS)
+            .build();
 
     public ImageProcessor(OpenCVService openCVService, PPStructureService ppStructureService,
                           OCRLogService ocrLogService, QualityScoreService qualityScoreService,

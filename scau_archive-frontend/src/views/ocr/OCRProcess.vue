@@ -63,10 +63,15 @@
             <span v-else style="color:var(--text-secondary)">-</span>
           </template>
         </el-table-column>
+        <el-table-column label="操作" width="70" align="center">
+          <template #default="{ row }">
+            <el-button size="small" type="danger" :icon="Delete" circle @click="handleDeleteLog(row.logId)" />
+          </template>
+        </el-table-column>
       </el-table>
     </el-card>
 
-    <el-dialog v-model="historyVisible" title="历史记录" width="900px" :close-on-click-modal="false">
+    <el-dialog v-model="historyVisible" title="历史记录" width="95%" :close-on-click-modal="false">
       <el-table :data="historyRecords" v-loading="historyLoading" stripe border style="width: 100%" empty-text="暂无历史记录">
         <el-table-column prop="fileName" label="文件名" min-width="200" />
         <el-table-column prop="fileType" label="类型" width="70" align="center">

@@ -280,6 +280,12 @@ public class DataPersistenceService {
                         Wrappers.<ProvinceDim>lambdaQuery().eq(ProvinceDim::getProvinceName, corrected));
             }
         }
+        if (dim == null) {
+            dim = new ProvinceDim();
+            dim.setProvinceName(provinceName.trim());
+            provinceDimMapper.insert(dim);
+            log.warn("自动创建维度记录 [省份]: {} → province_id={}", provinceName, dim.getProvinceId());
+        }
         return dim;
     }
 
@@ -295,6 +301,12 @@ public class DataPersistenceService {
                 dim = majorDimMapper.selectOne(
                         Wrappers.<MajorDim>lambdaQuery().eq(MajorDim::getMajorName, corrected));
             }
+        }
+        if (dim == null) {
+            dim = new MajorDim();
+            dim.setMajorName(majorName.trim());
+            majorDimMapper.insert(dim);
+            log.warn("自动创建维度记录 [专业]: {} → major_id={}", majorName, dim.getMajorId());
         }
         return dim;
     }
@@ -312,6 +324,12 @@ public class DataPersistenceService {
                         Wrappers.<ClassDim>lambdaQuery().eq(ClassDim::getClassName, corrected));
             }
         }
+        if (dim == null) {
+            dim = new ClassDim();
+            dim.setClassName(className.trim());
+            classDimMapper.insert(dim);
+            log.warn("自动创建维度记录 [班级]: {} → class_id={}", className, dim.getClassId());
+        }
         return dim;
     }
 
@@ -328,6 +346,12 @@ public class DataPersistenceService {
                         Wrappers.<DegreeDim>lambdaQuery().eq(DegreeDim::getDegreeName, corrected));
             }
         }
+        if (dim == null) {
+            dim = new DegreeDim();
+            dim.setDegreeName(degreeName.trim());
+            degreeDimMapper.insert(dim);
+            log.warn("自动创建维度记录 [学历]: {} → degree_id={}", degreeName, dim.getDegreeId());
+        }
         return dim;
     }
 
@@ -343,6 +367,12 @@ public class DataPersistenceService {
                 dim = destinationDimMapper.selectOne(
                         Wrappers.<DestinationDim>lambdaQuery().eq(DestinationDim::getDestName, corrected));
             }
+        }
+        if (dim == null) {
+            dim = new DestinationDim();
+            dim.setDestName(destName.trim());
+            destinationDimMapper.insert(dim);
+            log.warn("自动创建维度记录 [去向]: {} → dest_id={}", destName, dim.getDestId());
         }
         return dim;
     }

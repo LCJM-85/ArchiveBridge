@@ -61,11 +61,21 @@ public class MetaDataMappingService {
     }
 
     private String findValue(Map<String, String> raw, MetaDataStandard rule) {
-        // 按优先级匹配：fieldCode > fieldName > sourceField
-        for (String key : List.of(rule.getFieldCode(), rule.getFieldName(), rule.getSourceField())) {
+        // 匹配优先级：fieldName > sourceField > fieldCode
+        for (String key : List.of(rule.getFieldName(), rule.getSourceField(), rule.getFieldCode())) {
             if (key != null && raw.containsKey(key)) {
                 String val = raw.get(key);
                 return val != null ? val.trim() : "";
+            }
+        }
+        // 包含匹配：列名包含 key 或 key 包含列名
+        for (Map.Entry<String, String> entry : raw.entrySet()) {
+            String col = entry.getKey();
+            for (String key : List.of(rule.getFieldName(), rule.getSourceField(), rule.getFieldCode())) {
+                if (key != null && (col.contains(key) || key.contains(col))) {
+                    String val = entry.getValue();
+                    return val != null ? val.trim() : "";
+                }
             }
         }
         return null;

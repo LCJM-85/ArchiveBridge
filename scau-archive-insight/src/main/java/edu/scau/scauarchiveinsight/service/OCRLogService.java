@@ -55,10 +55,9 @@ public class OCRLogService {
                       String typePart = dataFile.getNameCount() > 2
                               ? dataFile.getName(dataFile.getNameCount() - 2).toString() : "unknown";
 
-                      // 检查是否已记录
+                      // 检查是否已记录（任一状态均视为已处理）
                       LambdaQueryWrapper<OCRLogDim> check = new LambdaQueryWrapper<>();
-                      check.eq(OCRLogDim::getFileName, fileName)
-                           .eq(OCRLogDim::getRecognizeStatus, status);
+                      check.eq(OCRLogDim::getFileName, fileName);
                       if (ocrLogDimMapper.selectCount(check) > 0) return;
 
                       // 从 archive_file_dim 查找 fileId
