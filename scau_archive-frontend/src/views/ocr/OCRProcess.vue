@@ -125,14 +125,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Refresh, Monitor, Timer, Delete } from '@element-plus/icons-vue'
-import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog, fetchQualityScores } from '@/api/modules/ocr'
+import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog, fetchQualityScores, fetchProcessingCount } from '@/api/modules/ocr'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
 const todayLogs = ref([])
 const scoresMap = ref({})
+
+const processingCount = ref(0)
+let pollTimer = null
 
 const historyVisible = ref(false)
 const historyLoading = ref(false)
@@ -142,7 +145,7 @@ const historyPageSize = ref(15)
 const historyTotal = ref(0)
 
 const stats = computed(() => ({
-  processing: 0,
+  processing: processingCount.value,
   warning: todayLogs.value.filter(f => f.recognizeStatus === 'warning').length,
   success: todayLogs.value.filter(f => f.recognizeStatus === 'success').length,
   error: todayLogs.value.filter(f => f.recognizeStatus === 'failed').length,
@@ -195,6 +198,15 @@ async function fetchQualityScoresForLogs(logs) {
   }
 }
 
+async function pollProcessingCount() {
+  try {
+    const res = await fetchProcessingCount()
+    processingCount.value = res.data.data || 0
+  } catch {
+    // 忽略
+  }
+}
+
 async function fetchToday() {
   try {
     const res = await fetchTodayOcrLogs()
@@ -230,13 +242,22 @@ async function handleDeleteLog(logId) {
     await ElMessageBox.confirm('确定删除该日志吗？', '提示', { type: 'warning' })
     await deleteOcrLog(logId)
     ElMessage.success('删除成功')
-    await fetchHistory()
+    await fetchToday()
+    if (historyVisible.value) await fetchHistory()
   } catch {
     // cancelled or error
   }
 }
 
-onMounted(fetchToday)
+onMounted(() => {
+  fetchToday()
+  pollProcessingCount()
+  pollTimer = setInterval(pollProcessingCount, 3000)
+})
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+})
 </script>
 
 <style scoped>

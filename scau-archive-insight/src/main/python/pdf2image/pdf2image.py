@@ -11,7 +11,7 @@ def pdf_to_images(pdf_path):
 
     for page_num in range(len(doc)):
         page = doc[page_num]
-        pix = page.get_pixmap(dpi=200)
+        pix = page.get_pixmap(dpi=300)
         img_path = os.path.join(out_dir, f"{ts}_page_{page_num + 1}.png")
         pix.save(img_path)
         print(img_path, flush=True)

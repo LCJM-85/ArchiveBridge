@@ -2,6 +2,7 @@ package edu.scau.scauarchiveinsight.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.scau.scauarchiveinsight.mapper.MetaDataStandardMapper;
 import edu.scau.scauarchiveinsight.pojo.MetaDataStandard;
@@ -34,16 +35,17 @@ public class MetaDataService {
         return metaDataStandardMapper.selectPage(page, wrapper);
     }
 
-    public MetaDataStandard getById(String fieldCode) {
-        return metaDataStandardMapper.selectById(fieldCode);
+    public MetaDataStandard getByFieldCode(String fieldCode) {
+        return metaDataStandardMapper.selectOne(
+                Wrappers.<MetaDataStandard>lambdaQuery().eq(MetaDataStandard::getFieldCode, fieldCode));
     }
 
     public boolean add(MetaDataStandard metaDataStandard) {
         return metaDataStandardMapper.insert(metaDataStandard) > 0;
     }
 
-    public boolean delete(String fieldCode) {
-        return metaDataStandardMapper.deleteById(fieldCode) > 0;
+    public boolean delete(Integer metadataId) {
+        return metaDataStandardMapper.deleteById(metadataId) > 0;
     }
 
     public boolean update(MetaDataStandard metaDataStandard) {

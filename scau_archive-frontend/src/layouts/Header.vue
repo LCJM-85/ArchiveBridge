@@ -25,7 +25,7 @@
         </el-icon>
       </el-button>
 
-      <el-badge :value="3" hidden="0">
+      <el-badge :value="3" :hidden="false">
         <el-button text>
           <el-icon size="18"><Bell /></el-icon>
         </el-button>

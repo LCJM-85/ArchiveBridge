@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class StorageService {
@@ -19,6 +20,15 @@ public class StorageService {
     private static final Path STORAGE_ROOT = Paths.get(System.getProperty("user.dir"), "storage", "temp");
     private static final Path ARCHIVE_ROOT = Paths.get(System.getProperty("user.dir"), "storage", "archive");
     private static final Path FAILED_ROOT = Paths.get(System.getProperty("user.dir"), "storage", "failed");
+
+    private final AtomicInteger processingCount = new AtomicInteger(0);
+
+    /**
+     * 当前处理中的文件数
+     */
+    public int getProcessingCount() {
+        return processingCount.get();
+    }
 
     public Map<String, Object> saveFiles(List<MultipartFile> files, String type) {
         List<Map<String, String>> uploaded = new ArrayList<>();
@@ -52,6 +62,9 @@ public class StorageService {
         result.put("success", errors.isEmpty());
         result.put("uploaded", uploaded);
         result.put("errors", errors);
+
+        processingCount.addAndGet(uploaded.size());
+
         return result;
     }
 
@@ -89,6 +102,8 @@ public class StorageService {
             // 移动文件
             Files.move(source, target);
 
+            processingCount.decrementAndGet();
+
             return target.toString();
         }
     }
@@ -124,6 +139,8 @@ public class StorageService {
             }
 
             Files.move(source, target);
+
+            processingCount.decrementAndGet();
 
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 Path errorFile = target.resolveSibling(target.getFileName() + ".error.json");

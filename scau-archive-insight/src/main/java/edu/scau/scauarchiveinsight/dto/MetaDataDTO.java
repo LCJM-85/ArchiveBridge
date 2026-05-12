@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class MetaDataDTO {
+    private Integer metadataId;
     private String fieldCode;
     private String fieldName;
     private String fieldType;

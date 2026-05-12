@@ -40,8 +40,8 @@ export const useMetaDataStore = defineStore('metadata', () => {
     return res.data
   }
 
-  async function remove(fieldCode) {
-    const res = await deleteMetaData(fieldCode)
+  async function remove(metadataId) {
+    const res = await deleteMetaData(metadataId)
     return res.data
   }
 

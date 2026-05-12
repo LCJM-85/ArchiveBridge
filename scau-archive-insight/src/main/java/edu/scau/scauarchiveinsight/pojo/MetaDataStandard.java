@@ -10,7 +10,10 @@ import lombok.Data;
 @TableName("metadata_standard")
 public class MetaDataStandard {
 
-    @TableId(value = "field_code", type = IdType.INPUT)
+    @TableId(value = "metadata_id", type = IdType.AUTO)
+    private Integer metadataId;
+
+    @TableField("field_code")
     private String fieldCode;
 
     @TableField("field_name")

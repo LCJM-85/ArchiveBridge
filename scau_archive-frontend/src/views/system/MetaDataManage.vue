@@ -33,7 +33,7 @@
         <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
             <el-button size="small" :icon="Edit" @click="openEditDialog(row)">编辑</el-button>
-            <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.fieldCode)">删除</el-button>
+            <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.metadataId)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -167,10 +167,10 @@ async function handleSubmit() {
   }
 }
 
-async function handleDelete(fieldCode) {
+async function handleDelete(metadataId) {
   try {
     await ElMessageBox.confirm('确定删除该元数据吗？', '提示', { type: 'warning' })
-    await store.remove(fieldCode)
+    await store.remove(metadataId)
     ElMessage.success('删除成功')
     await store.fetchPage()
   } catch {

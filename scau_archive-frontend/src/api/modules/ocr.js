@@ -19,3 +19,7 @@ export function deleteOcrLog(logId) {
 export function fetchQualityScores(fileIds) {
   return request.get('/api/quality-score/list', { params: { fileIds: fileIds.join(',') } })
 }
+
+export function fetchProcessingCount() {
+  return request.get('/storage/processing-count')
+}

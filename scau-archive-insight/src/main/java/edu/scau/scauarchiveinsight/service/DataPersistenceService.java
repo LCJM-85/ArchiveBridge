@@ -56,7 +56,7 @@ public class DataPersistenceService {
     @Autowired
     private DestinationDimMapper destinationDimMapper;
 
-    /**
+/**
      * 持久化提取的结构化数据
      * @param archiveType admission 或 graduation
      * @param data 提取的键值对
@@ -71,7 +71,24 @@ public class DataPersistenceService {
 
     // ===================== 招生档案：admission_fact + student_fact 去重持久化 =====================
 
+    /**
+     * 入库前字段清洗：无法满足数据库约束的字段置 null，避免整条记录失败
+     */
+    private void sanitizeFields(Map<String, String> data) {
+        // id_card 必须是 18 位，否则置 null
+        String idCard = data.get("id_card");
+        if (idCard != null && !idCard.isBlank() && idCard.trim().length() != 18) {
+            data.put("id_card", null);
+        }
+        // gender 只能是 男/女，否则置 null（避免 OCR 错位把长文本写入 gender）
+        String gender = data.get("gender");
+        if (gender != null && !gender.isBlank() && !"男".equals(gender.trim()) && !"女".equals(gender.trim())) {
+            data.put("gender", null);
+        }
+    }
+
     private void saveAdmissionData(Map<String, String> data, Integer fileId) {
+        sanitizeFields(data);
         // 维度字段提前查出，student_fact 和 admission_fact 共用
         String provinceName = data.get("province_name");
         ProvinceDim province = fuzzyLookupProvince(provinceName);
@@ -151,9 +168,8 @@ public class DataPersistenceService {
         }
     }
 
-    // ===================== 毕业档案：graduation_fact 去重持久化 =====================
-
     private void saveGraduationData(Map<String, String> data, Integer fileId) {
+        sanitizeFields(data);
         String degreeName = data.get("degree_name");
         DegreeDim degree = fuzzyLookupDegree(degreeName);
 
@@ -267,6 +283,15 @@ public class DataPersistenceService {
 
     // ===================== 维度表模糊查询（提取为方法，避免重复代码） =====================
 
+    private boolean isValidDimValue(String value, String label) {
+        // 纯数字的值明显是 OCR 识别错位（学号/身份证号），不写入维度表
+        if (value.trim().matches("\\d+")) {
+            log.warn("维度值校验拒绝 [{}]: \"{}\" 是纯数字，疑似 OCR 错位", label, value.trim());
+            return false;
+        }
+        return true;
+    }
+
     private ProvinceDim fuzzyLookupProvince(String provinceName) {
         if (provinceName == null || provinceName.isBlank()) return null;
         ProvinceDim dim = provinceDimMapper.selectOne(
@@ -279,12 +304,6 @@ public class DataPersistenceService {
                 dim = provinceDimMapper.selectOne(
                         Wrappers.<ProvinceDim>lambdaQuery().eq(ProvinceDim::getProvinceName, corrected));
             }
-        }
-        if (dim == null) {
-            dim = new ProvinceDim();
-            dim.setProvinceName(provinceName.trim());
-            provinceDimMapper.insert(dim);
-            log.warn("自动创建维度记录 [省份]: {} → province_id={}", provinceName, dim.getProvinceId());
         }
         return dim;
     }
@@ -302,7 +321,7 @@ public class DataPersistenceService {
                         Wrappers.<MajorDim>lambdaQuery().eq(MajorDim::getMajorName, corrected));
             }
         }
-        if (dim == null) {
+        if (dim == null && isValidDimValue(majorName, "专业")) {
             dim = new MajorDim();
             dim.setMajorName(majorName.trim());
             majorDimMapper.insert(dim);
@@ -324,7 +343,7 @@ public class DataPersistenceService {
                         Wrappers.<ClassDim>lambdaQuery().eq(ClassDim::getClassName, corrected));
             }
         }
-        if (dim == null) {
+        if (dim == null && isValidDimValue(className, "班级")) {
             dim = new ClassDim();
             dim.setClassName(className.trim());
             classDimMapper.insert(dim);
@@ -335,20 +354,22 @@ public class DataPersistenceService {
 
     private DegreeDim fuzzyLookupDegree(String degreeName) {
         if (degreeName == null || degreeName.isBlank()) return null;
+        String v = degreeName.trim();
         DegreeDim dim = degreeDimMapper.selectOne(
-                Wrappers.<DegreeDim>lambdaQuery().eq(DegreeDim::getDegreeName, degreeName.trim()));
+                Wrappers.<DegreeDim>lambdaQuery().eq(DegreeDim::getDegreeName, v));
         if (dim == null) {
             List<String> allNames = degreeDimMapper.selectList(null).stream()
                     .map(DegreeDim::getDegreeName).collect(Collectors.toList());
-            String corrected = fuzzyResolve(degreeName, allNames, "学历");
-            if (corrected != null) {
+            String corrected = TextUtil.fuzzyMatch(v, allNames, 1);
+            if (corrected != null && v.charAt(0) == corrected.charAt(0)) {
                 dim = degreeDimMapper.selectOne(
                         Wrappers.<DegreeDim>lambdaQuery().eq(DegreeDim::getDegreeName, corrected));
+                log.warn("维度值模糊纠正 [学历]: \"{}\" → \"{}\"", v, corrected);
             }
         }
-        if (dim == null) {
+        if (dim == null && isValidDimValue(degreeName, "学历")) {
             dim = new DegreeDim();
-            dim.setDegreeName(degreeName.trim());
+            dim.setDegreeName(v);
             degreeDimMapper.insert(dim);
             log.warn("自动创建维度记录 [学历]: {} → degree_id={}", degreeName, dim.getDegreeId());
         }
@@ -357,20 +378,22 @@ public class DataPersistenceService {
 
     private DestinationDim fuzzyLookupDestination(String destName) {
         if (destName == null || destName.isBlank()) return null;
+        String v = destName.trim();
         DestinationDim dim = destinationDimMapper.selectOne(
-                Wrappers.<DestinationDim>lambdaQuery().eq(DestinationDim::getDestName, destName.trim()));
+                Wrappers.<DestinationDim>lambdaQuery().eq(DestinationDim::getDestName, v));
         if (dim == null) {
             List<String> allNames = destinationDimMapper.selectList(null).stream()
                     .map(DestinationDim::getDestName).collect(Collectors.toList());
-            String corrected = fuzzyResolve(destName, allNames, "去向");
-            if (corrected != null) {
+            String corrected = TextUtil.fuzzyMatch(v, allNames, 1);
+            if (corrected != null && v.charAt(0) == corrected.charAt(0)) {
                 dim = destinationDimMapper.selectOne(
                         Wrappers.<DestinationDim>lambdaQuery().eq(DestinationDim::getDestName, corrected));
+                log.warn("维度值模糊纠正 [去向]: \"{}\" → \"{}\"", v, corrected);
             }
         }
-        if (dim == null) {
+        if (dim == null && isValidDimValue(destName, "去向")) {
             dim = new DestinationDim();
-            dim.setDestName(destName.trim());
+            dim.setDestName(v);
             destinationDimMapper.insert(dim);
             log.warn("自动创建维度记录 [去向]: {} → dest_id={}", destName, dim.getDestId());
         }
@@ -392,6 +415,12 @@ public class DataPersistenceService {
         }
         String corrected = TextUtil.fuzzyMatch(input, standards, TextUtil.autoThreshold(input));
         if (corrected != null) {
+            // 如果输入比匹配结果长太多（>1.5倍），说明是不同概念，不纠正
+            // 例如 "法学学士" (4) → "学士" (2) 应拒绝
+            if (input.trim().length() > corrected.length() * 1.5) {
+                log.warn("维度值模糊纠正拒绝 [{}]: \"{}\" → \"{}\" 长度差过大", label, input, corrected);
+                return null;
+            }
             log.warn("维度值模糊纠正 [{}]: \"{}\" → \"{}\"", label, input, corrected);
         }
         return corrected;

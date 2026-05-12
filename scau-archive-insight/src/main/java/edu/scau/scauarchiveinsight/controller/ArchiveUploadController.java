@@ -35,7 +35,9 @@ public class ArchiveUploadController {
     public ResponseEntity<Map<String, Object>> uploadFiles(
             @RequestParam("files") List<MultipartFile> files,
             @RequestParam("type") String type,
-            @RequestParam("archiveType") String archiveType) {
+            @RequestParam("archiveType") String archiveType,
+            @RequestParam(value = "provinceName", required = false) String provinceName,
+            @RequestParam(value = "admissionDate", required = false) String admissionDate) {
 
         Map<String, Object> result = storageService.saveFiles(files, type);
 
@@ -58,7 +60,7 @@ public class ArchiveUploadController {
 
             switch (ext) {
                 case "csv" -> {
-                    Map<String, Object> csvResult = csvProcessor.process(path, archiveType);
+                    Map<String, Object> csvResult = csvProcessor.process(path, archiveType, provinceName, admissionDate);
                     Map<String, Object> entry = new LinkedHashMap<>();
                     entry.put("file", name);
                     entry.put("type", "csv");
@@ -67,7 +69,7 @@ public class ArchiveUploadController {
                     allResults.add(entry);
                 }
                 case "xls", "xlsx" -> {
-                    Map<String, Object> excelResult = excelProcessor.process(path, archiveType);
+                    Map<String, Object> excelResult = excelProcessor.process(path, archiveType, provinceName, admissionDate);
                     Map<String, Object> entry = new LinkedHashMap<>();
                     entry.put("file", name);
                     entry.put("type", "excel");
@@ -76,7 +78,7 @@ public class ArchiveUploadController {
                     allResults.add(entry);
                 }
                 case "pdf" -> {
-                    List<Map<String, Object>> pages = pdfProcessor.process(path, archiveType);
+                    List<Map<String, Object>> pages = pdfProcessor.process(path, archiveType, provinceName, admissionDate);
                     allResults.add(Map.of("file", name, "type", "pdf", "data", pages));
                 }
                 case "jpg", "jpeg", "png", "bmp", "gif", "tiff", "webp" -> {
@@ -86,7 +88,7 @@ public class ArchiveUploadController {
         }
 
         if (!imageBatch.isEmpty()) {
-            List<Map<String, Object>> imageResults = imageProcessor.process(imageBatch, archiveType);
+            List<Map<String, Object>> imageResults = imageProcessor.process(imageBatch, archiveType, provinceName, admissionDate);
             List<Map<String, Object>> allErrors = new ArrayList<>();
             for (Map<String, Object> wr : imageResults) {
                 @SuppressWarnings("unchecked")

@@ -29,6 +29,14 @@ public class PPStructureService {
             .build();
 
     public String parseTable(String imagePath) {
+        return runPython(imagePath);
+    }
+
+    public String parsePdf(String pdfPath) {
+        return runPython(pdfPath);
+    }
+
+    private String runPython(String inputPath) {
         try {
             List<MetaDataStandard> rules = metaDataService.list();
 
@@ -39,7 +47,7 @@ public class PPStructureService {
             String scriptPath = "src/main/python/ppstructure/ocr_table.py";
 
             ProcessBuilder pb = new ProcessBuilder(
-                    python, scriptPath, imagePath,
+                    python, scriptPath, inputPath,
                     rulesFile.toAbsolutePath().toString()
             );
             Map<String, String> env = pb.environment();

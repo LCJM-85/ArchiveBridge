@@ -3,6 +3,7 @@ package edu.scau.scauarchiveinsight.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.scau.scauarchiveinsight.dto.R;
+import edu.scau.scauarchiveinsight.service.StorageService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,6 +21,11 @@ public class StorageController {
 
     private static final Path STORAGE_ROOT = Paths.get(System.getProperty("user.dir"), "storage");
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final StorageService storageService;
+
+    public StorageController(StorageService storageService) {
+        this.storageService = storageService;
+    }
 
     @GetMapping("/status")
     public R<List<Map<String, Object>>> getStatus() {
@@ -29,6 +35,11 @@ public class StorageController {
         files.addAll(scanDir(STORAGE_ROOT.resolve("failed"), "error"));
         files.sort((a, b) -> String.valueOf(b.get("date")).compareTo(String.valueOf(a.get("date"))));
         return R.ok(files);
+    }
+
+    @GetMapping("/processing-count")
+    public R<Integer> getProcessingCount() {
+        return R.ok(storageService.getProcessingCount());
     }
 
     private List<Map<String, Object>> scanDir(Path root, String status) {

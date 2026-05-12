@@ -32,6 +32,14 @@ public class CSVProcessor {
     }
 
     public Map<String, Object> process(String filePath, String archiveType) {
+        return process(filePath, archiveType, null, null);
+    }
+
+    public Map<String, Object> process(String filePath, String archiveType, String provinceName) {
+        return process(filePath, archiveType, provinceName, null);
+    }
+
+    public Map<String, Object> process(String filePath, String archiveType, String provinceName, String admissionDate) {
         List<Map<String, String>> rows = new ArrayList<>();
         String fileType = "CSV";
 
@@ -92,6 +100,16 @@ public class CSVProcessor {
             Integer fileId = null;
             if (mappedData != null) {
                 fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
+                if (provinceName != null && !provinceName.isBlank()) {
+                    for (Map<String, String> record : mappedData) {
+                        record.putIfAbsent("province_name", provinceName);
+                    }
+                }
+                if (admissionDate != null && !admissionDate.isBlank()) {
+                    for (Map<String, String> record : mappedData) {
+                        record.putIfAbsent("admission_date", admissionDate);
+                    }
+                }
                 for (Map<String, String> record : mappedData) {
                     dataPersistenceService.saveExtractedData(archiveType, record, fileId);
                 }

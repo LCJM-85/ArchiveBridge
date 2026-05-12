@@ -1,5 +1,6 @@
 # PP-Structure V3 表格识别 + 字段映射
 import sys, json, os, logging, re
+import paddle
 from paddleocr import PPStructureV3
 
 logging.getLogger("ppocr").setLevel(logging.ERROR)
@@ -20,6 +21,7 @@ def levenshtein(a, b):
     return prev[n]
 
 # ====================== 初始化
+_ = paddle.device.set_device("gpu") if paddle.device.cuda.device_count() > 0 else None
 table_engine = PPStructureV3(lang="ch", use_table_recognition=True)
 
 # ====================== 从 HTML 解析表格网格
@@ -131,7 +133,7 @@ def extract_metadata(grid, rules):
 
 # ====================== 主入口
 if __name__ == "__main__":
-    img_path = sys.argv[1]
+    input_path = sys.argv[1]
     rule_path = sys.argv[2] if len(sys.argv) >= 3 else None
 
     rules = []
@@ -140,8 +142,13 @@ if __name__ == "__main__":
             rules = json.load(f)
 
     try:
-        results = table_engine.predict(img_path)
-        all_data = []
+        # PDF 直接传给 PPStructureV3，让它内部处理渲染
+        if input_path.lower().endswith(".pdf"):
+            results = table_engine.predict(input_path)
+        else:
+            results = table_engine.predict(input_path)
+
+        all_grids = []
         all_errors = []
 
         for page_res in results:
@@ -149,13 +156,14 @@ if __name__ == "__main__":
             for tbl in tables:
                 html = tbl.get("pred_html", "")
                 grid = parse_html_table(html)
-                if grid:
-                    mapped = extract_metadata(grid, rules)
-                    all_data.extend(mapped.get("data", []))
-                    all_errors.extend(mapped.get("errors", []))
+                if grid and len(grid) >= 2:
+                    all_grids.append({
+                        "headers": grid[0],
+                        "rows": grid[1:]
+                    })
 
-        output = {"data": all_data, "errors": all_errors}
+        output = {"grids": all_grids, "errors": all_errors}
         print(json.dumps(output, ensure_ascii=False))
 
     except Exception as e:
-        print(json.dumps({"data": [], "errors": [{"msg": str(e)}]}))
+        print(json.dumps({"grids": [], "errors": [{"msg": str(e)}]}))

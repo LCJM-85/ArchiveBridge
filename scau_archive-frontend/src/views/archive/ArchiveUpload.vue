@@ -11,12 +11,46 @@
       </template>
 
       <!-- Archive Type Selector -->
-      <div class="archive-type-selector">
+      <div class="archive-type-selector" :class="{ 'archive-type-selector--required': !archiveType }">
         <span class="archive-type-label">档案类型：</span>
         <el-radio-group v-model="archiveType" :disabled="isUploading">
           <el-radio value="admission">招生档案</el-radio>
           <el-radio value="graduation">毕业档案</el-radio>
         </el-radio-group>
+        <span v-if="!archiveType" class="archive-type-hint">请先选择档案类型</span>
+        <template v-if="archiveType === 'admission'">
+          <span class="archive-type-divider"></span>
+          <span class="archive-type-label">省份：</span>
+          <el-select
+            v-model="selectedProvince"
+            placeholder="选择省份（可选）"
+            clearable
+            size="small"
+            style="width: 160px"
+          >
+            <el-option
+              v-for="p in provinces"
+              :key="p.provinceId"
+              :label="p.provinceName"
+              :value="p.provinceName"
+            />
+          </el-select>
+          <span class="archive-type-label">录取年份：</span>
+          <el-select
+            v-model="selectedAdmissionYear"
+            placeholder="选择年份（可选）"
+            clearable
+            size="small"
+            style="width: 130px"
+          >
+            <el-option
+              v-for="y in admissionYears"
+              :key="y"
+              :label="String(y)"
+              :value="y"
+            />
+          </el-select>
+        </template>
       </div>
 
       <!-- File Type Selector -->
@@ -25,7 +59,7 @@
           v-for="t in fileTypes"
           :key="t.key"
           class="type-card"
-          :class="{ active: activeType === t.key }"
+          :class="{ active: activeType === t.key, 'type-card--disabled': !archiveType }"
           @click="switchType(t.key)"
         >
           <div class="type-card-icon" :style="{ background: t.bg }">
@@ -41,12 +75,12 @@
       <!-- Drop Zone -->
       <div
         class="drop-zone"
-        :class="{ 'drop-zone--dragover': isDragOver, 'drop-zone--has-files': files.length > 0 }"
-        @dragenter.prevent="isDragOver = true"
+        :class="{ 'drop-zone--dragover': isDragOver, 'drop-zone--has-files': files.length > 0, 'drop-zone--disabled': !archiveType }"
+        @dragenter.prevent="onDragEnter"
         @dragover.prevent="isDragOver = true"
         @dragleave.prevent="isDragOver = false"
         @drop.prevent="onDrop"
-        @click="triggerInput"
+        @click="onDropZoneClick"
       >
         <input
           ref="fileInput"
@@ -130,13 +164,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { defineOptions } from 'vue'
 
 defineOptions({ name: 'ArchiveUpload' })
 import { useRouter } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
 import { uploadFiles } from '@/api/modules/archive'
+import { fetchProvinces } from '@/api/modules/admission'
 import {
   Upload,
   UploadFilled,
@@ -160,7 +195,7 @@ const fileTypes = [
 ]
 
 const activeType = ref('image')
-const archiveType = ref('admission')
+const archiveType = ref('')
 const fileInput = ref(null)
 const isDragOver = ref(false)
 const isUploading = ref(false)
@@ -168,18 +203,55 @@ const uidCounter = ref(0)
 
 const files = reactive([])
 
+const provinces = ref([])
+const selectedProvince = ref('')
+const selectedAdmissionYear = ref('')
+const admissionYears = computed(() => {
+  const current = new Date().getFullYear()
+  const years = []
+  for (let y = 2000; y <= current + 2; y++) {
+    years.push(y)
+  }
+  return years
+})
+
 const currentType = computed(() => fileTypes.find((t) => t.key === activeType.value))
 
 const acceptStr = computed(() => currentType.value.accept)
 
+watch(archiveType, (val) => {
+  if (val === 'admission' && provinces.value.length === 0) {
+    fetchProvinces().then((res) => {
+      provinces.value = res.data.data || []
+    }).catch(() => {})
+  }
+  if (val !== 'admission') {
+    selectedProvince.value = ''
+    selectedAdmissionYear.value = ''
+  }
+})
+
 function switchType(key) {
   if (isUploading.value) return
+  if (!archiveType.value) {
+    ElMessage.warning('请先选择档案类型')
+    return
+  }
   activeType.value = key
   clearAll()
 }
 
-function triggerInput() {
+function onDropZoneClick() {
+  if (!archiveType.value) {
+    ElMessage.warning('请先选择档案类型')
+    return
+  }
   fileInput.value?.click()
+}
+
+function onDragEnter() {
+  if (!archiveType.value) return
+  isDragOver.value = true
 }
 
 function onFileSelect(e) {
@@ -190,6 +262,10 @@ function onFileSelect(e) {
 
 function onDrop(e) {
   isDragOver.value = false
+  if (!archiveType.value) {
+    ElMessage.warning('请先选择档案类型')
+    return
+  }
   const dropped = Array.from(e.dataTransfer.files || [])
   addFiles(dropped)
 }
@@ -205,7 +281,7 @@ function addFiles(newFiles) {
       raw: f,
       name: f.name,
       size: f.size,
-      status: 'pending',
+      status: 'toUpload',
       progress: 0,
     })
   }
@@ -247,22 +323,32 @@ function formatSize(bytes) {
 
 async function handleUpload() {
   if (files.length === 0 || isUploading.value) return
+  if (!archiveType.value) {
+    ElMessage.warning('请先选择档案类型')
+    return
+  }
   isUploading.value = true
 
-  const pending = files.filter((f) => f.status === 'pending')
-  pending.forEach((f) => {
+  const toUpload = files.filter((f) => f.status !== 'done')
+  if (toUpload.length === 0) { isUploading.value = false; return }
+  toUpload.forEach((f) => {
     f.status = 'uploading'
     f.progress = 0
   })
 
   try {
+    const admissionDate = selectedAdmissionYear.value
+      ? selectedAdmissionYear.value + '-09-01'
+      : ''
     const { data } = await uploadFiles(
-      pending.map((f) => f.raw),
+      toUpload.map((f) => f.raw),
       activeType.value,
-      archiveType.value
+      archiveType.value,
+      selectedProvince.value,
+      admissionDate
     )
 
-    pending.forEach((f) => {
+    toUpload.forEach((f) => {
       f.status = data.success ? 'done' : 'error'
       f.progress = 100
     })
@@ -285,7 +371,7 @@ async function handleUpload() {
       err.message ||
       '网络异常，请检查服务是否正常运行'
 
-    pending.forEach((f) => {
+    toUpload.forEach((f) => {
       f.status = 'error'
     })
 
@@ -342,6 +428,24 @@ async function handleUpload() {
   white-space: nowrap;
 }
 
+.archive-type-selector--required {
+  border-color: #e6a23c;
+  background: rgba(230, 162, 60, 0.04);
+}
+
+.archive-type-hint {
+  font-size: 12px;
+  color: #e6a23c;
+  margin-left: 4px;
+}
+
+.archive-type-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border-light);
+  margin: 0 12px;
+}
+
 /* Type Selector */
 .type-selector {
   display: grid;
@@ -372,6 +476,12 @@ async function handleUpload() {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
   box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.type-card--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .type-card-icon {
@@ -415,6 +525,11 @@ async function handleUpload() {
 
 .drop-zone--has-files {
   padding: 24px 20px;
+}
+
+.drop-zone--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .drop-zone-icon {

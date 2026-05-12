@@ -47,6 +47,8 @@ server:
   port: 8080
   servlet:
     context-path: / # 上下文路径，默认/即可
+  tomcat:
+    max-http-form-post-size: 500MB
 
 # 未登录被拦截时返回给前端的登录页地址（可与前端路由一致）
 app:
@@ -58,7 +60,7 @@ jwt:
   # 密钥：必须32位以上（生产环境建议用环境变量注入，不要硬编码）
   secret: 8Z7x9sKpR2tG5bN3aQ6dF1cV4wH7jY0u
   # Token 过期时间：单位秒（默认7天=604800秒）
-  expiration: 604800
+  expiration: 86400
   # Token 前缀（前端请求头携带时用，如 Bearer xxxxx）
   token-prefix: Bearer
   # 存放 Token 的请求头名称

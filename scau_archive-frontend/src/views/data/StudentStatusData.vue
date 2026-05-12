@@ -69,13 +69,9 @@
             <el-tooltip content="编辑" placement="top">
               <el-button size="small" circle :icon="Edit" @click="openEditDialog(row)" />
             </el-tooltip>
-            <el-popconfirm title="确定删除该记录吗？" @confirm="handleDelete(row.id)">
-              <template #reference>
-                <el-tooltip content="删除" placement="top">
-                  <el-button size="small" circle type="danger" :icon="Delete" />
-                </el-tooltip>
-              </template>
-            </el-popconfirm>
+            <el-tooltip content="删除" placement="top">
+              <el-button size="small" circle type="danger" :icon="Delete" @click="handleDelete(row.id)" />
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -263,11 +259,15 @@ async function handleSubmit() {
 async function handleDelete(id) {
   try {
     await ElMessageBox.confirm('确定删除该学籍记录吗？', '提示', { type: 'warning' })
+  } catch {
+    return
+  }
+  try {
     await store.remove(id)
     ElMessage.success('删除成功')
     await store.fetchPage()
-  } catch {
-    // cancelled or error
+  } catch (e) {
+    ElMessage.error(e.response?.data?.message || '删除失败')
   }
 }
 

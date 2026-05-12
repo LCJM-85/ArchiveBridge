@@ -8,147 +8,133 @@ SCAU Archive Insight is a full-stack student archive management system for South
 
 - **Backend**: Spring Boot 3.5.13 (Java 17) + MyBatis-Plus 3.5.13 + PostgreSQL/PostGIS + Druid
 - **Frontend**: Vue 3 SPA (Vite 8, Element Plus, Pinia, ECharts, Axios)
-- **Python scripts**: PPStructure (PaddleOCR table recognition), PDF-to-image (PyMuPDF), image enhancement (OpenCV)
+- **Python scripts**: PPStructureV3 (PaddleOCR table recognition), PDF-to-image (PyMuPDF), image enhancement (OpenCV)
+- **Database**: PostgreSQL on localhost:5432, database `scau_archive`, user `postgres` / `123456`
 
 ## Commands
 
 ### Backend (Spring Boot, port 8080)
 ```bash
-# Must override JAVA_HOME to JDK 17+
 cd scau-archive-insight
 JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw clean package   # Build
 JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw spring-boot:run  # Run
 ```
-Note: No automated tests exist in the project.
 
 ### Frontend (Vue 3, port 5173)
 ```bash
 cd scau_archive-frontend
 npm install        # Install dependencies
-npm run dev        # Dev server
+npm run dev        # Dev server (hot reload)
 npm run build      # Production build
 npm run preview    # Preview production build
 ```
 
-### Python (Windows venv)
+### Python (Windows venv, PaddlePaddle-GPU 3.2.2 + paddleocr 3.5.0)
 ```bash
-cd scau-archive-insight
-src/main/python/.venv/Scripts/python.exe src/main/python/ppstructure/ppstructure.py <image_path> [rules_path]
-src/main/python/.venv/Scripts/python.exe src/main/python/pdf2image/pdf2image.py <pdf_path>
-src/main/python/.venv/Scripts/python.exe src/main/python/openCV/opencv.py <image_path>
+# HOME must point to models/ (contains .paddlex cache, avoids Chinese-username path issue)
+HOME="D:/Ideaworkplace/SCAU/scau-archive-insight/models" \
+USERPROFILE="D:/Ideaworkplace/SCAU/scau-archive-insight/models" \
+scau-archive-insight/src/main/python/.venv/Scripts/python.exe \
+  scau-archive-insight/src/main/python/ppstructure/ocr_table.py <image_path> [rules_path]
 ```
 
-### Model Download (PP-OCRv4 Server Models)
-```powershell
-cd scau-archive-insight
-mkdir models\server -Force
-cd models\server
-curl -O https://paddleocr.bj.bcebos.com/PP-OCRv4/chinese/ch_PP-OCRv4_det_server_infer.tar
-tar -xf ch_PP-OCRv4_det_server_infer.tar
-curl -O https://paddleocr.bj.bcebos.com/PP-OCRv4/chinese/ch_PP-OCRv4_rec_server_infer.tar
-tar -xf ch_PP-OCRv4_rec_server_infer.tar
-curl -O https://paddleocr.bj.bcebos.com/dygraph_v2.0/ch/ch_ppocr_mobile_v2.0_cls_infer.tar
-tar -xf ch_ppocr_mobile_v2.0_cls_infer.tar
+### Database Access
+```bash
+# psql at D:/postgresql/bin/psql.exe
+PGPASSWORD=123456 D:/postgresql/bin/psql.exe -h localhost -U postgres -d scau_archive
 ```
 
-## Architecture
+## Key Architecture Rules
 
-### Backend Layers
-Base package: `edu.scau.scauarchiveinsight`
-- **controller/** — REST endpoints:
-  - `ArchiveUploadController` (`/api/upload`) — multipart file upload + type/archiveType params
-  - `LoginController` (`/api/login`, `/api/captcha`) — captcha + JWT auth
-  - `ChangePasswordController` (`/api/change-password`)
-  - `MetaDataController` (`/metadata/**`) — CRUD + page query for metadata_standard table
-  - `StorageController` (`/storage/status`) — scans temp/archive/failed dirs for monitoring
-  - `OCRLogController` (`/ocr/log/**`) — sync today's logs, query history, delete
-- **dto/** — `LoginDTO`, `ChangePasswordDTO`
-- **service/** — Business logic:
-  - `UserService` — login, password change
-  - `StorageService` — `saveFiles()`, `moveArchiveFile()`, `failedFile()` with `.error.json` sidecar
-  - `MetaDataService` — CRUD + keyword search page for metadata_standard
-  - `MetaDataMappingService` — field mapping + validation for CSV/Excel (uses `metadata_standard` rules)
-  - `PPStructureService` — calls Python PPStructure via ProcessBuilder, passes metadata rules as temp JSON
-  - `OCRLogService` — syncTodayLogs (scans archive/failed dirs), getTodayLogs, getHistory, delete
-  - `PdfToImageService` — calls pdf2image.py via ProcessBuilder
-  - `OpenCVService` — calls opencv.py via ProcessBuilder
-  - `DataPersistenceService` — saveExtractedData with fuzzy dimension matching + deduplication
-  - `TextUtil` — Levenshtein distance fuzzy matching for OCR error correction
-- **processor/** — File parsing (each follows same pattern: extract → map → persist → archive/failed):
-  - `CSVProcessor` — standard CSV parsing with quote handling
-  - `ExcelProcessor` — Apache POI (both .xls and .xlsx)
-  - `PDFProcessor` — pdf2image → OpenCV enhance → PPStructure table recognition → persist
-  - `ImageProcessor` — image → OpenCV enhance → PPStructure table recognition → persist
-- **mapper/** — MyBatis-Plus interfaces for all entities: `StudentDimMapper`, `StudentFactMapper`, `AdmissionFactMapper`, `GraduationFactMapper`, `CollegeDimMapper`, `MajorDimMapper`, `ClassDimMapper`, `ProvinceDimMapper`, `NationDimMapper`, `PoliticalDimMapper`, `DegreeDimMapper`, `DestinationDimMapper`, `SourceTypeDimMapper`, `ArchiveFileDimMapper`, `OCRLogDimMapper`, `QualityScoreDimMapper`, `MetaDataStandardMapper`, `UserMapper`, `DateDimMapper`
-- **pojo/** — Entity classes: dimension tables, fact tables (`StudentFact`, `AdmissionFact`, `GraduationFact`), `MetaDataStandard`, `OCRLogDim`, `SysUser`
-- **config/** — `SecurityConfig` (Spring Security + CORS), `MyBatisPlusConfig` (PaginationInnerInterceptor), `GlobalExceptionHandler`, `JsonAuthenticationEntryPoint`
-- **filter/** — `JwtAuthenticationFilter` (OncePerRequestFilter)
-- **util/** — `JwtUtils`, `DateUtil`, `TextUtil`
+### Field Matching Priority (all pipelines)
+```
+fieldName > sourceField > fieldCode
+```
+- **OCR pipeline** (Python `ocr_table.py`): 4-level matching: exact → remove-whitespace → contains → Levenshtein distance (≤1 char for ≤3-char text, ≤30% for longer)
+- **CSV/Excel pipeline** (Java `MetaDataMappingService`): exact key match → contains match
+- Results always use `fieldCode` as output key
 
-### File Upload Pipeline
-1. `ArchiveUploadController` receives multipart files + `type` (image/pdf/excel/csv) + `archiveType` (admission/graduation)
-2. `StorageService.saveFiles()` saves to `storage/temp/{yyyyMMdd}/{type}/`
-3. Based on file extension, dispatches to processor:
-   - **CSV/Excel** → parsed into `List<Map>` → `MetaDataMappingService` maps fields + validates → `DataPersistenceService.saveExtractedData()` per record → archive to `storage/archive/`
-   - **PDF** → `PdfToImageService` (Python PyMuPDF) → `OpenCVService` → `PPStructureService` (table recognition) → structured JSON → persist → archive
-   - **Images** → `OpenCVService` (Python enhance) → `PPStructureService` (table recognition) → persist → archive
-4. On failure: `StorageService.failedFile()` moves to `storage/failed/` + writes `.error.json` sidecar
-5. `OCRLogService.syncTodayLogs()` scans `archive/` and `failed/` dirs daily to populate `ocr_log_dim` table
-
-### Metadata-Driven Data Cleaning
-- All processors use `metadata_standard` table rules for field mapping and validation
-- `MetaDataMappingService`: maps source fields → `fieldCode`, validates types (int/decimal/boolean/date), checks required fields
-- For image/PDF pipelines: `PPStructureService` passes metadata rules as a temp JSON file to Python; PPStructure returns JSON with `fieldCode` as keys
-- Field matching priority: `fieldCode` > `fieldName` > `sourceField`
+### Dimension Table Auto-Creation
+When `fuzzyLookupXxx()` fails to find a name in dimension tables (province/major/class/degree/destination), it **auto-inserts** a new record with that name. This prevents FK nulls when processing data with unrecognized dimension values.
 
 ### Data Deduplication
-- **admission**: match by `student_no` → `id_card` → `exam_no`, UPDATE existing or INSERT new for both `admission_fact` and `student_fact`
-- **graduation**: match by `student_no` → `id_card`, UPDATE existing or INSERT new for `graduation_fact`, mark `student_fact.graduated = true`
-- **Fuzzy dimension matching**: exact match fails → Levenshtein distance auto-correct (e.g. "广冬" → "广东") for province/major/class/degree/destination lookups
+- **admission**: match by `student_no` → `id_card` → `exam_no`, UPDATE existing or INSERT
+- **graduation**: match by `student_no` → `id_card`, UPDATE existing or INSERT; marks `student_fact.graduated = true`
 
-### Authentication
-- `GET /api/captcha` → session-based captcha (Hutool LineCaptcha, 2min TTL)
-- `POST /api/login` → validates captcha + BCrypt password → returns JWT
-- Subsequent requests: `Authorization: Bearer <token>` header
-- Rate limiting: 8 attempts/10min per IP+user, 30 captcha requests/min per IP
-- `SessionCreationPolicy.ALWAYS` (captcha stored in HttpSession)
-- Frontend axios instance (`utils/request.js`) auto-attaches JWT and handles 401 redirects
+### File Upload Pipeline
+1. `ArchiveUploadController` → `StorageService.saveFiles()` → saves to `storage/temp/{yyyyMMdd}/{type}/`
+2. Dispatched by extension to processors (CSV/Excel/Image/PDF), each follows: extract → map → persist → archive/failed
+3. Quality score saved to `quality_score_dim` after successful processing
+4. OCR log created via `addLog()` during processing OR `syncTodayLogs()` scans archive/failed dirs
+5. On failure: `storage/failed/` + `.error.json` sidecar
+
+### PPStructureV3 Notes
+- Uses PaddleX models auto-cached at `models/.paddlex/official_models/` (~1.8 GB)
+- Must set `HOME` and `USERPROFILE` env vars to `models/` directory (avoids C++ inference crash with Chinese-chars in Windows username)
+- Table output is `pred_html` (HTML), parsed via regex; NOT the old `cells[row][col]` format
+- Python script must NOT be named `ppstructure.py` (circular import with paddleocr module)
+
+## Project Structure
+
+### Backend (scau-archive-insight)
+```
+src/main/java/edu/scau/scauarchiveinsight/
+├── controller/     — REST endpoints
+│   ├── ArchiveUploadController  POST /api/upload
+│   ├── LoginController          GET /api/captcha, POST /api/login
+│   ├── AdmissionController      /api/admission/**
+│   ├── GraduationController     /api/graduation/**
+│   ├── StudentController        /api/student/**
+│   ├── MetaDataController       /metadata/**
+│   ├── StorageController        /storage/status
+│   ├── OCRLogController         /ocr/log/**
+│   └── QualityScoreController   /api/quality-score/list
+├── service/        — Business logic
+│   ├── *Processor.java          — CSVProcessor, ExcelProcessor, PDFProcessor, ImageProcessor
+│   ├── DataPersistenceService   — save + dedup + fuzzy dimension matching
+│   ├── MetaDataMappingService   — CSV/Excel field mapping + validation
+│   ├── PPStructureService       — Calls Python ocr_table.py via ProcessBuilder
+│   ├── OCRLogService            — syncTodayLogs, getTodayLogs, addLog, delete
+│   ├── QualityScoreService      — completeness/accuracy/consistency/timeliness scoring
+│   └── *Service.java            — CRUD services for admission/graduation/student
+├── dto/            — AdmissionDTO, GraduationDTO, StudentDTO, LoginDTO
+├── vo/             — AdmissionVO, GraduationVO, StudentVO
+├── mapper/         — MyBatis-Plus interfaces (BaseMapper<T>)
+├── pojo/           — Entity classes (dimension + fact tables)
+├── config/         — SecurityConfig, MyBatisPlusConfig, GlobalExceptionHandler
+├── filter/         — JwtAuthenticationFilter
+└── util/           — JwtUtils, DateUtil, TextUtil (Levenshtein)
+```
+
+### Frontend (scau_archive-frontend)
+```
+src/
+├── api/modules/    — auth, archive, metadata, ocr, admission, graduation, student
+├── store/          — Pinia: user, menu, archive, metadata, admission, graduation, student
+├── views/
+│   ├── data/       — AdmissionData, GraduationData, StudentStatusData
+│   ├── ocr/        — OCRProcess (today logs, quality scores, history, delete)
+│   ├── archive/    — ArchiveUpload
+│   ├── charts/     — AdmissionTrend, Geographic, MajorTrainingPath, AIPrediction
+│   └── system/     — MetaDataManage, UserManage
+├── layouts/        — AppLayout, Header, Sidebar, Content
+├── router/         — Auth guard via localStorage JWT
+└── utils/          — auth, format
+```
 
 ### Python Scripts
-All called via `ProcessBuilder` from Java services, Python venv at `.venv/Scripts/python.exe`:
-- **ppstructure.py**: PaddleOCR PPStructure → table structure recognition → returns `{"data": [{...}], "errors": [...]}`
-- **pdf2image.py**: PyMuPDF (fitz) → 200dpi PNG per page → prints paths to stdout
-- **opencv.py**: OpenCV → grayscale → Gaussian blur → adaptive threshold → sharpen
+```
+src/main/python/
+├── ppstructure/ocr_table.py    — PPStructureV3 → HTML table → field mapping → JSON
+├── pdf2image/pdf2image.py      — PyMuPDF → 200dpi PNG per page
+├── openCV/opencv.py            — Grayscale → blur → threshold → sharpen
+```
 
-### Database (PostgreSQL + PostGIS)
-- **Dimension tables**: student_dim, college_dim, major_dim, class_dim, province_dim, nation_dim, political_dim, degree_dim, destination_dim, source_type_dim, archive_file_dim, ocr_log_dim, quality_score_dim
-- **Fact tables**: student_fact, admission_fact, graduation_fact
-- **Metadata table**: metadata_standard (fieldCode PK, fieldName, fieldType, sourceField, transformType, transformRule, isRequired)
-- `date_dim` table was removed; all `xxx_date_id` FK columns replaced with direct `xxx_date date` columns
-- Connection pool: Druid (initial 5, min 10, max 20)
-- All entity fields use `@TableField("snake_case_name")` for explicit column mapping
-- Config: `src/main/resources/application.yaml`
-
-### Frontend Structure
-- **api/** — Axios instance + modular API layer:
-  - `request.js` — axios instance with JWT interceptor and 401 handling
-  - `modules/` — API modules per domain: `auth.js`, `archive.js`, `metadata.js`, `ocr.js`, `analysis.js`, `report.js`
-- **layouts/** — `AppLayout.vue`, `Header.vue`, `Sidebar.vue`, `Content.vue`
-- **components/common/** — `TableView`, `UploadPanel`, `Loading`, `Empty`
-- **composables/** — `useTheme.js`, `useFullscreen.js`, `usePasswordChange.js`
-- **config/** — `index.js` (APP_CONFIG, JWT_CONFIG, PAGE_CONFIG)
-- **styles/** — `index.css` (full CSS variable theme system: light + dark mode)
-- **store/** — Pinia stores (auto-sync with localStorage): `user.js`, `menu.js`, `archive.js`, `metadata.js`
-- **utils/** — `auth.js` (token/remember-me helpers), `format.js`
-- **router/index.js** — Auth guard via localStorage JWT + client-side expiry check
-- **views/** — All page views:
-  - `login/Login.vue`, `dashboard/Dashboard.vue`
-  - `archive/ArchiveUpload.vue`
-  - `data/AdmissionData.vue`, `GraduationData.vue`, `StudentStatusData.vue`
-  - `charts/AddmissionTrend.vue`, `Geographic.vue`, `MajorTrainingPath.vue`, `AIPrediction.vue`
-  - `analysis/ReportGenerate.vue`, `report/ReportGenerate.vue`
-  - `ocr/OCRProcess.vue`
-  - `governance/DataClean.vue`, `DataQuality.vue`
-  - `prediction/PredictionView.vue`
-  - `system/MetaDataManage.vue`, `UserManage.vue`
-- All imports use `@/` path alias (e.g., `@/store/user`, `@/api/modules/auth`)
+### Storage
+```
+storage/
+├── temp/{yyyyMMdd}/{type}/     — Upload staging
+├── archive/{yyyyMMdd}/{type}/  — Successfully processed files
+├── failed/{yyyyMMdd}/{type}/   — Failed files + .error.json sidecar
+└── ocr_log_dim table           — Log entries created by addLog() or syncTodayLogs()
+```

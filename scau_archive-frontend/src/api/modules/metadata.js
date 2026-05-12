@@ -12,6 +12,6 @@ export function updateMetaData(data) {
   return request.put('/metadata/update', data)
 }
 
-export function deleteMetaData(fieldCode) {
-  return request.delete('/metadata/delete', { params: { fieldCode } })
+export function deleteMetaData(metadataId) {
+  return request.delete('/metadata/delete', { params: { metadataId } })
 }

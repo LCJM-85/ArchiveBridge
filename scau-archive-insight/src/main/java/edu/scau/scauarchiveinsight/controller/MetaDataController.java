@@ -40,8 +40,8 @@ public class MetaDataController {
     }
 
     @GetMapping("/get/{fieldCode}")
-    public R<MetaDataStandard> getById(@PathVariable String fieldCode) {
-        MetaDataStandard item = metaDataService.getById(fieldCode);
+    public R<MetaDataStandard> getByFieldCode(@PathVariable String fieldCode) {
+        MetaDataStandard item = metaDataService.getByFieldCode(fieldCode);
         if (item == null) {
             return R.error("字段编码不存在");
         }
@@ -65,6 +65,7 @@ public class MetaDataController {
     @PutMapping("/update")
     public R<Void> update(@RequestBody MetaDataDTO dto) {
         MetaDataStandard entity = new MetaDataStandard();
+        entity.setMetadataId(dto.getMetadataId());
         entity.setFieldCode(dto.getFieldCode());
         entity.setFieldName(dto.getFieldName());
         entity.setFieldType(dto.getFieldType());
@@ -73,12 +74,12 @@ public class MetaDataController {
         entity.setTransformRule(dto.getTransformRule());
         entity.setIsRequired(dto.getIsRequired());
         boolean updated = metaDataService.update(entity);
-        return updated ? R.ok(null, "更新成功") : R.error("更新失败，字段编码不存在");
+        return updated ? R.ok(null, "更新成功") : R.error("更新失败");
     }
 
     @DeleteMapping("/delete")
-    public R<Void> delete(@RequestParam String fieldCode) {
-        boolean removed = metaDataService.delete(fieldCode);
-        return removed ? R.ok(null, "删除成功") : R.error("删除失败，字段编码不存在");
+    public R<Void> delete(@RequestParam Integer metadataId) {
+        boolean removed = metaDataService.delete(metadataId);
+        return removed ? R.ok(null, "删除成功") : R.error("删除失败");
     }
 }
