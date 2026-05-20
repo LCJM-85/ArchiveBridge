@@ -51,6 +51,24 @@
             />
           </el-select>
         </template>
+        <span v-if="activeType === 'image' || activeType === 'pdf'" class="archive-type-divider"></span>
+        <el-switch
+          v-if="activeType === 'image' || activeType === 'pdf'"
+          v-model="useLlm"
+          :disabled="!llmConfigured || isUploading"
+          size="small"
+          style="margin-right: 6px"
+        />
+        <span
+          v-if="activeType === 'image' || activeType === 'pdf'"
+          class="archive-type-label"
+          :class="{ 'llm-enabled': useLlm }"
+        >
+          LLM 智能提取
+          <el-tooltip content="使用 AI 直接识别图片内容，无需 OCR 匹配规则" placement="top">
+            <el-icon size="14" style="margin-left:2px;cursor:pointer;vertical-align:-2px"><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </span>
       </div>
 
       <!-- File Type Selector -->
@@ -164,14 +182,13 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { defineOptions } from 'vue'
 
 defineOptions({ name: 'ArchiveUpload' })
-import { useRouter } from 'vue-router'
 import { ElMessage, ElNotification } from 'element-plus'
 import { uploadFiles } from '@/api/modules/archive'
-import { fetchProvinces } from '@/api/modules/admission'
+import { fetchProvinces, fetchLLMStatus } from '@/api/modules/admission'
 import {
   Upload,
   UploadFilled,
@@ -184,8 +201,6 @@ import {
   CircleClose,
   Close,
 } from '@element-plus/icons-vue'
-
-const router = useRouter()
 
 const fileTypes = [
   { key: 'image', label: '图片文件', hint: '.jpg / .png / .tiff', icon: Picture, accept: '.jpg,.jpeg,.png,.tif,.tiff,.bmp', acceptLabel: '.jpg / .png / .tiff 等图片文件', bg: 'rgba(64, 158, 255, 0.1)', color: '#409eff' },
@@ -206,6 +221,8 @@ const files = reactive([])
 const provinces = ref([])
 const selectedProvince = ref('')
 const selectedAdmissionYear = ref('')
+const useLlm = ref(false)
+const llmConfigured = ref(false)
 const admissionYears = computed(() => {
   const current = new Date().getFullYear()
   const years = []
@@ -230,6 +247,12 @@ watch(archiveType, (val) => {
     selectedAdmissionYear.value = ''
   }
 })
+
+// 检查 LLM 配置状态
+fetchLLMStatus().then(res => {
+  llmConfigured.value = res.data?.data?.configured || false
+  useLlm.value = llmConfigured.value
+}).catch(() => {})
 
 function switchType(key) {
   if (isUploading.value) return
@@ -345,7 +368,8 @@ async function handleUpload() {
       activeType.value,
       archiveType.value,
       selectedProvince.value,
-      admissionDate
+      admissionDate,
+      useLlm.value
     )
 
     toUpload.forEach((f) => {
@@ -444,6 +468,10 @@ async function handleUpload() {
   height: 20px;
   background: var(--border-light);
   margin: 0 12px;
+}
+.llm-enabled {
+  color: var(--color-primary) !important;
+  font-weight: 600;
 }
 
 /* Type Selector */

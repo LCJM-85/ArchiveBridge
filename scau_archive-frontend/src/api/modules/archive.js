@@ -1,6 +1,6 @@
 import request from '../request'
 
-export function uploadFiles(files, type, archiveType, provinceName, admissionDate) {
+export function uploadFiles(files, type, archiveType, provinceName, admissionDate, useLlm = false) {
   const formData = new FormData()
   files.forEach((f) => formData.append('files', f))
   formData.append('type', type)
@@ -10,6 +10,9 @@ export function uploadFiles(files, type, archiveType, provinceName, admissionDat
   }
   if (admissionDate) {
     formData.append('admissionDate', admissionDate)
+  }
+  if (useLlm) {
+    formData.append('useLlm', 'true')
   }
   return request.post('/api/upload', formData, {
     timeout: 1000000,

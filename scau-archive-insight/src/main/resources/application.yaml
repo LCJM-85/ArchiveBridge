@@ -50,6 +50,16 @@ server:
   tomcat:
     max-http-form-post-size: 500MB
 
+# LLM 配置（用于 LLM 智能提取，必须使用支持图片的多模态模型）
+# 推荐:
+#   DeepSeek:  模型 deepseek-vl2,      地址 https://api.deepseek.com/v1
+#   通义千问:  模型 qwen-vl-plus,       地址 https://dashscope.aliyuncs.com/compatible-mode/v1
+#   OpenAI:    模型 gpt-4o-mini,         地址 https://api.openai.com/v1
+llm:
+  api-key: ""
+  base-url: https://api.deepseek.com/v1
+  model: deepseek-vl2
+
 # 未登录被拦截时返回给前端的登录页地址（可与前端路由一致）
 app:
   security:

@@ -8,8 +8,8 @@ SCAU Archive Insight is a full-stack student archive management system for South
 
 - **Backend**: Spring Boot 3.5.13 (Java 17) + MyBatis-Plus 3.5.13 + PostgreSQL/PostGIS + Druid
 - **Frontend**: Vue 3 SPA (Vite 8, Element Plus, Pinia, ECharts, Axios)
-- **Python scripts**: PPStructureV3 (PaddleOCR table recognition), PDF-to-image (PyMuPDF), image enhancement (OpenCV), ARIMA+XGBoost prediction
-- **Analysis modules**: Trend analysis (5 charts), Geographic distribution (China map via PostGIS), Training path (Sankey), AI prediction (ARIMA+XGBoost), Report generation (Word/A3 poster)
+- **Python scripts**: PPStructureV3 (PaddleOCR table recognition), PDF-to-image (PyMuPDF), image enhancement (OpenCV), ARIMA+XGBoost prediction, LLM Vision extraction
+- **Analysis modules**: Trend analysis (5 charts), Geographic distribution (China map via PostGIS), Training path (Sankey), AI prediction (ARIMA+XGBoost), Report generation (Word/A3 poster), LLM-based archive extraction
 - **Database**: PostgreSQL on localhost:5432, database `scau_archive`, user `postgres` / `123456`
 
 ## Commands
@@ -66,15 +66,16 @@ When `fuzzyLookupXxx()` fails to find a name in dimension tables (province/major
 
 ### File Upload Pipeline
 1. `ArchiveUploadController` → `StorageService.saveFiles()` → saves to `storage/temp/{yyyyMMdd}/{type}/`
-2. Dispatched by extension to processors (CSV/Excel/Image/PDF), each follows: extract → map → persist → archive/failed
-3. Quality score saved to `quality_score_dim` after successful processing
-4. OCR log created via `addLog()` during processing OR `syncTodayLogs()` scans archive/failed dirs
-5. On failure: `storage/failed/` + `.error.json` sidecar
+2. Dispatched by extension to processors (CSV/Excel/Image/PDF/LLM), each follows: extract → map → persist → archive/failed
+3. Upload form has an "LLM 智能提取" toggle for image/PDF types — when enabled, uses `LLMProcessor` instead of OCR
+4. Quality score saved to `quality_score_dim` after successful processing
+5. OCR log created via `addLog()` during processing OR `syncTodayLogs()` scans archive/failed dirs
+6. On failure: `storage/failed/` + `.error.json` sidecar
 
 ### Upload Type Mapping (from frontend)
 - `csv` → `CSVProcessor`, `excel` → `ExcelProcessor`
-- `pdf` → `PDFProcessor` (PyMuPDF → pages → OCR each page)
-- `ocr` / `wax` → `ImageProcessor` (OpenCV enhance → OCR)
+- `pdf` → `PDFProcessor` (PyMuPDF → pages → OCR each page) or `LLMProcessor` when LLM toggle on
+- `ocr` / `wax` → `ImageProcessor` (OpenCV enhance → OCR) or `LLMProcessor` when LLM toggle on
 
 ### Security
 - Spring Security + JWT (BCrypt), stateless, no session
@@ -84,6 +85,28 @@ When `fuzzyLookupXxx()` fails to find a name in dimension tables (province/major
 
 ### ProvinceDim GeoJSON
 `province_dim.geom` stores province boundaries (`geometry(MultiPolygon,4326)`). Data sourced from the `china-geojson` npm package. The frontend imports a static snapshot at `scau_archive-frontend/src/assets/geo/china.json` (simplified, ~240KB). To refresh: query `ST_AsGeoJSON(ST_Simplify(geom,0.05),4)` from the database.
+
+### LLM 智能提取配置
+`application.yaml` 中配置 LLM Vision API（必须使用支持图片的多模态模型）:
+```yaml
+llm:
+  api-key: "sk-your-key"
+  base-url: https://dashscope.aliyuncs.com/compatible-mode/v1  # 通义千问示例
+  model: qwen-vl-plus
+```
+推荐搭配: 通义千问 qwen-vl-plus（¥0.003/千token）、DeepSeek-VL2（第三方平台）、GPT-4o-mini
+上传页面勾选「LLM 智能提取」开关后，图片/PDF 走 LLMProcessor 路径，跳过 OCR。
+LLM 路径包含完整的存库、质量评分、OCR 日志、归档流程，与 OCR 路径一致。
+
+### LLM Processing Flow (useLlm=true)
+```
+Image/PDF → LLMProcessor.process()
+  ├─ LLMExtractionService.extract()  → 调 Python → LLM Vision API
+  ├─ DataPersistenceService.saveExtractedData()  → 写入事实表
+  ├─ QualityScoreService.scoreFile()  → 质量评分
+  ├─ OCRLogService.addLog()  → 处理日志
+  └─ StorageService  → 归档/失败处理
+```
 
 ### PPStructureV3 Notes
 - Uses PaddleX models auto-cached at `models/.paddlex/official_models/` (~1.8 GB)
@@ -141,10 +164,12 @@ src/main/java/edu/scau/scauarchiveinsight/
 │   ├── DashboardController         /api/dashboard/**
 │   ├── MetaDataController          /metadata/**
 │   ├── StorageController           /storage/status
+│   ├── LLMController               GET /api/llm/status (check if LLM is configured)
 │   ├── OCRLogController            /ocr/log/**
 │   └── QualityScoreController      /api/quality-score/list
 ├── service/        — Business logic
-│   ├── processor/   — CSVProcessor, ExcelProcessor, ImageProcessor, PDFProcessor
+│   ├── processor/   — CSVProcessor, ExcelProcessor, ImageProcessor, PDFProcessor, LLMProcessor
+│   ├── LLMExtractionService        — Calls Python llm_extractor.py (LLM Vision API)
 │   ├── DataPersistenceService      — save + dedup + fuzzy dimension matching
 │   ├── MetaDataMappingService      — CSV/Excel field mapping + validation
 │   ├── FieldCorrectionService      — post-mapping Levenshtein distance correction
@@ -192,11 +217,11 @@ src/
 ### Python Scripts
 ```
 src/main/python/
-├── ppstructure/ocr_table.py    — PPStructureV3 → HTML table → field mapping → JSON
-├── pdf2image/pdf2image.py      — PyMuPDF → 200dpi PNG per page
-├── openCV/opencv.py            — Grayscale → blur → threshold → sharpen
-├── predict/predict_admission.py — ARIMA + XGBoost ensemble → 3-year forecast
-└── data_fill/                  — Data filling/completion scripts
+├── ppstructure/ocr_table.py        — PPStructureV3 → HTML table → field mapping → JSON
+├── ppstructure/llm_extractor.py    — LLM Vision API → field extraction → JSON
+├── pdf2image/pdf2image.py          — PyMuPDF → 200dpi PNG per page
+├── openCV/opencv.py                — Grayscale → blur → threshold → sharpen
+└── predict/predict_admission.py    — ARIMA + XGBoost ensemble → 3-year forecast
 ```
 
 ### Storage
@@ -205,6 +230,7 @@ storage/
 ├── temp/{yyyyMMdd}/{type}/     — Upload staging
 ├── archive/{yyyyMMdd}/{type}/  — Successfully processed files
 ├── failed/{yyyyMMdd}/{type}/   — Failed files + .error.json sidecar
+├── enhance/                    — OpenCV enhanced temp images (auto-cleaned)
 └── ocr_log_dim table           — Log entries created by addLog() or syncTodayLogs()
 ```
 

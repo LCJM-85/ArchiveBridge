@@ -64,6 +64,10 @@ export function fetchDashboardStats() {
   return request.get('/api/dashboard/stats')
 }
 
+export function fetchLLMStatus() {
+  return request.get('/api/llm/status')
+}
+
 export function downloadReportWord(year) {
   return request.get('/api/report/word', { params: { year }, responseType: 'blob' })
 }
