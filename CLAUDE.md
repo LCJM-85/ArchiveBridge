@@ -8,7 +8,8 @@ SCAU Archive Insight is a full-stack student archive management system for South
 
 - **Backend**: Spring Boot 3.5.13 (Java 17) + MyBatis-Plus 3.5.13 + PostgreSQL/PostGIS + Druid
 - **Frontend**: Vue 3 SPA (Vite 8, Element Plus, Pinia, ECharts, Axios)
-- **Python scripts**: PPStructureV3 (PaddleOCR table recognition), PDF-to-image (PyMuPDF), image enhancement (OpenCV)
+- **Python scripts**: PPStructureV3 (PaddleOCR table recognition), PDF-to-image (PyMuPDF), image enhancement (OpenCV), ARIMA+XGBoost prediction
+- **Analysis modules**: Trend analysis (5 charts), Geographic distribution (China map via PostGIS), Training path (Sankey), AI prediction (ARIMA+XGBoost), Report generation (Word/A3 poster)
 - **Database**: PostgreSQL on localhost:5432, database `scau_archive`, user `postgres` / `123456`
 
 ## Commands
@@ -81,6 +82,9 @@ When `fuzzyLookupXxx()` fails to find a name in dimension tables (province/major
 - JWT stored in localStorage, sent via `Authorization: Bearer <token>` header
 - Login flow: GET `/api/captcha` → POST `/api/login` (captchaKey + captchaCode required)
 
+### ProvinceDim GeoJSON
+`province_dim.geom` stores province boundaries (`geometry(MultiPolygon,4326)`). Data sourced from the `china-geojson` npm package. The frontend imports a static snapshot at `scau_archive-frontend/src/assets/geo/china.json` (simplified, ~240KB). To refresh: query `ST_AsGeoJSON(ST_Simplify(geom,0.05),4)` from the database.
+
 ### PPStructureV3 Notes
 - Uses PaddleX models auto-cached at `models/.paddlex/official_models/` (~1.8 GB)
 - Must set `HOME` and `USERPROFILE` env vars to `models/` directory (avoids C++ inference crash with Chinese-chars in Windows username)
@@ -91,6 +95,28 @@ When `fuzzyLookupXxx()` fails to find a name in dimension tables (province/major
 - `router/index.js` uses `localStorage.getItem('token')` as auth guard — redirects to `/login` if missing
 - Pinia stores backed by localStorage for persistence across refreshes
 - Axios interceptors: attach token header, handle 401 → redirect login
+
+### AdmissionController Trend/GEO Endpoints
+All under `/api/admission/`:
+- `GET /api/admission/trend/yearly|major|province|score|gender` — yearly aggregation queries with optional `startYear`/`endYear`
+- `GET /api/admission/geo/province-stats` — province admission counts
+- `GET /api/admission/geo/map-data` — Full GeoJSON FeatureCollection from `province_dim.geom`
+- `GET /api/admission/training-path/sankey` — Sankey data (major→degree→destination)
+- `GET /api/admission/predict/next-years?years=3` — Runs Python ARIMA+XGBoost prediction
+
+### Dashboard/Report Endpoints
+- `GET /api/dashboard/stats` — Homepage aggregate stats + trend + major distribution
+- `GET /api/report/data?year=2024` — Annual report data (overview, distribution, scores, destination)
+
+### Python Prediction Script
+```bash
+# Requires statsmodels + xgboost (installed in project venv via Tsinghua mirror)
+HOME="D:/Ideaworkplace/SCAU/scau-archive-insight/models" \
+USERPROFILE="D:/Ideaworkplace/SCAU/scau-archive-insight/models" \
+scau-archive-insight/src/main/python/.venv/Scripts/python.exe \
+  scau-archive-insight/src/main/python/predict/predict_admission.py \
+  --yearly "2020,2021,2022,2023,2024,2025" --counts "100,100,100,100,100,50" --years_ahead 3
+```
 
 ### JSON Response Wrapper
 All API responses use `R<T>` (`dto/R.java`):
@@ -108,15 +134,17 @@ src/main/java/edu/scau/scauarchiveinsight/
 │   ├── ArchiveUploadController     POST /api/upload
 │   ├── LoginController             GET /api/captcha, POST /api/login
 │   ├── ChangePasswordController    POST /api/change-password
-│   ├── AdmissionController         /api/admission/**
+│   ├── AdmissionController         /api/admission/** (also hosts trend/geo/training-path/predict endpoints)
 │   ├── GraduationController        /api/graduation/**
 │   ├── StudentController           /api/student/**
+│   ├── ReportController            /api/report/**
+│   ├── DashboardController         /api/dashboard/**
 │   ├── MetaDataController          /metadata/**
 │   ├── StorageController           /storage/status
 │   ├── OCRLogController            /ocr/log/**
 │   └── QualityScoreController      /api/quality-score/list
 ├── service/        — Business logic
-│   ├── *Processor.java             — CSVProcessor, ExcelProcessor, ImageProcessor, PDFProcessor
+│   ├── processor/   — CSVProcessor, ExcelProcessor, ImageProcessor, PDFProcessor
 │   ├── DataPersistenceService      — save + dedup + fuzzy dimension matching
 │   ├── MetaDataMappingService      — CSV/Excel field mapping + validation
 │   ├── FieldCorrectionService      — post-mapping Levenshtein distance correction
@@ -125,6 +153,12 @@ src/main/java/edu/scau/scauarchiveinsight/
 │   ├── OpenCVService               — Calls Python opencv.py
 │   ├── OCRLogService               — syncTodayLogs, getTodayLogs, addLog, delete
 │   ├── QualityScoreService         — completeness/accuracy/consistency/timeliness scoring
+│   ├── TrendAnalysisService        — 5 aggregation queries for trend charts
+│   ├── GeographicService           — province stats + GeoJSON from PostGIS
+│   ├── TrainingPathService         — Sankey diagram data (major→degree→destination)
+│   ├── PredictionService           — Calls Python predict_admission.py (ARIMA+XGBoost)
+│   ├── ReportService               — Annual report data aggregation
+│   ├── DashboardService            — Homepage dashboard stats
 │   └── *Service.java               — CRUD: AdmissionService, GraduationService, StudentService, UserService, StorageService, MetaDataService
 ├── dto/            — AdmissionDTO, GraduationDTO, StudentDTO, LoginDTO, ChangePasswordDTO, MetaDataDTO, R<T>
 ├── vo/             — AdmissionVO, GraduationVO, StudentVO
@@ -144,12 +178,9 @@ src/
 │   ├── archive/     — ArchiveUpload
 │   ├── data/        — AdmissionData, GraduationData, StudentStatusData
 │   ├── ocr/         — OCRProcess (today logs, quality scores, history, delete)
-│   ├── charts/      — AdmissionTrend, Geographic, MajorTrainingPath, AIPrediction
-│   ├── dashboard/   — Data overview dashboard
-│   ├── analysis/    — Data analysis views
-│   ├── governance/  — Data governance
-│   ├── prediction/  — AI prediction views
-│   ├── report/      — Report generation
+│   ├── charts/      — AddmissionTrend (5 ECharts: yearly/major/province/score/gender), Geographic (China map + province ranking), MajorTrainingPath (Sankey: major→degree→destination), AIPrediction (ARIMA+XGBoost forecast with confidence bands)
+│   ├── dashboard/   — Dashboard (greeting, stat cards, trend chart, province pie, quick links)
+│   ├── report/      — ReportGenerate (annual report + A3 printable poster with print-to-PDF)
 │   ├── system/      — MetaDataManage, UserManage
 │   └── login/       — Login page
 ├── layouts/         — AppLayout, Header, Sidebar, Content
@@ -164,8 +195,8 @@ src/main/python/
 ├── ppstructure/ocr_table.py    — PPStructureV3 → HTML table → field mapping → JSON
 ├── pdf2image/pdf2image.py      — PyMuPDF → 200dpi PNG per page
 ├── openCV/opencv.py            — Grayscale → blur → threshold → sharpen
-├── data_fill/                  — Data filling/completion scripts
-└── predict/                    — Prediction scripts
+├── predict/predict_admission.py — ARIMA + XGBoost ensemble → 3-year forecast
+└── data_fill/                  — Data filling/completion scripts
 ```
 
 ### Storage

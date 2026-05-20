@@ -13,5 +13,6 @@ public class AdmissionDTO {
     private String examNo;
     private Integer provinceId;
     private Integer majorId;
+    private Integer admissionScore;
     private LocalDate admissionDate;
 }

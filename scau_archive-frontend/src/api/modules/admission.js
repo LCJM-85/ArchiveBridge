@@ -23,3 +23,48 @@ export function fetchProvinces() {
 export function fetchMajors() {
   return request.get('/api/admission/majors')
 }
+
+export function fetchTrendYearly(params) {
+  return request.get('/api/admission/trend/yearly', { params })
+}
+
+export function fetchTrendMajor(params) {
+  return request.get('/api/admission/trend/major', { params })
+}
+
+export function fetchTrendProvince(params) {
+  return request.get('/api/admission/trend/province', { params })
+}
+
+export function fetchTrendScore(params) {
+  return request.get('/api/admission/trend/score', { params })
+}
+
+export function fetchTrendGender(params) {
+  return request.get('/api/admission/trend/gender', { params })
+}
+
+export function fetchProvinceStats() {
+  return request.get('/api/admission/geo/province-stats')
+}
+
+export function fetchSankeyData() {
+  return request.get('/api/admission/training-path/sankey')
+}
+
+export function fetchPrediction(years = 3) {
+  return request.get('/api/admission/predict/next-years', { params: { years } })
+}
+
+export function fetchReportData(year) {
+  return request.get('/api/report/data', { params: { year } })
+}
+
+export function fetchDashboardStats() {
+  return request.get('/api/dashboard/stats')
+}
+
+export function downloadReportWord(year) {
+  return request.get('/api/report/word', { params: { year }, responseType: 'blob' })
+}
+

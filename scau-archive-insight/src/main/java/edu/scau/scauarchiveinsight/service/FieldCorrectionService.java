@@ -156,6 +156,13 @@ public class FieldCorrectionService {
             return 0;
         });
         recognizers.put("exam_no", v -> v.matches("\\d{9,15}") ? 70 : 0);
+        recognizers.put("admission_score", v -> {
+            if (v.matches("\\d{3}")) {
+                int val = Integer.parseInt(v);
+                return val <= 750 ? 100 : 50;
+            }
+            return 0;
+        });
         recognizers.put("class_name", v -> v.contains("班") ? 60 : 0);
 
         return recognizers;

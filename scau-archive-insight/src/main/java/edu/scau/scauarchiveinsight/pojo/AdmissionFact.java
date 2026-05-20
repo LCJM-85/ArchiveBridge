@@ -32,6 +32,8 @@ public class AdmissionFact {
 
     private LocalDate admissionDate;
 
+    private Integer admissionScore;
+
     private Integer fileId;
 
     private LocalDateTime createTime;

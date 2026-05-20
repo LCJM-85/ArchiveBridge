@@ -129,6 +129,7 @@ public class AdmissionService {
         vo.setName(fact.getName());
         vo.setIdCard(fact.getIdCard());
         vo.setGender(fact.getGender());
+        vo.setAdmissionScore(fact.getAdmissionScore());
         vo.setAdmissionDate(fact.getAdmissionDate());
         vo.setCreateTime(fact.getCreateTime());
         vo.setUpdateTime(fact.getUpdateTime());
@@ -162,6 +163,7 @@ public class AdmissionService {
         entity.setExamNo(dto.getExamNo());
         entity.setProvinceId(dto.getProvinceId());
         entity.setMajorId(dto.getMajorId());
+        entity.setAdmissionScore(dto.getAdmissionScore());
         entity.setAdmissionDate(dto.getAdmissionDate());
         return entity;
     }

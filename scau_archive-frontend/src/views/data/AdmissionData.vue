@@ -48,6 +48,7 @@
         <el-table-column prop="provinceName" label="生源省份" min-width="100" />
         <el-table-column prop="majorName" label="录取专业" min-width="120" />
         <el-table-column prop="admissionDate" label="录取日期" width="110" align="center" />
+        <el-table-column prop="admissionScore" label="录取分数" width="100" align="center" />
         <el-table-column label="来源文件" min-width="140">
           <template #default="{ row }">
             <span style="font-size:12px;color:var(--text-secondary)">{{ row.fileName || '-' }}</span>
@@ -149,6 +150,13 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="录取分数" prop="admissionScore">
+              <el-input-number v-model="form.admissionScore" :min="0" :max="750" placeholder="0-750" style="width:100%" controls-position="right" />
+            </el-form-item>
+          </el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -181,6 +189,7 @@ const defaultForm = {
   admissionDate: '',
   provinceId: null,
   majorId: null,
+  admissionScore: null,
 }
 const form = ref({ ...defaultForm })
 
@@ -228,6 +237,7 @@ function openEditDialog(row) {
     admissionDate: row.admissionDate || '',
     provinceId: row.provinceId ?? null,
     majorId: row.majorId ?? null,
+    admissionScore: row.admissionScore ?? null,
   }
   dialogVisible.value = true
 }

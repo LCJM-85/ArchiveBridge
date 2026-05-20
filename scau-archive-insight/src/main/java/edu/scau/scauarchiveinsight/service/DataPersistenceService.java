@@ -102,6 +102,14 @@ public class DataPersistenceService {
         String dateStr = data.get("admission_date");
         LocalDate admissionDate = DateUtil.convertToLocalDate(dateStr);
 
+        Integer admissionScore = null;
+        String scoreStr = data.get("admission_score");
+        if (scoreStr != null && !scoreStr.isBlank()) {
+            try {
+                admissionScore = Integer.parseInt(scoreStr.trim());
+            } catch (NumberFormatException ignored) {}
+        }
+
         LocalDateTime now = LocalDateTime.now();
 
         // ========== student_fact：去重匹配 student_no → id_card ==========
@@ -134,7 +142,7 @@ public class DataPersistenceService {
         }
 
         // ========== admission_fact：去重匹配 student_no → id_card → exam_no ==========
-        AdmissionFact admissionFact = buildAdmissionFact(data, province, major, admissionDate, fileId);
+        AdmissionFact admissionFact = buildAdmissionFact(data, province, major, admissionDate, admissionScore, fileId);
 
         AdmissionFact existingAdmission = null;
         if (studentNo != null && !studentNo.isBlank()) {
@@ -267,7 +275,8 @@ public class DataPersistenceService {
     }
 
     private AdmissionFact buildAdmissionFact(Map<String, String> data, ProvinceDim province,
-                                              MajorDim major, LocalDate admissionDate, Integer fileId) {
+                                              MajorDim major, LocalDate admissionDate,
+                                              Integer admissionScore, Integer fileId) {
         AdmissionFact fact = new AdmissionFact();
         fact.setStudentNo(data.get("student_no"));
         fact.setExamNo(data.get("exam_no"));
@@ -277,6 +286,7 @@ public class DataPersistenceService {
         if (province != null) fact.setProvinceId(province.getProvinceId());
         if (major != null) fact.setMajorId(major.getMajorId());
         if (admissionDate != null) fact.setAdmissionDate(admissionDate);
+        fact.setAdmissionScore(admissionScore);
         fact.setFileId(fileId);
         return fact;
     }

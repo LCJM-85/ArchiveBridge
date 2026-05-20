@@ -16,6 +16,7 @@ public class AdmissionVO {
     private String provinceName;
     private Integer majorId;
     private String majorName;
+    private Integer admissionScore;
     private Integer fileId;
     private String fileName;
     private LocalDate admissionDate;
