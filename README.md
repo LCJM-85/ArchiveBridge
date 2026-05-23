@@ -1,151 +1,159 @@
-# SCAU 档案洞察系统
+# SCAU Archive Insight
 
-华南农业大学毕业生与招生可视化名册管理系统。支持学生档案的批量导入、OCR 智能识别、元数据驱动的数据清洗、多维度可视化分析及报表生成。
+华南农业大学 招生学籍档案数字化与可视化分析平台
+
+把纸面名册变成会说话的图表，让招生与毕业数据一键洞察。
+
+## 功能模块
+
+| 模块 | 说明 |
+|------|------|
+| **档案智能采集** | 支持蜡纸/扫描PDF/OCR/Excel/CSV五类输入，自动表格识别与字段映射，可选 LLM 智能提取 |
+| **OCR 识别监控** | 实时查看处理进度、质量评分、处理日志、失败原因 |
+| **招生数据管理** | 录取名单查看、筛选、编辑 |
+| **学籍数据管理** | 在校生学籍信息管理 |
+| **毕业数据管理** | 毕业生信息、学位、去向管理 |
+| **可视化分析大屏** | 招生趋势分析、地理热力分布、学科培养桑基图、AI招生预测 |
+| **智能报告生成** | 一键生成年度招生质量报告（Word + A3 海报打印） |
+| **元数据管理** | 自定义字段编码、字段名、来源字段映射规则 |
+| **数据脱敏** | 身份证号、姓名等敏感信息一键脱敏（后端注解驱动 + 前端开关） |
+| **API 文档** | Swagger UI 在线接口文档与测试 |
 
 ## 技术栈
 
-### 后端
-- **框架**: Spring Boot 3.5.13 + MyBatis-Plus 3.5.13
-- **语言**: Java 17
-- **数据库**: PostgreSQL + PostGIS
-- **连接池**: Druid（初始 5，最小 10，最大 20）
-- **安全**: Spring Security + JWT（BCrypt 加密）+ Hutool 图形验证码
-- **构建**: Maven Wrapper
+| 层 | 技术 |
+|----|------|
+| 后端 | Spring Boot 3.5.13, MyBatis-Plus 3.5.13, PostgreSQL 15, PostGIS, Druid |
+| 前端 | Vue 3, Vite 8, Element Plus, ECharts 5, Pinia, Axios |
+| Python | PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.2.2 (GPU), PyMuPDF, OpenCV |
+| 预测 | ARIMA + XGBoost 集成预测 |
+| LLM | 智谱 GLM-4V-Plus-0111 / 通义千问 Qwen-VL-Plus |
+| 部署 | Docker, Docker Compose, Nginx |
 
-### 前端
-- **框架**: Vue 3（Vite 8）
-- **UI**: Element Plus
-- **状态管理**: Pinia（localStorage 持久化）
-- **可视化**: ECharts
-- **HTTP**: Axios
+## 快速启动
 
-### 数据处理
-- **OCR**: PaddleOCR（Python，基于列位置的表格识别）
-- **PDF 转图**: PyMuPDF / fitz（Python，200dpi PNG）
-- **图像增强**: OpenCV（Python，灰度 → 高斯模糊 → 自适应阈值 → 锐化）
+### 本地开发
+
+**1. 数据库**
+```bash
+# 需要 PostgreSQL 15+ 和 PostGIS 扩展
+PGPASSWORD=123456 psql -h localhost -U postgres -d scau_archive < backup.sql
+```
+
+**2. 后端**（端口 8080）
+```bash
+cd scau-archive-insight
+JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw spring-boot:run
+# API 文档: http://localhost:8080/swagger-ui.html
+```
+
+**3. 前端**（端口 5173）
+```bash
+cd scau_archive-frontend
+npm install
+npm run dev
+```
+
+### Docker 部署
+
+```bash
+# 1. 导出数据库
+PGPASSWORD=123456 pg_dump -h localhost -U postgres -d scau_archive > backup.sql
+
+# 2. 构建并启动
+docker compose up -d
+
+# 3. 导入数据
+docker cp backup.sql scau-db:/tmp/
+docker exec scau-db psql -U postgres -d scau_archive -f /tmp/backup.sql
+
+# 4. 访问 http://localhost
+```
+
+## 核心流程
+
+### 文件上传处理
+
+```
+上传文件 → StorageService.saveFiles() → storage/temp/{date}/{type}/
+  ├─ CSV/Excel → 字段映射 → 数据校验 → 持久化 → 归档
+  ├─ PDF → 转图片 → 逐页OCR/LLM → 结构化数据 → 持久化 → 归档
+  ├─ 图片 → OpenCV增强 → OCR/LLM → 结构化数据 → 持久化 → 归档
+  └─ 失败 → storage/failed/ + .error.json 错误日志
+```
+
+### LLM 智能提取
+
+启用「LLM 智能提取」开关后，图片/PDF走 LLM 路径：
+- 直接调用多模态大模型提取结构化数据
+- 图片自动压缩（最长边1200px，JPEG质量85）
+- PDF多页合并归档（一条日志，一次计数）
+- 完整的存库、质量评分、日志流程
+
+### 字段匹配
+
+```
+fieldName > sourceField > fieldCode
+```
+OCR管道：精确匹配 → 去空白匹配 → 包含匹配 → Levenshtein距离修正
+
+## API 文档
+
+启动后端后访问：`http://localhost:8080/swagger-ui.html`
+- 所有接口带中文描述
+- 支持 JWT Bearer Token 在线测试
+
+## LLM 配置
+
+`application.yaml`:
+```yaml
+llm:
+  api-key: "your-api-key"
+  base-url: https://open.bigmodel.cn/api/paas/v4
+  model: glm-4v-plus-0111
+```
+
+推荐模型：智谱 GLM-4V-Plus-0111（付费，支持Base64）、通义千问 Qwen-VL-Plus
+
+## 数据脱敏
+
+Header 右上角「脱敏/原始」开关控制。开启后身份证号、姓名等敏感信息在 API 返回时自动遮挡，不修改数据库原始数据。
 
 ## 项目结构
 
 ```
-scau-archive-insight/                   # 后端 Spring Boot
-├── src/main/java/com/scau/archive/
-│   ├── controller/                     # REST 控制器
-│   │   ├── ArchiveUploadController     # /api/upload — 文件上传
-│   │   ├── LoginController             # /api/login, /api/captcha
-│   │   ├── ChangePasswordController    # /api/change-password
-│   │   ├── MetaDataController          # /metadata/** — 元数据 CRUD
-│   │   ├── StorageController           # /storage/status — 存储监控
-│   │   └── OCRLogController            # /ocr/log/** — OCR 日志
-│   ├── service/                        # 业务逻辑层
-│   │   ├── UserService                 # 登录 / 密码修改
-│   │   ├── StorageService              # 文件存储与归档管理
-│   │   ├── MetaDataService             # 元数据标准 CRUD
-│   │   ├── MetaDataMappingService      # 字段映射与数据校验
-│   │   ├── OCRService / OCRLogService  # OCR 识别与日志同步
-│   │   ├── PdfToImageService           # PDF 转图片
-│   │   ├── OpenCVService               # 图像增强
-│   │   └── DataPersistenceService      # 数据持久化接口（需自行实现）
-│   ├── processor/                      # 文件解析器
-│   │   ├── CSVProcessor                # CSV 解析（含引号处理）
-│   │   ├── ExcelProcessor              # Excel 解析（Apache POI）
-│   │   ├── PDFProcessor                # PDF → 图片 → OCR → 入库
-│   │   └── WaxProcessor                # 蜡纸图片 → OpenCV增强 → OCR
-│   ├── mapper/                         # MyBatis-Plus 数据访问接口
-│   ├── pojo/                           # 实体类（维度/事实/元数据等）
-│   ├── config/                         # 安全配置 / CORS / 异常处理
-│   ├── filter/                         # JWT 认证过滤器
-│   └── util/                           # JWT 工具类
-└── src/main/python/
-    ├── ocr/ocr.py                      # PaddleOCR 表格识别
-    ├── pdf2image/pdf2image.py          # PDF → PNG
-    └── openCV/opencv.py                # 图像预处理增强
-
-scau_archive-frontend/                  # 前端 Vue 3
-├── src/
-│   ├── views/                          # 页面
-│   │   ├── dashboard                   # 数据看板
-│   │   ├── archive/ArchiveUpload       # 档案上传
-│   │   ├── analysis                    # 数据分析
-│   │   ├── charts                      # 图表可视化
-│   │   ├── data                        # 数据管理
-│   │   ├── governance                  # 数据治理
-│   │   ├── ocr/OCRProcess              # OCR 处理
-│   │   ├── prediction                  # AI 预测
-│   │   ├── report                      # 报表
-│   │   └── system/MetaDataManage       # 系统设置 / 元数据管理
-│   ├── components/                     # 组件
-│   │   ├── common/ (TableView, UploadPanel, Loading, Empty)
-│   │   └── layout/ (AppLayout, Header, Sidebar, Content)
-│   ├── api/                            # Axios API 接口
-│   ├── store/                          # Pinia 状态管理（user, archive, menu, metadata）
-│   └── router/                         # 路由配置（JWT 守卫）
-└── package.json
+SCAU/
+├── docker-compose.yml              # Docker 编排（db + backend + frontend）
+├── scau-archive-insight/           # Spring Boot 后端
+│   ├── Dockerfile                  # 后端镜像（Java 21 + Python 3 + PaddlePaddle）
+│   └── src/
+│       ├── main/java/edu/scau/scauarchiveinsight/
+│       │   ├── controller/         # 14 个 REST 控制器
+│       │   ├── service/            # 业务逻辑 + processor 文件处理器
+│       │   ├── config/             # Security, Swagger, 脱敏, MyBatis-Plus 配置
+│       │   ├── util/               # JWT, 脱敏工具, 文本工具
+│       │   ├── dto/vo/mapper/pojo/ # 数据传输、视图、映射、实体
+│       │   └── filter/             # JWT 认证过滤器
+│       └── main/python/
+│           ├── ppstructure/        # OCR 表格识别 + LLM 提取
+│           ├── pdf2image/          # PDF → PNG
+│           ├── openCV/             # 图像增强
+│           ├── predict/            # ARIMA+XGBoost 预测
+│           └── seed/               # 假数据生成
+├── scau_archive-frontend/          # Vue 3 前端
+│   ├── Dockerfile                  # 前端镜像
+│   ├── nginx.conf                  # Nginx 反向代理配置
+│   └── src/
+│       ├── views/                  # 页面组件
+│       ├── api/                    # API 接口封装
+│       ├── store/                  # Pinia 状态管理
+│       └── layouts/                # 布局组件
+├── storage/                        # 文件存储（运行时）
+└── models/                         # PaddlePaddle 模型缓存（运行时）
 ```
-
-## 快速开始
-
-### 后端
-
-> **注意**: 需 JDK 17+，构建时需指定 JAVA_HOME。
-
-```bash
-cd scau-archive-insight
-JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw clean package     # 构建
-JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw spring-boot:run   # 启动（端口 8080）
-JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw test              # 运行测试
-```
-
-### 前端
-
-```bash
-cd scau_archive-frontend
-npm install                   # 安装依赖
-npm run dev                   # 启动开发服务器（端口 5173）
-npm run build                 # 生产构建
-npm run preview               # 预览生产构建
-```
-
-### Python 脚本（Windows venv）
-
-```bash
-cd scau-archive-insight
-.venv/Scripts/python.exe src/main/python/ocr/ocr.py <图片路径>
-.venv/Scripts/python.exe src/main/python/pdf2image/pdf2image.py <PDF路径>
-.venv/Scripts/python.exe src/main/python/opencv/opencv.py <图片路径>
-```
-
-## 核心功能
-
-- **档案上传**: 支持 CSV、Excel、PDF 及图片（OCR/蜡纸）批量上传，按类型（入学/毕业）自动分流处理
-- **OCR 识别**: 基于 PaddleOCR 的列对齐表格识别，输出结构化的 JSON 数据（字段编码为键）
-- **元数据治理**: 自定义字段映射、类型校验、清洗规则，驱动全流程数据标准化
-- **数据看板**: 招生趋势、地理分布、专业流向等多维度 ECharts 可视化
-- **AI 预测**: 基于历史数据的招生与就业趋势预测
-- **存储监控**: 实时监控临时 / 归档 / 失败目录状态
-- **用户管理**: JWT 认证 + 图形验证码 + BCrypt 密码 + 密码修改
-- **安全防护**: IP+用户登录频率限制（8 次/10 分钟）、验证码请求限流（30 次/分钟）
-
-## 文件上传处理流程
-
-1. 接收 multipart 文件 + 类型参数（pdf / wax / ocr / excel / csv）+ 档案类型（admission / graduation）
-2. 文件保存至 `storage/temp/{yyyyMMdd}/{type}/`
-3. 根据格式分发至对应处理器：
-   - **CSV / Excel** → 解析为行记录 → `MetaDataMappingService` 字段映射 + 校验 → `DataPersistenceService` 持久化 → 归档
-   - **PDF** → PyMuPDF 转图片 → PaddleOCR 逐页识别 → 结构化数据 → 持久化 → 归档
-   - **图片（wax / ocr）** → OpenCV 增强 → PaddleOCR 识别 → 持久化 → 归档
-4. 处理失败：移至 `storage/failed/` 并生成 `.error.json` 错误日志
-5. OCR 日志每日自动同步归档与失败目录数据至 `ocr_log_dim` 表
-
-## 元数据驱动数据清洗
-
-- `metadata_standard` 表定义字段编码、名称、类型、来源字段、转换规则、是否必填
-- 字段匹配优先级：`fieldCode` > `fieldName` > `sourceField`
-- 支持类型自动转换：int / decimal / boolean / date
-- OCR 处理时，元数据规则以临时 JSON 文件传递给 Python 脚本，输出以 `fieldCode` 为键
 
 ## 数据库
 
-- **维度表**: student_dim, college_dim, major_dim, class_dim, province_dim, nation_dim, political_dim, degree_dim, destination_dim, source_type_dim, archive_file_dim, ocr_log_dim, quality_score_dim
-- **事实表**: student_fact, admission_fact, graduation_fact
-- **元数据表**: metadata_standard（fieldCode 主键）
-- 日期字段使用 `date` 类型直接存储（已移除 date_dim 表及 FK 关联）
+- **事实表**: admission_fact, student_fact, graduation_fact
+- **维度表**: province_dim, major_dim, college_dim, degree_dim, destination_dim, nation_dim, political_dim, class_dim, archive_file_dim, ocr_log_dim, quality_score_dim
+- **系统表**: sys_user, metadata_standard
