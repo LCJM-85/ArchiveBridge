@@ -60,8 +60,9 @@ public class LLMExtractionService {
             );
             Map<String, String> env = pb.environment();
             env.put("PYTHONIOENCODING", "utf-8");
-            env.put("HOME", "D:/Ideaworkplace/SCAU/scau-archive-insight/models");
-            env.put("USERPROFILE", "D:/Ideaworkplace/SCAU/scau-archive-insight/models");
+            String modelsDir = Path.of("models").toAbsolutePath().normalize().toString();
+            env.put("HOME", modelsDir);
+            env.put("USERPROFILE", modelsDir);
             pb.redirectErrorStream(true);
 
             Process process = pb.start();

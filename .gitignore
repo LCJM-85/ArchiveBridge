@@ -24,3 +24,4 @@ models/
 logs/
 temp/
 CLAUDE.md
+.claude/
