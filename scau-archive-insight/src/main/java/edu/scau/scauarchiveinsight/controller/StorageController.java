@@ -1,5 +1,7 @@
 package edu.scau.scauarchiveinsight.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.scau.scauarchiveinsight.dto.R;
@@ -15,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 
+@Tag(name = "存储状态", description = "文件存储状态监控")
 @RestController
 @RequestMapping("/storage")
 public class StorageController {
@@ -27,6 +30,7 @@ public class StorageController {
         this.storageService = storageService;
     }
 
+    @Operation(summary = "获取存储文件状态列表")
     @GetMapping("/status")
     public R<List<Map<String, Object>>> getStatus() {
         List<Map<String, Object>> files = new ArrayList<>();
@@ -37,6 +41,7 @@ public class StorageController {
         return R.ok(files);
     }
 
+    @Operation(summary = "获取正在处理的文件数量")
     @GetMapping("/processing-count")
     public R<Integer> getProcessingCount() {
         return R.ok(storageService.getProcessingCount());

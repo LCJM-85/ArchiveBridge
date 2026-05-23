@@ -3,11 +3,10 @@ spring:
     name: scau-archive-insight
 
   datasource:
-
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/scau_archive
-    username: postgres
-    password: 123456
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:scau_archive}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASS:123456}
     type: com.alibaba.druid.pool.DruidDataSource
 
     druid:
@@ -56,14 +55,27 @@ server:
 #   通义千问:  模型 qwen-vl-plus,       地址 https://dashscope.aliyuncs.com/compatible-mode/v1
 #   OpenAI:    模型 gpt-4o-mini,         地址 https://api.openai.com/v1
 llm:
-  api-key: ""
-  base-url: https://api.deepseek.com/v1
-  model: deepseek-vl2
+  api-key: "0ef693ed0e604cb5899c6ffb8bf6d8f4.MgGHmUrQrlwSewqm"
+  base-url: https://open.bigmodel.cn/api/paas/v4
+  model: glm-4v-plus-0111
 
 # 未登录被拦截时返回给前端的登录页地址（可与前端路由一致）
 app:
   security:
     unauthorized-login-url: http://localhost:5173/login
+
+# SpringDoc Swagger 配置
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    try-it-out-enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+  packages-to-scan: edu.scau.scauarchiveinsight.controller
 
 # JWT 核心配置（和之前的 JwtUtils 工具类对应）
 jwt:

@@ -25,11 +25,21 @@
         </el-icon>
       </el-button>
 
-      <el-badge :value="3" :hidden="false">
-        <el-button text>
-          <el-icon size="18"><Bell /></el-icon>
-        </el-button>
-      </el-badge>
+      <el-tooltip content="数据脱敏" placement="bottom">
+        <el-switch
+          v-model="desensitizeEnabled"
+          size="small"
+          style="margin: 0 6px"
+          @change="handleDesensitizeToggle"
+          inline-prompt
+          active-text="脱敏"
+          inactive-text="原始"
+        />
+      </el-tooltip>
+
+      <el-button text>
+        <el-icon size="18"><Bell /></el-icon>
+      </el-button>
 
       <el-dropdown>
         <div class="user-info">
@@ -66,7 +76,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useMenuStore } from '@/store/menu'
@@ -74,6 +84,7 @@ import { useUserStore } from '@/store/user'
 import { useTheme } from '@/composables/useTheme'
 import { useFullscreen } from '@/composables/useFullscreen'
 import { usePasswordChange } from '@/composables/usePasswordChange'
+import { getDesensitizeStatus, toggleDesensitize } from '@/api/modules/desensitize'
 import {
   HomeFilled,
   FullScreen,
@@ -103,6 +114,26 @@ const {
 } = usePasswordChange(() => {
   logout()
 })
+
+const desensitizeEnabled = ref(false)
+
+onMounted(async () => {
+  try {
+    const res = await getDesensitizeStatus()
+    desensitizeEnabled.value = res.data.data === true
+  } catch {}
+})
+
+async function handleDesensitizeToggle(val) {
+  try {
+    await toggleDesensitize(val)
+    ElMessage.success(val ? '脱敏已开启，刷新数据中...' : '脱敏已关闭，刷新数据中...')
+    setTimeout(() => location.reload(), 300)
+  } catch {
+    desensitizeEnabled.value = !val
+    ElMessage.error('操作失败')
+  }
+}
 
 function logout() {
   userStore.logout()

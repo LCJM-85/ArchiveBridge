@@ -22,7 +22,13 @@ def levenshtein(a, b):
 
 # ====================== 初始化
 _ = paddle.device.set_device("gpu") if paddle.device.cuda.device_count() > 0 else None
-table_engine = PPStructureV3(lang="ch", use_table_recognition=True)
+table_engine = PPStructureV3(
+    lang="ch",
+    use_table_recognition=True,
+    text_detection_model_name="PP-OCRv4_mobile_det",
+    text_recognition_model_name="PP-OCRv4_mobile_rec",
+    text_recognition_batch_size=6,
+)
 
 # ====================== 从 HTML 解析表格网格
 def parse_html_table(html):

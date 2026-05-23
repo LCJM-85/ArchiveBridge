@@ -2,6 +2,8 @@ package edu.scau.scauarchiveinsight.controller;
 
 import edu.scau.scauarchiveinsight.dto.ChangePasswordDTO;
 import edu.scau.scauarchiveinsight.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import edu.scau.scauarchiveinsight.util.JwtUtils;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@Tag(name = "修改密码", description = "用户修改密码")
 @RestController
 @RequestMapping("/api")
 public class ChangePasswordController {
@@ -22,6 +25,7 @@ public class ChangePasswordController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Operation(summary = "修改用户密码")
     @PostMapping("/change-password")
     public ResponseEntity<Map<String, Object>> changePassword(
             @Valid @RequestBody ChangePasswordDTO dto,

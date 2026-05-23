@@ -1,0 +1,57 @@
+services:
+
+  # PostgreSQL + PostGIS
+  db:
+    image: postgis/postgis:15-3.3
+    container_name: scau-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: scau_archive
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Spring Boot 后端（含 Python+PaddlePaddle）
+  backend:
+    build: ./scau-archive-insight
+    container_name: scau-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: scau_archive
+      DB_USER: postgres
+      DB_PASS: 123456
+      LLM_API_KEY: ""
+      LLM_BASE_URL: https://open.bigmodel.cn/api/paas/v4
+      LLM_MODEL: glm-4v-plus-0111
+    volumes:
+      - storage_data:/app/storage
+      # PaddlePaddle 模型缓存（持久化，避免每次下载 1.8GB）
+      - paddle_models:/app/models/.paddlex
+
+  # Vue 3 前端（Nginx）
+  frontend:
+    build: ./scau_archive-frontend
+    container_name: scau-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
+  storage_data:
+  paddle_models:

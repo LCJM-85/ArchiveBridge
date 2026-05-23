@@ -76,9 +76,6 @@
           <el-icon><Setting /></el-icon>
           <span>系统管理</span>
         </template>
-        <el-menu-item index="user">
-          <span>用户管理</span>
-        </el-menu-item>
         <el-menu-item index="meta">
           <span>元数据管理</span>
         </el-menu-item>

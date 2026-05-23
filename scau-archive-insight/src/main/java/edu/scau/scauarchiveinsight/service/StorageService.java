@@ -69,6 +69,22 @@ public class StorageService {
     }
 
     /**
+     * 删除 temp 下的文件并调整处理计数（用于 PDF 转图片后清理原始 PDF）
+     */
+    public void removeTempFile(String fileName) throws IOException {
+        try (var stream = Files.walk(STORAGE_ROOT)) {
+            Optional<Path> matched = stream
+                    .filter(Files::isRegularFile)
+                    .filter(p -> p.getFileName().toString().equals(fileName))
+                    .findFirst();
+            if (matched.isPresent()) {
+                Files.deleteIfExists(matched.get());
+                processingCount.decrementAndGet();
+            }
+        }
+    }
+
+    /**
      * 将 storage/temp 下的文件转移到 storage/archive
      *
      * @param fileName 文件名（支持模糊匹配，如 "2025_报告.xlsx"）

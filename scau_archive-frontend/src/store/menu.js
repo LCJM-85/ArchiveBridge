@@ -14,7 +14,6 @@ export const useMenuStore = defineStore('menu', () => {
     { key: 'charts', title: '可视化分析大屏'},
     { key: 'data', title: '数据管理'},
     { key: 'process', title: 'ocr识别进程'},
-    { key: 'user', title: '用户管理'},
     { key: 'meta', title: '元数据管理'},
     { key: 'admission', title: '招生数据管理'},
     { key: 'studentstatus', title: '学籍数据管理'},

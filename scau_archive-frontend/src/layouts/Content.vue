@@ -17,7 +17,6 @@ import ReportGenerate from '@/views/report/ReportGenerate.vue'
 import AdmissionData from '@/views/data/AdmissionData.vue'
 import StudentStatusData from '@/views/data/StudentStatusData.vue'
 import GraduationData from '@/views/data/GraduationData.vue'
-import UserManage from '@/views/system/UserManage.vue'
 import AddmissionTrend from '@/views/charts/AddmissionTrend.vue'
 import AIPrediction from '@/views/charts/AIPrediction.vue'
 import Geographic from '@/views/charts/Geographic.vue'
@@ -36,7 +35,6 @@ const componentMap = {
   studentstatus: StudentStatusData,
   graduation: GraduationData,
   meta: MetaDataManage,
-  user: UserManage,
   trend: AddmissionTrend,
   prediction: AIPrediction,
   geo: Geographic,

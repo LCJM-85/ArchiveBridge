@@ -6,6 +6,8 @@ import edu.scau.scauarchiveinsight.processor.ImageProcessor;
 import edu.scau.scauarchiveinsight.processor.LLMProcessor;
 import edu.scau.scauarchiveinsight.processor.PDFProcessor;
 import edu.scau.scauarchiveinsight.service.StorageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.file.*;
 import java.util.*;
 
+@Tag(name = "档案上传", description = "档案文件上传与处理")
 @RestController
 @RequestMapping("/api")
 public class ArchiveUploadController {
@@ -37,6 +40,7 @@ public class ArchiveUploadController {
         this.llmProcessor = llmProcessor;
     }
 
+    @Operation(summary = "上传档案文件并自动处理")
     @PostMapping("/upload")
     public ResponseEntity<Map<String, Object>> uploadFiles(
             @RequestParam("files") List<MultipartFile> files,
@@ -74,10 +78,13 @@ public class ArchiveUploadController {
                 }
                 case "pdf" -> {
                     if (useLlm) {
-                        // LLM 模式：PDF 先转图片，和图片一起批量处理
+                        // LLM 模式：PDF 先转图片，页面图片不进入 imageBatch（避免计数和日志被拆分）
                         try {
                             List<String> pageImages = pdfToImage(path);
-                            imageBatch.addAll(pageImages);
+                            // 统一处理所有页面，只归档一次 PDF 原始文件（计数只 +1/-1）
+                            List<Map<String, Object>> pdfResult = llmProcessor.processPdfPages(
+                                    path, pageImages, archiveType, provinceName, admissionDate);
+                            allResults.add(Map.of("file", name, "type", "pdf-llm", "data", pdfResult));
                         } catch (Exception e) {
                             Map<String, Object> entry = new LinkedHashMap<>();
                             entry.put("file", name);

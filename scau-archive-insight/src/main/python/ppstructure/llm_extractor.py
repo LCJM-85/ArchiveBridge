@@ -18,8 +18,31 @@ import urllib.request
 import urllib.error
 
 def encode_image(image_path):
+    """读取图片并压缩，返回(base64, mime_type)"""
+    try:
+        import cv2
+        import numpy as np
+        with open(image_path, 'rb') as f:
+            raw = f.read()
+        img = cv2.imdecode(np.frombuffer(raw, np.uint8), cv2.IMREAD_COLOR)
+        if img is not None:
+            h, w = img.shape[:2]
+            max_dim = 1200
+            if max(h, w) > max_dim:
+                scale = max_dim / max(h, w)
+                new_w, new_h = int(w * scale), int(h * scale)
+                img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+            _, buf = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+            return base64.b64encode(buf).decode('utf-8'), "image/jpeg"
+    except Exception:
+        pass
+    # fallback: 原图
     with open(image_path, 'rb') as f:
-        return base64.b64encode(f.read()).decode('utf-8')
+        b64 = base64.b64encode(f.read()).decode('utf-8')
+    ext = os.path.splitext(image_path)[1].lower()
+    type_map = {'.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
+                '.tiff': 'image/tiff', '.webp': 'image/webp'}
+    return b64, type_map.get(ext, 'image/png')
 
 def call_llm_api(messages, api_key, base_url, model):
     """调用 OpenAI 兼容的 LLM API"""
@@ -48,8 +71,7 @@ def call_llm_api(messages, api_key, base_url, model):
 def build_prompt(rules):
     """从元数据规则构建prompt"""
     fields_desc = "\n".join([
-        f"- {r['fieldCode']}（{r['fieldName']}）"
-        for r in rules
+        _format_field(r) for r in rules
     ])
 
     field_names = [r['fieldCode'] for r in rules]
@@ -62,7 +84,7 @@ def build_prompt(rules):
         f"{fields_desc}\n\n"
         "## 要求\n"
         f"1. 返回 JSON 数组，用以下字段编码作为键: {field_keys}\n"
-        "2. 自己判断图片中每一列对应哪个字段，不需要严格匹配表头文字\n"
+        "2. 图片表头可能和字段名不完全一致，请根据含义匹配\n"
         "3. 如果图片中有字段不在列表中，尝试用最接近的字段编码\n"
         "4. 完全无法匹配的列忽略掉，不要硬塞到不相关的字段\n"
         "5. 如果某个学生某字段在图片中无对应值，设为 null\n"
@@ -70,6 +92,14 @@ def build_prompt(rules):
         "7. 只返回 JSON 数组，不要 markdown 代码块或其它说明文字\n"
         "8. 如果图片不是表格或无有效数据，返回空数组 []"
     )
+
+def _format_field(r):
+    """格式化单行字段描述，包含别名信息"""
+    base = f"- {r['fieldCode']}（{r['fieldName']}）"
+    alias = r.get('sourceField', '') or ''
+    if alias and alias != r.get('fieldName', ''):
+        base += f"，别名: {alias}"
+    return base
 
 def main():
     parser = argparse.ArgumentParser()
@@ -105,18 +135,8 @@ def main():
         return
 
     try:
-        # 编码图片
-        image_b64 = encode_image(args.image_path)
-        image_type = "image/png"
-        ext = os.path.splitext(args.image_path)[1].lower()
-        if ext in ('.jpg', '.jpeg'):
-            image_type = "image/jpeg"
-        elif ext == '.png':
-            image_type = "image/png"
-        elif ext == '.tiff':
-            image_type = "image/tiff"
-        elif ext == '.webp':
-            image_type = "image/webp"
+        # 编码图片（自动压缩到最长边1200px）
+        image_b64, image_type = encode_image(args.image_path)
 
         prompt = build_prompt(rules)
 

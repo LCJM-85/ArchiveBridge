@@ -7,6 +7,8 @@ import cn.hutool.captcha.LineCaptcha;
 import edu.scau.scauarchiveinsight.dto.LoginDTO;
 import edu.scau.scauarchiveinsight.service.UserService;
 import edu.scau.scauarchiveinsight.util.JwtUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -23,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api")
+@Tag(name = "登录认证", description = "验证码生成、用户登录")
 public class LoginController {
     private static final int MAX_LOGIN_ATTEMPTS = 8;
     private static final long LOGIN_WINDOW_MILLIS = 10 * 60 * 1000L;
@@ -39,6 +42,7 @@ public class LoginController {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Operation(summary = "用户登录", description = "需要先获取验证码，提交用户名+密码+验证码")
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginDTO loginDTO,
                                                      HttpServletRequest request) {
@@ -96,6 +100,7 @@ public class LoginController {
         }
     }
 
+    @Operation(summary = "获取验证码图片")
     @GetMapping("/captcha")
     public void captcha(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String clientIp = resolveClientIp(request);
