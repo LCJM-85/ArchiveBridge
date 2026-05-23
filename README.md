@@ -148,9 +148,8 @@ SCAU/
 │       ├── api/                    # API 接口封装
 │       ├── store/                  # Pinia 状态管理
 │       └── layouts/                # 布局组件
-└── scau-archive-insight/
-    ├── storage/                    # 文件存储（运行时）
-    └── models/                     # PaddlePaddle 模型缓存（运行时）
+├── storage/                        # 文件存储（运行时）
+└── models/                         # PaddlePaddle 模型缓存（运行时）
 ```
 
 ## 数据库
