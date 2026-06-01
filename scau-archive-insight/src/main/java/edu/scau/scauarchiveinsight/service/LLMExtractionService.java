@@ -3,6 +3,8 @@ package edu.scau.scauarchiveinsight.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.scau.scauarchiveinsight.pojo.MetaDataStandard;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import java.util.*;
 
 @Service
 public class LLMExtractionService {
+
+    private static final Logger log = LoggerFactory.getLogger(LLMExtractionService.class);
 
     @Autowired
     private MetaDataService metaDataService;
@@ -36,6 +40,14 @@ public class LLMExtractionService {
                     new TypeReference<Map<String, Object>>() {});
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> data = (List<Map<String, Object>>) parsed.getOrDefault("data", List.of());
+            @SuppressWarnings("unchecked")
+            List<Object> errors = (List<Object>) parsed.getOrDefault("errors", List.of());
+            if (!errors.isEmpty()) {
+                log.warn("LLM 提取返回错误: {} (图片: {})", errors, imagePath);
+            }
+            if (data.isEmpty() && errors.isEmpty()) {
+                log.warn("LLM 提取结果为空且无错误信息，LLM 可能认为图片无有效数据 (图片: {})", imagePath);
+            }
             return data;
         } catch (Exception e) {
             throw new RuntimeException("LLM 提取结果解析失败: " + e.getMessage(), e);
@@ -48,8 +60,10 @@ public class LLMExtractionService {
             Path rulesFile = Files.createTempFile("llm_rules_", ".json");
             objectMapper.writeValue(rulesFile.toFile(), rules);
 
-            String python = "src/main/python/.venv/Scripts/python.exe";
-            String scriptPath = "src/main/python/ppstructure/llm_extractor.py";
+            String python = Path.of("", "src/main/python/.venv/Scripts/python.exe")
+                    .toAbsolutePath().normalize().toString();
+            String scriptPath = Path.of("", "src/main/python/ppstructure/llm_extractor.py")
+                    .toAbsolutePath().normalize().toString();
 
             ProcessBuilder pb = new ProcessBuilder(
                     python, scriptPath, inputPath,
@@ -60,8 +74,9 @@ public class LLMExtractionService {
             );
             Map<String, String> env = pb.environment();
             env.put("PYTHONIOENCODING", "utf-8");
-            env.put("HOME", "D:/Ideaworkplace/SCAU/scau-archive-insight/models");
-            env.put("USERPROFILE", "D:/Ideaworkplace/SCAU/scau-archive-insight/models");
+            String modelsDir = Path.of("", "models").toAbsolutePath().normalize().toString();
+            env.put("HOME", modelsDir);
+            env.put("USERPROFILE", modelsDir);
             pb.redirectErrorStream(true);
 
             Process process = pb.start();

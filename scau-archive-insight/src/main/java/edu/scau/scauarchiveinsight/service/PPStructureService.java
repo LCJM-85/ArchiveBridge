@@ -43,8 +43,10 @@ public class PPStructureService {
             Path rulesFile = Files.createTempFile("ppstructure_rules_", ".json");
             objectMapper.writeValue(rulesFile.toFile(), rules);
 
-            String python = "src/main/python/.venv/Scripts/python.exe";
-            String scriptPath = "src/main/python/ppstructure/ocr_table.py";
+            String python = Path.of("", "src/main/python/.venv/Scripts/python.exe")
+                    .toAbsolutePath().normalize().toString();
+            String scriptPath = Path.of("", "src/main/python/ppstructure/ocr_table.py")
+                    .toAbsolutePath().normalize().toString();
 
             ProcessBuilder pb = new ProcessBuilder(
                     python, scriptPath, inputPath,
@@ -52,8 +54,9 @@ public class PPStructureService {
             );
             Map<String, String> env = pb.environment();
             env.put("PYTHONIOENCODING", "utf-8");
-            env.put("HOME", "D:/Ideaworkplace/SCAU/scau-archive-insight/models");
-            env.put("USERPROFILE", "D:/Ideaworkplace/SCAU/scau-archive-insight/models");
+            String modelsDir = Path.of("", "models").toAbsolutePath().normalize().toString();
+            env.put("HOME", modelsDir);
+            env.put("USERPROFILE", modelsDir);
             pb.redirectErrorStream(true);
 
             Process process = pb.start();

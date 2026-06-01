@@ -3,6 +3,7 @@ package edu.scau.scauarchiveinsight.service;
 import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
 
 @Service
 public class OpenCVService {
@@ -14,9 +15,11 @@ public class OpenCVService {
      */
     public String enhanceImage(String imagePath) {
         try {
-            String python = "src/main/python/.venv/Scripts/python.exe";
+            String python = Path.of("", "src/main/python/.venv/Scripts/python.exe")
+                    .toAbsolutePath().normalize().toString();
 
-            String scriptPath = "src/main/python/opencv/opencv.py";
+            String scriptPath = Path.of("", "src/main/python/opencv/opencv.py")
+                    .toAbsolutePath().normalize().toString();
 
             ProcessBuilder pb = new ProcessBuilder(
                     python,

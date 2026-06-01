@@ -89,6 +89,7 @@ public class LLMProcessor {
                         ocrLogService.addLog(fileId, fileName, fileType, "warning", sb.toString());
                     }
                 } else {
+                    log.warn("LLM 提取结果为空 (图片: {})", imagePath);
                     storageService.failedFile(fileName, "LLM 未提取到有效数据");
                 }
 

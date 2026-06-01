@@ -23,10 +23,6 @@ public class DashboardService {
         result.put("provinceCount", Optional.ofNullable(
                 admissionFactMapper.reportOverview(2024)).map(m -> ((Number) m.getOrDefault("provincecount", 0)).intValue()).orElse(0));
 
-        // 省均分（复用已有查询）
-        Map<String, Object> scoreAll = admissionFactMapper.reportScore(2024);
-        result.put("avgScore", scoreAll != null ? scoreAll.getOrDefault("avgscore", 0) : 0);
-
         // 趋势
         result.put("trend", admissionFactMapper.yearlyAdmissionCounts());
 

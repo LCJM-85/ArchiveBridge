@@ -165,8 +165,10 @@ public class ArchiveUploadController {
     }
 
     private List<String> pdfToImage(String pdfPath) throws Exception {
-        String python = "src/main/python/.venv/Scripts/python.exe";
-        String script = "src/main/python/pdf2image/pdf2image.py";
+        String python = Path.of("", "src/main/python/.venv/Scripts/python.exe")
+                .toAbsolutePath().normalize().toString();
+        String script = Path.of("", "src/main/python/pdf2image/pdf2image.py")
+                .toAbsolutePath().normalize().toString();
         Path pdfFile = Paths.get(pdfPath);
         String baseName = pdfFile.getFileName().toString().replace('.', '_');
         Path outputDir = pdfFile.getParent().resolve(baseName + "_pages");
