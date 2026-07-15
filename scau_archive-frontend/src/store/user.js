@@ -7,6 +7,7 @@ import {
   getRememberedUser,
   getStoredToken,
   getStoredUsername,
+  getStoredRole,
   getLoginErrorMessage,
   getSafeRedirectPath,
   saveAuthInfo,
@@ -16,6 +17,7 @@ import {
 export const useUserStore = defineStore('user', () => {
   const token = ref(getStoredToken())
   const currentUsername = ref(getStoredUsername())
+  const role = ref(getStoredRole())
   const username = ref('')
   const password = ref('')
   const rememberMe = ref(false)
@@ -77,7 +79,8 @@ export const useUserStore = defineStore('user', () => {
         }
 
         currentUsername.value = username.value.trim()
-        saveAuthInfo(token.value, currentUsername.value)
+        role.value = response.data.role || 'user'
+        saveAuthInfo(token.value, currentUsername.value, role.value)
 
         if (rememberMe.value) {
           saveRememberedUser(username.value.trim(), password.value)
@@ -103,12 +106,14 @@ export const useUserStore = defineStore('user', () => {
   function logout() {
     token.value = ''
     currentUsername.value = ''
+    role.value = ''
     clearAuthInfo()
   }
 
   return {
     token,
     currentUsername,
+    role,
     username,
     password,
     rememberMe,

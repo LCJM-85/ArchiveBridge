@@ -22,6 +22,8 @@ import AIPrediction from '@/views/charts/AIPrediction.vue'
 import Geographic from '@/views/charts/Geographic.vue'
 import MajorTrainingPath from '@/views/charts/MajorTrainingPath.vue'
 import MetaDataManage from '@/views/system/MetaDataManage.vue'
+import UserManage from '@/views/system/UserManage.vue'
+import AIAssistant from '@/views/ai/AIAssistant.vue'
 
 const menuStore = useMenuStore()
 const { activeMenu } = storeToRefs(menuStore)
@@ -35,6 +37,8 @@ const componentMap = {
   studentstatus: StudentStatusData,
   graduation: GraduationData,
   meta: MetaDataManage,
+  users: UserManage,
+  'ai-assistant': AIAssistant,
   trend: AddmissionTrend,
   prediction: AIPrediction,
   geo: Geographic,

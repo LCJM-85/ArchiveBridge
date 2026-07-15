@@ -16,7 +16,6 @@ public class UserService {
     @Autowired
     private UserMapper userMapper;
 
-    // BCrypt 密码加密器（Spring 内置，无需额外依赖）
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
@@ -24,21 +23,20 @@ public class UserService {
      */
     public SysUser getUserByUsername(String username) {
         LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(SysUser::getUsername, username); // 等价于：WHERE username = ?
-        return userMapper.selectOne(queryWrapper); // 查单条数据
+        queryWrapper.eq(SysUser::getUsername, username);
+        return userMapper.selectOne(queryWrapper);
     }
 
     /**
      * 验证用户名和密码
+     * @return 0=成功, 1=用户不存在, 2=密码错误, 3=账号已禁用
      */
-    public boolean verifyUser(String username, String password) {
-        // 1. 根据用户名查用户
+    public int verifyUser(String username, String password) {
         SysUser user = getUserByUsername(username);
-        if (user == null) {
-            return false; // 用户名不存在
-        }
-        // 2. 验证密码（BCrypt 匹配：明文密码 vs 数据库加密密码）
-        return passwordEncoder.matches(password, user.getPassword());
+        if (user == null) return 1;
+        if (user.getStatus() != null && user.getStatus() == 0) return 3;
+        if (!passwordEncoder.matches(password, user.getPassword())) return 2;
+        return 0;
     }
 
     /**
@@ -47,12 +45,8 @@ public class UserService {
      */
     public int changePassword(String username, String oldPassword, String newPassword) {
         SysUser user = getUserByUsername(username);
-        if (user == null) {
-            return 1;
-        }
-        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            return 2;
-        }
+        if (user == null) return 1;
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) return 2;
         user.setPassword(passwordEncoder.encode(newPassword));
         userMapper.updateById(user);
         return 0;

@@ -51,6 +51,11 @@ public class SysUser {
     private Integer status;
 
     /**
+     * 角色 admin-管理员 user-普通用户
+     */
+    private String role;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

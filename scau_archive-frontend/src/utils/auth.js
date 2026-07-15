@@ -45,14 +45,16 @@ export function clearRememberedUser() {
   localStorage.removeItem('rememberedPassword')
 }
 
-export function saveAuthInfo(token, username) {
+export function saveAuthInfo(token, username, role) {
   localStorage.setItem('token', token)
   localStorage.setItem('username', username)
+  if (role) localStorage.setItem('role', role)
 }
 
 export function clearAuthInfo() {
   localStorage.removeItem('token')
   localStorage.removeItem('username')
+  localStorage.removeItem('role')
 }
 
 export function getStoredToken() {
@@ -61,6 +63,10 @@ export function getStoredToken() {
 
 export function getStoredUsername() {
   return localStorage.getItem('username') || ''
+}
+
+export function getStoredRole() {
+  return localStorage.getItem('role') || ''
 }
 
 export function getRememberedUser() {

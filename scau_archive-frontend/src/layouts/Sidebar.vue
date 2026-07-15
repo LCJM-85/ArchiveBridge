@@ -71,6 +71,11 @@
         <span>智能报告生成</span>
       </el-menu-item>
 
+      <el-menu-item index="ai-assistant">
+        <el-icon><Cpu /></el-icon>
+        <span>AI 助手</span>
+      </el-menu-item>
+
       <el-sub-menu index="system">
         <template #title>
           <el-icon><Setting /></el-icon>
@@ -78,6 +83,9 @@
         </template>
         <el-menu-item index="meta">
           <span>元数据管理</span>
+        </el-menu-item>
+        <el-menu-item index="users" v-if="userRole === 'admin'">
+          <span>用户管理</span>
         </el-menu-item>
       </el-sub-menu>
     </el-menu>
@@ -89,12 +97,16 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { DataLine, Files, House, Upload, Setting, DataBoard, Document } from '@element-plus/icons-vue'
+import { DataLine, Files, House, Upload, Setting, DataBoard, Document, Cpu } from '@element-plus/icons-vue'
 import { useMenuStore } from '@/store/menu'
+import { useUserStore } from '@/store/user'
 
 const menuStore = useMenuStore()
+const userStore = useUserStore()
 const { activeMenu } = storeToRefs(menuStore)
+const userRole = computed(() => userStore.role)
 
 const handleSelect = (menuKey) => {
   menuStore.setActive(menuKey)

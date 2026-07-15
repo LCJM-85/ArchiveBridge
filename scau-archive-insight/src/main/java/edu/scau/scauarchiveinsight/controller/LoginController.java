@@ -5,6 +5,7 @@ package edu.scau.scauarchiveinsight.controller;
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
 import edu.scau.scauarchiveinsight.dto.LoginDTO;
+import edu.scau.scauarchiveinsight.pojo.SysUser;
 import edu.scau.scauarchiveinsight.service.UserService;
 import edu.scau.scauarchiveinsight.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
@@ -80,21 +81,34 @@ public class LoginController {
         request.getSession().removeAttribute("captchaExpireAt");
 
         // 校验账号密码是否匹配数据库中的用户
-        boolean isValid = userService.verifyUser(username.trim(), password);
-        if (isValid) {
+        int verifyCode = userService.verifyUser(username.trim(), password);
+        if (verifyCode == 0) {
             clearAttempts(loginAttempts, loginKey);
-            // 登录成功后签发 JWT，前端后续请求放到 Authorization 头中
-            String token = jwtUtils.generateToken(username.trim());
+
+            SysUser user = userService.getUserByUsername(username.trim());
+            String role = user != null && user.getRole() != null ? user.getRole() : "user";
+
+            // 登录成功后签发 JWT，含角色信息
+            String token = jwtUtils.generateToken(username.trim(), role);
             result.put("code", 200);
             result.put("message", "登录成功");
             result.put("success", true);
             result.put("token", token);
+            result.put("role", role);
+            result.put("username", username.trim());
             return ResponseEntity.ok(result);
         } else {
             recordAttempt(loginAttempts, loginKey, LOGIN_WINDOW_MILLIS);
-            // 认证失败统一返回 401，便于前端分支处理
+            String msg;
+            if (verifyCode == 3) {
+                msg = "账号已被禁用，请联系管理员";
+            } else if (verifyCode == 1) {
+                msg = "用户名或密码错误";
+            } else {
+                msg = "用户名或密码错误";
+            }
             result.put("code", 401);
-            result.put("message", "用户名或密码错误");
+            result.put("message", msg);
             result.put("success", false);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
         }

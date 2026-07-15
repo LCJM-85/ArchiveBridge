@@ -66,6 +66,7 @@ public class ReportService {
         result.put("majorDistribution", majorDist);
         result.put("provinceDistribution", provinceDist);
         result.put("destination", destination);
+
         return result;
     }
 }

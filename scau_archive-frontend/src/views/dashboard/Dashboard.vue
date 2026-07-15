@@ -41,15 +41,15 @@
         <div class="info-list">
           <div class="info-item">
             <span class="info-key">档案总存储</span>
-            <span class="info-val">—</span>
+            <span class="info-val">{{ dashboardData?.totalFiles ?? '—' }} 份</span>
           </div>
           <div class="info-item">
             <span class="info-key">今日上传</span>
-            <span class="info-val">{{ dashboardData?.todayUploads || 0 }} 份</span>
+            <span class="info-val">{{ dashboardData?.todayUploads ?? 0 }} 份</span>
           </div>
           <div class="info-item">
             <span class="info-key">数据质量</span>
-            <span class="info-val tag-good">优</span>
+            <span class="info-val" :class="qualityTagClass">{{ qualityTagText }}</span>
           </div>
         </div>
       </el-card>
@@ -103,6 +103,23 @@ const stats = computed(() => [
   { label: '开设专业', value: dashboardData.value?.majorCount ?? '—' },
   { label: '录取平均分', value: dashboardData.value?.avgScore ?? '—' },
 ])
+
+const qualityTagText = computed(() => {
+  const q = dashboardData.value?.avgQuality
+  if (q == null) return '—'
+  if (q >= 85) return '优'
+  if (q >= 70) return '良'
+  if (q >= 60) return '中'
+  return '待提升'
+})
+const qualityTagClass = computed(() => {
+  const q = dashboardData.value?.avgQuality
+  if (q == null) return ''
+  if (q >= 85) return 'tag-good'
+  if (q >= 70) return 'tag-ok'
+  if (q >= 60) return 'tag-medium'
+  return 'tag-bad'
+})
 
 function renderCharts(data) {
   if (!trendChartRef.value || !majorChartRef.value) return
@@ -194,6 +211,9 @@ onBeforeUnmount(() => {
 .info-key { color: var(--text-secondary); }
 .info-val { font-weight: 600; }
 .tag-good { color: #67c23a; }
+.tag-ok { color: #409eff; }
+.tag-medium { color: #e6a23c; }
+.tag-bad { color: #f56c6c; }
 
 .quick-links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 4px 0; }
 .quick-item {

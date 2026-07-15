@@ -34,14 +34,16 @@ public class JwtUtils {
     }
 
     /**
-     * 生成 Token（包含用户名、过期时间等信息）
+     * 生成 Token（包含用户名、角色、过期时间等信息）
      * @param username 用户名（作为 Token 的核心载荷）
+     * @param role 用户角色
      * @return JWT Token
      */
-    public String generateToken(String username) {
+    public String generateToken(String username, String role) {
         // 1. 构建 Token 载荷（可添加用户ID、角色等额外信息）
         Map<String, Object> claims = new HashMap<>();
         claims.put("username", username);
+        claims.put("role", role);
 
         // 2. 生成 Token
         return Jwts.builder()
@@ -65,6 +67,20 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.get("username", String.class);
+    }
+
+    /**
+     * 从 Token 中解析角色
+     * @param token JWT Token
+     * @return 角色
+     */
+    public String getRoleFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSecretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("role", String.class);
     }
 
     /**

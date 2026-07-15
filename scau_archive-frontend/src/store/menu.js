@@ -15,11 +15,13 @@ export const useMenuStore = defineStore('menu', () => {
     { key: 'data', title: '数据管理'},
     { key: 'process', title: 'ocr识别进程'},
     { key: 'meta', title: '元数据管理'},
+    { key: 'users', title: '用户管理'},
     { key: 'admission', title: '招生数据管理'},
     { key: 'studentstatus', title: '学籍数据管理'},
     { key: 'graduation', title: '毕业数据管理'},
     { key: 'trend', title: '招生趋势分析'},
     { key: 'prediction', title: '智能预测'},
+    { key: 'ai-assistant', title: 'AI 助手'},
     { key: 'geo', title: '录取地理分布'},
     { key: 'path', title: '学科培养路径'}
   ]

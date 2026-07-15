@@ -75,6 +75,12 @@
         </el-card>
       </div>
 
+      <el-card v-if="aiAnalysis || aiAnalysisLoading" shadow="never" class="analysis-card">
+        <template #header><span>AI 智能分析</span></template>
+        <div v-if="aiAnalysisLoading" class="analysis-loading">AI 正在分析报告数据…</div>
+        <div v-else class="analysis-content" v-html="renderAnalysis(aiAnalysis)"></div>
+      </el-card>
+
       <el-card shadow="never" class="print-card">
         <template #header>
           <div class="print-header">
@@ -104,6 +110,10 @@
               </tbody>
             </table>
           </div>
+          <div v-if="aiAnalysis" class="poster-analysis">
+            <div class="poster-analysis-title">AI 智能分析</div>
+            <div class="poster-analysis-content" v-html="renderAnalysis(aiAnalysis)"></div>
+          </div>
           <div class="poster-footer">报告生成日期: {{ generateDate }}</div>
         </div>
       </el-card>
@@ -126,14 +136,18 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { storeToRefs } from 'pinia'
 import { Files } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { fetchReportData } from '@/api/modules/admission'
+import { analyzeReport } from '@/api/modules/ai'
+import { useReportStore } from '@/store/report'
 
-const selectedYear = ref(new Date().getFullYear())
-const yearOptions = Array.from({ length: 6 }, (_, i) => 2020 + i)
-const reportData = ref(null)
-const generateDate = ref('')
+const reportStore = useReportStore()
+const { reportData, selectedYear, generateDate, aiAnalysis, aiAnalysisLoading } = storeToRefs(reportStore)
+
+const currentYear = new Date().getFullYear()
+const yearOptions = Array.from({ length: currentYear - 2019 }, (_, i) => 2020 + i)
 
 const majorChartRef = ref(null)
 const provinceChartRef = ref(null)
@@ -185,14 +199,42 @@ function disposeCharts() {
 
 async function generateReport() {
   disposeCharts()
+  reportStore.setAiAnalysis('')
+  reportStore.setAiLoading(false)
+
   try {
     const res = await fetchReportData(selectedYear.value)
-    reportData.value = res.data?.data || null
-    generateDate.value = new Date().toLocaleDateString('zh-CN')
-    if (reportData.value) renderCharts(reportData.value)
+    const data = res.data?.data || null
+    reportStore.setReport(data, new Date().toLocaleDateString('zh-CN'))
+    if (data) renderCharts(data)
   } catch (e) {
     console.error('获取报告数据失败:', e)
+    return
   }
+
+  // 后台加载 AI 分析
+  await fetchAiAnalysis()
+}
+
+async function fetchAiAnalysis() {
+  if (!reportData.value) return
+  reportStore.setAiLoading(true)
+  try {
+    const res = await analyzeReport({ reportData: reportData.value })
+    reportStore.setAiAnalysis(res.data?.data?.analysis || '')
+  } catch {
+    // AI 分析失败不影响页面
+  } finally {
+    reportStore.setAiLoading(false)
+  }
+}
+
+function renderAnalysis(text) {
+  if (!text) return ''
+  return text
+    .replace(/### (.+)/g, '<h4>$1</h4>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>')
 }
 
 function printPoster() {
@@ -221,7 +263,16 @@ watch(selectedYear, generateReport)
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
-  generateReport()
+  if (reportData.value) {
+    // 已有缓存数据，直接渲染图表
+    nextTick(() => renderCharts(reportData.value))
+    // 如果没有 AI 分析结果，后台加载
+    if (!aiAnalysis.value && !aiAnalysisLoading.value) {
+      fetchAiAnalysis()
+    }
+  } else {
+    generateReport()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -269,6 +320,11 @@ onBeforeUnmount(() => {
 .score-val.min { color: #67c23a; }
 
 .print-card { page-break-inside: avoid; }
+.analysis-card { margin-top: 16px; }
+.analysis-content { font-size: 14px; line-height: 1.8; color: var(--el-text-color-primary); }
+.analysis-content h4 { margin: 8px 0 4px; font-size: 15px; }
+.analysis-content strong { color: var(--color-primary); }
+.analysis-loading { font-size: 14px; color: var(--el-text-color-secondary); padding: 8px 0; }
 .print-header { display: flex; justify-content: space-between; align-items: center; }
 
 .poster {
@@ -286,6 +342,9 @@ onBeforeUnmount(() => {
 .poster-table th, .poster-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.15); }
 .poster-table th { opacity: 0.7; font-weight: 500; }
 .poster-footer { text-align: center; font-size: 12px; opacity: 0.5; }
+.poster-analysis { margin-top: 24px; padding: 16px; background: rgba(255,255,255,0.08); border-radius: 8px; }
+.poster-analysis-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; opacity: 0.8; }
+.poster-analysis-content { font-size: 12px; line-height: 1.7; opacity: 0.85; }
 
 @media print {
   body { background: #fff; }
