@@ -25,7 +25,7 @@ SYSTEM_PROMPT = """你是一个华南农业大学档案管理系统的 AI 数据
 def _build_llm(temperature=0.7):
     return ChatOpenAI(
         model="glm-4-flash",
-        openai_api_key=os.getenv("LLM_API_KEY"),
+        openai_api_key=os.getenv("GLM_API_KEY"),
         openai_api_base=os.getenv("LLM_BASE_URL", "https://open.bigmodel.cn/api/paas/v4"),
         temperature=temperature,
     )

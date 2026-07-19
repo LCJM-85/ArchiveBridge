@@ -105,7 +105,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('image_path', help='图片或PDF路径')
     parser.add_argument('rules_path', help='元数据规则JSON文件路径')
-    parser.add_argument('--api-key', default=os.environ.get('LLM_API_KEY', ''))
+    parser.add_argument('--api-key', default=os.environ.get('GLM_API_KEY', ''))
     parser.add_argument('--base-url', default=os.environ.get('LLM_BASE_URL', 'https://api.deepseek.com/v1'))
     parser.add_argument('--model', default=os.environ.get('LLM_MODEL', 'deepseek-chat'))
     args = parser.parse_args()

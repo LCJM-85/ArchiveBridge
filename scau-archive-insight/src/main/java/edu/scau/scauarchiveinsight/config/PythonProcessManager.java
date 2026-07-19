@@ -56,7 +56,7 @@ public class PythonProcessManager implements InitializingBean {
 
         ProcessBuilder pb = new ProcessBuilder(venvPython, scriptFile.getAbsolutePath());
         pb.redirectErrorStream(true);
-        pb.environment().put("LLM_API_KEY", llmApiKey != null ? llmApiKey : "");
+        pb.environment().put("GLM_API_KEY", llmApiKey != null ? llmApiKey : "");
         pb.environment().put("LLM_BASE_URL", llmBaseUrl != null ? llmBaseUrl : "");
         pb.environment().put("DB_HOST", dbHost);
         pb.environment().put("DB_PORT", dbPort);
