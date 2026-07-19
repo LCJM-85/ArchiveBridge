@@ -53,7 +53,7 @@ server:
 # 当前使用 Ollama 本地部署 qwen2.5vl:7b
 # 备份见 application.yaml.llm_backup
 llm:
-   api-key: "0ef693ed0e604cb5899c6ffb8bf6d8f4.MgGHmUrQrlwSewqm"
+   api-key: ${GLM_API_KEY:}
    base-url: https://open.bigmodel.cn/api/paas/v4
    model: glm-4v-plus-0111
 
