@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Any
 
 
 class ChatRequest(BaseModel):
@@ -17,3 +17,24 @@ class ReportRequest(BaseModel):
 
 class ReportResponse(BaseModel):
     analysis: str
+
+
+class KbProcessRequest(BaseModel):
+    file_path: str
+    title: str
+    file_type: str
+    store_path: str = ""
+
+
+class KbProcessUrlRequest(BaseModel):
+    url: str
+    title: str = ""
+
+
+class KbSearchRequest(BaseModel):
+    query: str
+    top_k: int = 5
+
+
+class KbSearchResponse(BaseModel):
+    results: list[Any]

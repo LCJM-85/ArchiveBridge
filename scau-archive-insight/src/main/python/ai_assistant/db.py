@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import threading
 import psycopg2
 from psycopg2 import pool
 
@@ -11,17 +12,26 @@ DB_CONFIG = {
     "password": os.getenv("DB_PASS", "123456"),
 }
 
-_connection_pool = None
+_pool = None
+_pool_lock = threading.Lock()
+
+
+def _get_pool():
+    global _pool
+    if _pool is None:
+        with _pool_lock:
+            if _pool is None:
+                _pool = pool.SimpleConnectionPool(1, 10, **DB_CONFIG)
+    return _pool
 
 
 def get_conn():
-    global _connection_pool
-    if _connection_pool is None:
-        _connection_pool = pool.ThreadedConnectionPool(1, 5, **DB_CONFIG)
-    return _connection_pool.getconn()
+    return _get_pool().getconn()
 
 
 def put_conn(conn):
-    global _connection_pool
-    if _connection_pool and conn:
-        _connection_pool.putconn(conn)
+    if conn:
+        try:
+            _get_pool().putconn(conn)
+        except Exception:
+            conn.close()

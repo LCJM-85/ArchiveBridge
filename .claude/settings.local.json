@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(JAVA_HOME=\"D:/java/jdk-21.0.5\" ./mvnw compile -q)"
+      "Bash(JAVA_HOME=\"D:/java/jdk-21.0.5\" ./mvnw compile -q)",
+      "Bash(cp *)"
     ]
   }
 }

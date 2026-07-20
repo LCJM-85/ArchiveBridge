@@ -71,10 +71,20 @@
         <span>智能报告生成</span>
       </el-menu-item>
 
-      <el-menu-item index="ai-assistant">
-        <el-icon><Cpu /></el-icon>
-        <span>AI 助手</span>
-      </el-menu-item>
+      <el-sub-menu index="ai">
+        <template #title>
+          <el-icon><Cpu /></el-icon>
+          <span>AI 智能</span>
+        </template>
+        <el-menu-item index="ai-assistant">
+          <el-icon><ChatDotSquare /></el-icon>
+          <span>AI 助手</span>
+        </el-menu-item>
+        <el-menu-item index="knowledge">
+          <el-icon><Collection /></el-icon>
+          <span>知识库</span>
+        </el-menu-item>
+      </el-sub-menu>
 
       <el-sub-menu index="system">
         <template #title>
@@ -99,7 +109,7 @@
 <script setup>
 import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { DataLine, Files, House, Upload, Setting, DataBoard, Document, Cpu } from '@element-plus/icons-vue'
+import { DataLine, Files, House, Upload, Setting, DataBoard, Document, Cpu, Collection, ChatDotSquare } from '@element-plus/icons-vue'
 import { useMenuStore } from '@/store/menu'
 import { useUserStore } from '@/store/user'
 

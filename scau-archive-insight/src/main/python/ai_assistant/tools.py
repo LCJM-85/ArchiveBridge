@@ -3,6 +3,9 @@ import json
 from langchain.tools import tool
 from db import get_conn, put_conn
 
+import re
+import requests
+
 
 def _query(sql, params=None, fetchone=False):
     conn = get_conn()
@@ -392,6 +395,62 @@ def get_student_detail(student_no: str) -> str:
     return json.dumps(result, ensure_ascii=False)
 
 
+@tool
+def web_search(query: str, max_results: int = 5) -> str:
+    """搜索互联网获取最新信息，支持新闻、百科、实时数据等。参数 query 为搜索关键词，max_results 为返回结果数（最多10）"""
+    try:
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                "AppleWebKit/537.36 (KHTML, like Gecko) "
+                "Chrome/120.0.0.0 Safari/537.36"
+            )
+        }
+        resp = requests.get(
+            "https://www.bing.com/search",
+            params={"q": query, "count": min(max_results, 10)},
+            headers=headers,
+            timeout=15,
+        )
+        resp.raise_for_status()
+        html = resp.text
+
+        results = []
+        for li in re.findall(r'<li class="b_algo"[^>]*>(.*?)</li>', html, re.S)[:max_results]:
+            # 提取链接和标题
+            a_tag = re.search(r'<a[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>', li, re.S)
+            if not a_tag:
+                continue
+            url = a_tag.group(1)
+            title = re.sub(r'<[^>]+>', '', a_tag.group(2)).strip()
+            # 提取摘要
+            p_tag = re.search(r'<p[^>]*>(.*?)</p>', li, re.S)
+            snippet = re.sub(r'<[^>]+>', '', p_tag.group(1)).strip() if p_tag else ""
+            results.append({"title": title, "url": url, "snippet": snippet})
+
+        if not results:
+            return json.dumps({"error": "未搜索到相关结果"}, ensure_ascii=False)
+        return json.dumps(results, ensure_ascii=False)
+    except Exception as e:
+        return json.dumps({"error": f"搜索失败: {str(e)}"}, ensure_ascii=False)
+
+
+@tool
+def web_fetch(url: str) -> str:
+    """获取指定网页的文本内容，参数 url 为完整网页链接"""
+    try:
+        from rag.document_loader import load_url
+        import asyncio
+        result = asyncio.run(load_url(url))
+        text = "\n".join(result) if result else ""
+        # 限制长度避免 token 溢出
+        if len(text) > 8000:
+            text = text[:8000] + "\n\n...（内容过长已截断）"
+        return text if text else "无法获取网页内容"
+    except Exception as e:
+        return f"获取失败: {str(e)}"
+
+
 tools = [
     get_admission_stats, get_admission_trend, get_major_distribution,
     get_province_distribution, get_score_stats, get_gender_distribution,
@@ -399,4 +458,5 @@ tools = [
     get_student_count, get_prediction_data, get_year_over_year,
     get_college_admission_stats, get_score_distribution, get_graduation_count,
     search_student, get_student_detail,
+    web_search, web_fetch,
 ]

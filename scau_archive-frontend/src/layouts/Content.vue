@@ -1,6 +1,6 @@
 <template>
   <el-main class="content">
-    <keep-alive :include="['ArchiveUpload']">
+    <keep-alive :include="['ArchiveUpload', 'AIAssistant']">
       <component :is="currentComponent" />
     </keep-alive>
   </el-main>
@@ -24,6 +24,7 @@ import MajorTrainingPath from '@/views/charts/MajorTrainingPath.vue'
 import MetaDataManage from '@/views/system/MetaDataManage.vue'
 import UserManage from '@/views/system/UserManage.vue'
 import AIAssistant from '@/views/ai/AIAssistant.vue'
+import Knowledge from '@/views/knowledge/Knowledge.vue'
 
 const menuStore = useMenuStore()
 const { activeMenu } = storeToRefs(menuStore)
@@ -42,7 +43,8 @@ const componentMap = {
   trend: AddmissionTrend,
   prediction: AIPrediction,
   geo: Geographic,
-  path: MajorTrainingPath
+  path: MajorTrainingPath,
+  knowledge: Knowledge
 }
 
 const currentComponent = computed(() => componentMap[activeMenu.value] || Dashboard)

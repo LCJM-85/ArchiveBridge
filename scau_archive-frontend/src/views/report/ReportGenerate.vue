@@ -75,10 +75,24 @@
         </el-card>
       </div>
 
-      <el-card v-if="aiAnalysis || aiAnalysisLoading" shadow="never" class="analysis-card">
-        <template #header><span>AI 智能分析</span></template>
+      <el-card shadow="never" class="analysis-card">
+        <template #header>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span>AI 智能分析</span>
+            <el-button
+              size="small"
+              type="primary"
+              :loading="aiAnalysisLoading"
+              :disabled="!reportData"
+              @click="fetchAiAnalysis"
+            >
+              {{ aiAnalysis ? '重新生成' : '生成分析' }}
+            </el-button>
+          </div>
+        </template>
         <div v-if="aiAnalysisLoading" class="analysis-loading">AI 正在分析报告数据…</div>
-        <div v-else class="analysis-content" v-html="renderAnalysis(aiAnalysis)"></div>
+        <div v-else-if="aiAnalysis" class="analysis-content" v-html="renderAnalysis(aiAnalysis)"></div>
+        <div v-else class="analysis-loading">点击「生成分析」按钮，AI 将自动分析报告数据</div>
       </el-card>
 
       <el-card shadow="never" class="print-card">
@@ -209,11 +223,7 @@ async function generateReport() {
     if (data) renderCharts(data)
   } catch (e) {
     console.error('获取报告数据失败:', e)
-    return
   }
-
-  // 后台加载 AI 分析
-  await fetchAiAnalysis()
 }
 
 async function fetchAiAnalysis() {
@@ -264,12 +274,7 @@ watch(selectedYear, generateReport)
 onMounted(() => {
   window.addEventListener('resize', handleResize)
   if (reportData.value) {
-    // 已有缓存数据，直接渲染图表
     nextTick(() => renderCharts(reportData.value))
-    // 如果没有 AI 分析结果，后台加载
-    if (!aiAnalysis.value && !aiAnalysisLoading.value) {
-      fetchAiAnalysis()
-    }
   } else {
     generateReport()
   }
