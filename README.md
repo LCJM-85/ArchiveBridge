@@ -14,7 +14,9 @@
 | **学籍数据管理** | 在校生学籍信息管理 |
 | **毕业数据管理** | 毕业生信息、学位、去向管理 |
 | **可视化分析大屏** | 招生趋势分析、地理热力分布、学科培养桑基图、AI招生预测 |
-| **智能报告生成** | 一键生成年度招生质量报告（Word + A3 海报打印） |
+| **智能报告生成** | 一键生成年度招生质量报告（Word + A3 海报打印），含 AI 智能分析 |
+| **AI 助手** | 流式 SSE 对话，自动检索知识库，支持联网搜索和数据库查询 |
+| **知识库 (RAG)** | 上传文件（PDF/DOCX/XLSX/TXT）或网页链接，自动分块向量化，AI 助手中增强回答 |
 | **元数据管理** | 自定义字段编码、字段名、来源字段映射规则 |
 | **数据脱敏** | 身份证号、姓名等敏感信息一键脱敏（后端注解驱动 + 前端开关） |
 | **API 文档** | Swagger UI 在线接口文档与测试 |
@@ -23,11 +25,12 @@
 
 | 层 | 技术 |
 |----|------|
-| 后端 | Spring Boot 3.5.13, MyBatis-Plus 3.5.13, PostgreSQL 15, PostGIS, Druid |
+| 后端 | Spring Boot 3.5.13, MyBatis-Plus 3.5.13, PostgreSQL 15 + pgvector, PostGIS, Druid |
 | 前端 | Vue 3, Vite 8, Element Plus, ECharts 5, Pinia, Axios |
-| Python | PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.2.2 (GPU), PyMuPDF, OpenCV |
+| Python | FastAPI, LangChain, PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.2.2 (GPU), PyMuPDF, OpenCV, Playwright |
+| LLM | 智谱 GLM-4-Plus (聊天) / GLM-4V-Plus-0111 (视觉) / embedding-3 (向量), 通义千问 Qwen-VL-Plus |
+| AI | SSE 流式对话、RAG 知识库（向量检索）、联网搜索（Bing scraping + Playwright） |
 | 预测 | ARIMA + XGBoost 集成预测 |
-| LLM | 智谱 GLM-4V-Plus-0111 / 通义千问 Qwen-VL-Plus |
 | 部署 | Docker, Docker Compose, Nginx |
 
 ## 快速启动
@@ -47,7 +50,14 @@ JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw spring-boot:run
 # API 文档: http://localhost:8080/swagger-ui.html
 ```
 
-**3. 前端**（端口 5173）
+**3. Python AI 助手**（端口 8765，AI 对话 + 知识库需要）
+```bash
+HOME="D:/Ideaworkplace/SCAU/scau-archive-insight/models" \
+scau-archive-insight/src/main/python/.venv/Scripts/python.exe \
+  scau-archive-insight/src/main/python/ai_assistant/main.py
+```
+
+**4. 前端**（端口 5173）
 ```bash
 cd scau_archive-frontend
 npm install
@@ -90,6 +100,15 @@ docker exec scau-db psql -U postgres -d scau_archive -f /tmp/backup.sql
 - PDF多页合并归档（一条日志，一次计数）
 - 完整的存库、质量评分、日志流程
 
+### AI 助手 + 知识库
+
+```
+用户提问 → 检索知识库（pgvector 余弦相似度）→ 拼入上下文 → LLM 生成回答
+  ├─ 流式 SSE：Python agent.astream_events() → Java SseEmitter → 前端 ReadableStream
+  ├─ 工具调用：19 种数据库查询 + 联网搜索（Bing）+ 网页抓取（Playwright）
+  └─ 知识库：上传文件/URL → 解析 → 分块 → 向量化（Zhipu embedding-3）→ 存入 pgvector
+```
+
 ### 字段匹配
 
 ```
@@ -128,13 +147,14 @@ SCAU/
 │   ├── Dockerfile                  # 后端镜像（Java 21 + Python 3 + PaddlePaddle）
 │   └── src/
 │       ├── main/java/edu/scau/scauarchiveinsight/
-│       │   ├── controller/         # 14 个 REST 控制器
+│       │   ├── controller/         # REST 控制器（含 AI 助手、知识库）
 │       │   ├── service/            # 业务逻辑 + processor 文件处理器
 │       │   ├── config/             # Security, Swagger, 脱敏, MyBatis-Plus 配置
 │       │   ├── util/               # JWT, 脱敏工具, 文本工具
 │       │   ├── dto/vo/mapper/pojo/ # 数据传输、视图、映射、实体
 │       │   └── filter/             # JWT 认证过滤器
 │       └── main/python/
+│           ├── ai_assistant/       # AI 助手（FastAPI + LangChain + RAG）
 │           ├── ppstructure/        # OCR 表格识别 + LLM 提取
 │           ├── pdf2image/          # PDF → PNG
 │           ├── openCV/             # 图像增强
@@ -146,7 +166,7 @@ SCAU/
 │   └── src/
 │       ├── views/                  # 页面组件
 │       ├── api/                    # API 接口封装
-│       ├── store/                  # Pinia 状态管理
+│       ├── store/                  # Pinia 状态管理（menu, tab, user）
 │       └── layouts/                # 布局组件
 └── scau-archive-insight/
     ├── storage/                    # 文件存储（运行时）
@@ -158,3 +178,4 @@ SCAU/
 - **事实表**: admission_fact, student_fact, graduation_fact
 - **维度表**: province_dim, major_dim, college_dim, degree_dim, destination_dim, nation_dim, political_dim, class_dim, archive_file_dim, ocr_log_dim, quality_score_dim
 - **系统表**: sys_user, metadata_standard
+- **知识库表**: knowledge_base, knowledge_chunks（含 pgvector 向量字段）
