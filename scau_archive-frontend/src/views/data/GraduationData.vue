@@ -10,7 +10,7 @@
           <div class="card-header-right">
             <el-input v-model="searchText" placeholder="搜索所有字段" clearable style="width:160px" @keyup.enter="handleSearch" @clear="handleClear" />
             <el-date-picker
-              v-model="store.createTimeRange"
+              v-model="createTimeRange"
               type="daterange"
               range-separator="至"
               start-placeholder="录入开始"
@@ -19,7 +19,7 @@
               style="width:200px"
             />
             <el-date-picker
-              v-model="store.updateTimeRange"
+              v-model="updateTimeRange"
               type="daterange"
               range-separator="至"
               start-placeholder="更新开始"
@@ -35,7 +35,7 @@
         </div>
       </template>
 
-      <el-table :data="store.tableData" v-loading="store.loading" stripe border style="width:100%">
+      <el-table :data="tableData" v-loading="loading" stripe border style="width:100%">
         <el-table-column prop="studentNo" label="学号" min-width="120" />
         <el-table-column prop="name" label="姓名" min-width="80" />
         <el-table-column prop="gender" label="性别" width="60" align="center">
@@ -76,9 +76,9 @@
 
       <div class="pagination-wrap">
         <el-pagination
-          v-model:current-page="store.current"
-          v-model:page-size="store.pageSize"
-          :total="store.total"
+          v-model:current-page="current"
+          v-model:page-size="pageSize"
+          :total="total"
           :page-sizes="[15, 30, 50, 100]"
           layout="total, sizes, prev, pager, next"
           background
@@ -123,14 +123,14 @@
           <el-col :span="12">
             <el-form-item label="学历" prop="degreeId">
               <el-select v-model="form.degreeId" placeholder="请选择" style="width:100%" filterable clearable>
-                <el-option v-for="d in store.degrees" :key="d.degreeId" :label="d.degreeName" :value="d.degreeId" />
+                <el-option v-for="d in degrees" :key="d.degreeId" :label="d.degreeName" :value="d.degreeId" />
               </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="毕业去向" prop="destId">
               <el-select v-model="form.destId" placeholder="请选择" style="width:100%" filterable clearable>
-                <el-option v-for="d in store.destinations" :key="d.destId" :label="d.destName" :value="d.destId" />
+                <el-option v-for="d in destinations" :key="d.destId" :label="d.destName" :value="d.destId" />
               </el-select>
             </el-form-item>
           </el-col>
@@ -156,9 +156,80 @@
 import { ref, onMounted } from 'vue'
 import { Plus, Edit, Delete, Search, School, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useGraduationStore } from '@/store/graduation'
+import { fetchGraduationPage, addGraduation, updateGraduation, deleteGraduation, fetchDegrees, fetchDestinations } from '@/api/modules/graduation'
 
-const store = useGraduationStore()
+const tableData = ref([])
+const loading = ref(false)
+const current = ref(1)
+const pageSize = ref(15)
+const total = ref(0)
+const pages = ref(0)
+const keyword = ref('')
+const createTimeRange = ref([])
+const updateTimeRange = ref([])
+const degrees = ref([])
+const destinations = ref([])
+
+async function fetchPage() {
+  loading.value = true
+  try {
+    const params = { current: current.value, size: pageSize.value }
+    if (keyword.value) params.keyword = keyword.value
+    if (createTimeRange.value && createTimeRange.value.length === 2) {
+      params.createTimeStart = createTimeRange.value[0]
+      params.createTimeEnd = createTimeRange.value[1]
+    }
+    if (updateTimeRange.value && updateTimeRange.value.length === 2) {
+      params.updateTimeStart = updateTimeRange.value[0]
+      params.updateTimeEnd = updateTimeRange.value[1]
+    }
+    const res = await fetchGraduationPage(params)
+    const d = res.data.data || {}
+    tableData.value = d.records || []
+    total.value = d.total || 0
+    current.value = d.current || 1
+    pageSize.value = d.size || 15
+    pages.value = d.pages || 0
+  } finally {
+    loading.value = false
+  }
+}
+
+async function fetchDegreesList() {
+  try {
+    const res = await fetchDegrees()
+    degrees.value = res.data.data || []
+  } catch { degrees.value = [] }
+}
+
+async function fetchDestinationsList() {
+  try {
+    const res = await fetchDestinations()
+    destinations.value = res.data.data || []
+  } catch { destinations.value = [] }
+}
+
+async function add(data) {
+  const res = await addGraduation(data)
+  return res.data
+}
+
+async function update(data) {
+  const res = await updateGraduation(data)
+  return res.data
+}
+
+async function remove(id) {
+  const res = await deleteGraduation(id)
+  return res.data
+}
+
+function setPage(p) { current.value = p }
+
+function clearTimeRanges() {
+  createTimeRange.value = []
+  updateTimeRange.value = []
+}
 
 const searchText = ref('')
 const dialogVisible = ref(false)
@@ -183,24 +254,24 @@ const rules = {
 }
 
 function handleSearch() {
-  store.keyword = searchText.value
-  store.current = 1
-  store.fetchPage()
+  keyword.value = searchText.value
+  current.value = 1
+  fetchPage()
 }
 
 function handleClear() {
   searchText.value = ''
-  store.keyword = ''
-  store.current = 1
-  store.fetchPage()
+  keyword.value = ''
+  current.value = 1
+  fetchPage()
 }
 
 function resetFilters() {
   searchText.value = ''
-  store.keyword = ''
-  store.clearTimeRanges()
-  store.current = 1
-  store.fetchPage()
+  keyword.value = ''
+  clearTimeRanges()
+  current.value = 1
+  fetchPage()
 }
 
 function openAddDialog() {
@@ -230,14 +301,14 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (isEdit.value) {
-      await store.update(form.value)
+      await update(form.value)
       ElMessage.success('更新成功')
     } else {
-      await store.add(form.value)
+      await add(form.value)
       ElMessage.success('添加成功')
     }
     dialogVisible.value = false
-    await store.fetchPage()
+    await fetchPage()
   } catch {
     ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
   } finally {
@@ -252,29 +323,29 @@ async function handleDelete(id) {
     return
   }
   try {
-    await store.remove(id)
+    await remove(id)
     ElMessage.success('删除成功')
-    await store.fetchPage()
+    await fetchPage()
   } catch (e) {
     ElMessage.error(e.response?.data?.message || '删除失败')
   }
 }
 
 function handlePageChange(p) {
-  store.setPage(p)
-  store.fetchPage()
+  setPage(p)
+  fetchPage()
 }
 
 function handleSizeChange(size) {
-  store.pageSize = size
-  store.current = 1
-  store.fetchPage()
+  pageSize.value = size
+  current.value = 1
+  fetchPage()
 }
 
 onMounted(() => {
-  store.fetchPage()
-  store.fetchDegreesList()
-  store.fetchDestinationsList()
+  fetchPage()
+  fetchDegreesList()
+  fetchDestinationsList()
 })
 </script>
 

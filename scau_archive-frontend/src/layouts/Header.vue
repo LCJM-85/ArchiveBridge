@@ -80,6 +80,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useMenuStore } from '@/store/menu'
+import { useTabStore } from '@/store/tab'
 import { useUserStore } from '@/store/user'
 import { useTheme } from '@/composables/useTheme'
 import { useFullscreen } from '@/composables/useFullscreen'
@@ -95,6 +96,7 @@ import {
 } from '@element-plus/icons-vue'
 
 const menuStore = useMenuStore()
+const tabStore = useTabStore()
 const userStore = useUserStore()
 const { activeTitle } = storeToRefs(menuStore)
 const { currentUsername } = storeToRefs(userStore)
@@ -137,6 +139,7 @@ async function handleDesensitizeToggle(val) {
 
 function logout() {
   userStore.logout()
+  tabStore.resetTabs()
   menuStore.resetMenu()
   ElMessage.success('退出成功')
 }

@@ -111,15 +111,18 @@ import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { DataLine, Files, House, Upload, Setting, DataBoard, Document, Cpu, Collection, ChatDotSquare } from '@element-plus/icons-vue'
 import { useMenuStore } from '@/store/menu'
+import { useTabStore } from '@/store/tab'
 import { useUserStore } from '@/store/user'
 
 const menuStore = useMenuStore()
+const tabStore = useTabStore()
 const userStore = useUserStore()
 const { activeMenu } = storeToRefs(menuStore)
 const userRole = computed(() => userStore.role)
 
 const handleSelect = (menuKey) => {
-  menuStore.setActive(menuKey)
+  const item = menuStore.menuItems.find((m) => m.key === menuKey)
+  tabStore.addTab(menuKey, item?.title || menuKey)
 }
 </script>
 

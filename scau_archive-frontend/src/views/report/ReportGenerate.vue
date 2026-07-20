@@ -150,15 +150,16 @@
 
 <script setup>
 import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
-import { storeToRefs } from 'pinia'
 import { Files } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { fetchReportData } from '@/api/modules/admission'
 import { analyzeReport } from '@/api/modules/ai'
-import { useReportStore } from '@/store/report'
 
-const reportStore = useReportStore()
-const { reportData, selectedYear, generateDate, aiAnalysis, aiAnalysisLoading } = storeToRefs(reportStore)
+const reportData = ref(null)
+const selectedYear = ref(new Date().getFullYear())
+const generateDate = ref('')
+const aiAnalysis = ref('')
+const aiAnalysisLoading = ref(false)
 
 const currentYear = new Date().getFullYear()
 const yearOptions = Array.from({ length: currentYear - 2019 }, (_, i) => 2020 + i)
@@ -213,13 +214,14 @@ function disposeCharts() {
 
 async function generateReport() {
   disposeCharts()
-  reportStore.setAiAnalysis('')
-  reportStore.setAiLoading(false)
+  aiAnalysis.value = ''
+  aiAnalysisLoading.value = false
 
   try {
     const res = await fetchReportData(selectedYear.value)
     const data = res.data?.data || null
-    reportStore.setReport(data, new Date().toLocaleDateString('zh-CN'))
+    reportData.value = data
+    generateDate.value = new Date().toLocaleDateString('zh-CN')
     if (data) renderCharts(data)
   } catch (e) {
     console.error('获取报告数据失败:', e)
@@ -228,14 +230,14 @@ async function generateReport() {
 
 async function fetchAiAnalysis() {
   if (!reportData.value) return
-  reportStore.setAiLoading(true)
+  aiAnalysisLoading.value = true
   try {
     const res = await analyzeReport({ reportData: reportData.value })
-    reportStore.setAiAnalysis(res.data?.data?.analysis || '')
+    aiAnalysis.value = res.data?.data?.analysis || ''
   } catch {
     // AI 分析失败不影响页面
   } finally {
-    reportStore.setAiLoading(false)
+    aiAnalysisLoading.value = false
   }
 }
 

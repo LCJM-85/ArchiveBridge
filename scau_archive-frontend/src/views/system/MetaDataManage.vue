@@ -16,7 +16,7 @@
         </div>
       </template>
 
-      <el-table :data="store.tableData" v-loading="store.loading" stripe border style="width: 100%">
+      <el-table :data="tableData" v-loading="loading" stripe border style="width: 100%">
         <el-table-column prop="fieldCode" label="字段编码" width="160" />
         <el-table-column prop="fieldName" label="字段名称" width="160" />
         <el-table-column prop="fieldType" label="字段类型" width="100" />
@@ -38,11 +38,11 @@
         </el-table-column>
       </el-table>
 
-      <div v-if="!store.keyword" class="pagination-wrap">
+      <div v-if="!keyword" class="pagination-wrap">
         <el-pagination
-          v-model:current-page="store.current"
-          v-model:page-size="store.pageSize"
-          :total="store.total"
+          v-model:current-page="current"
+          v-model:page-size="pageSize"
+          :total="total"
           layout="total, prev, pager, next"
           background
           @current-change="handlePageChange"
@@ -95,11 +95,57 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Plus, Edit, Delete, Search, Refresh } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Search, Refresh, Management } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { useMetaDataStore } from '@/store/metadata.js'
+import { fetchMetaDataPage, addMetaData, updateMetaData, deleteMetaData } from '@/api/modules/metadata'
 
-const store = useMetaDataStore()
+const tableData = ref([])
+const loading = ref(false)
+const current = ref(1)
+const pageSize = ref(15)
+const total = ref(0)
+const pages = ref(0)
+const keyword = ref('')
+
+async function fetchPage() {
+  loading.value = true
+  try {
+    const params = { current: current.value, size: pageSize.value }
+    if (keyword.value) params.keyword = keyword.value
+    const res = await fetchMetaDataPage(params)
+    const d = res.data.data || {}
+    tableData.value = d.records || []
+    total.value = d.total || 0
+    current.value = d.current || 1
+    pageSize.value = d.size || 15
+    pages.value = d.pages || 0
+  } finally {
+    loading.value = false
+  }
+}
+
+async function add(data) {
+  const res = await addMetaData(data)
+  return res.data
+}
+
+async function update(data) {
+  const res = await updateMetaData(data)
+  return res.data
+}
+
+async function remove(metadataId) {
+  const res = await deleteMetaData(metadataId)
+  return res.data
+}
+
+function setPage(p) { current.value = p }
+
+function search(val) {
+  keyword.value = val
+  current.value = 1
+  fetchPage()
+}
 
 const searchText = ref('')
 const dialogVisible = ref(false)
@@ -125,12 +171,12 @@ const rules = {
 }
 
 function handleSearch() {
-  store.search(searchText.value)
+  search(searchText.value)
 }
 
 function handleClear() {
   searchText.value = ''
-  store.search('')
+  search('')
 }
 
 function openAddDialog() {
@@ -152,14 +198,14 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (isEdit.value) {
-      await store.update(form.value)
+      await update(form.value)
       ElMessage.success('更新成功')
     } else {
-      await store.add(form.value)
+      await add(form.value)
       ElMessage.success('添加成功')
     }
     dialogVisible.value = false
-    await store.fetchPage()
+    await fetchPage()
   } catch {
     ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
   } finally {
@@ -170,20 +216,20 @@ async function handleSubmit() {
 async function handleDelete(metadataId) {
   try {
     await ElMessageBox.confirm('确定删除该元数据吗？', '提示', { type: 'warning' })
-    await store.remove(metadataId)
+    await remove(metadataId)
     ElMessage.success('删除成功')
-    await store.fetchPage()
+    await fetchPage()
   } catch {
     // cancelled or error
   }
 }
 
 function handlePageChange(p) {
-  store.setPage(p)
-  store.fetchPage()
+  setPage(p)
+  fetchPage()
 }
 
-onMounted(() => store.fetchPage())
+onMounted(() => fetchPage())
 </script>
 
 <style scoped>

@@ -84,8 +84,10 @@ import { Refresh, Document, DataAnalysis, TrendCharts, Upload } from '@element-p
 import * as echarts from 'echarts'
 import { fetchDashboardStats } from '@/api/modules/admission'
 import { useMenuStore } from '@/store/menu'
+import { useTabStore } from '@/store/tab'
 
 const menuStore = useMenuStore()
+const tabStore = useTabStore()
 const dashboardData = ref(null)
 const trendChartRef = ref(null)
 const majorChartRef = ref(null)
@@ -169,7 +171,8 @@ async function refresh() {
 }
 
 function goTo(key) {
-  menuStore.setActive(key)
+  const item = menuStore.menuItems.find((m) => m.key === key)
+  tabStore.addTab(key, item?.title || key)
 }
 
 function handleResize() {

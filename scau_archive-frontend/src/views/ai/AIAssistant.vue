@@ -44,13 +44,10 @@ export default { name: 'AIAssistant' }
 </script>
 <script setup>
 import { ref, nextTick, onActivated } from 'vue'
-import { storeToRefs } from 'pinia'
 import { UserFilled, Cpu } from '@element-plus/icons-vue'
 import { sendChatMessageStream } from '@/api/modules/ai'
-import { useAiStore } from '@/store/ai'
 
-const aiStore = useAiStore()
-const { messages } = storeToRefs(aiStore)
+const messages = ref([])
 const question = ref('')
 const loading = ref(false)
 const statusText = ref('')
@@ -135,7 +132,7 @@ function cancelStream() {
 }
 
 function clearChat() {
-  aiStore.clearMessages()
+  messages.value = []
 }
 
 function scrollToBottom() {

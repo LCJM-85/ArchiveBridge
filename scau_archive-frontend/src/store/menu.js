@@ -22,6 +22,7 @@ export const useMenuStore = defineStore('menu', () => {
     { key: 'trend', title: '招生趋势分析'},
     { key: 'prediction', title: '智能预测'},
     { key: 'ai-assistant', title: 'AI 助手'},
+    { key: 'knowledge', title: '知识库'},
     { key: 'geo', title: '录取地理分布'},
     { key: 'path', title: '学科培养路径'}
   ]

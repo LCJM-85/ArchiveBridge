@@ -1,15 +1,18 @@
 <template>
   <el-main class="content">
-    <keep-alive :include="['ArchiveUpload', 'AIAssistant']">
-      <component :is="currentComponent" />
-    </keep-alive>
+    <TabBar />
+    <div class="content-wrapper">
+      <keep-alive :include="componentNames">
+        <component :is="currentComponent" />
+      </keep-alive>
+    </div>
   </el-main>
 </template>
 
 <script setup>
 import { computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useMenuStore } from '@/store/menu'
+import { useTabStore } from '@/store/tab'
+import TabBar from '@/layouts/TabBar.vue'
 import Dashboard from '@/views/dashboard/Dashboard.vue'
 import ArchiveUpload from '@/views/archive/ArchiveUpload.vue'
 import OCRProcess from '@/views/ocr/OCRProcess.vue'
@@ -26,8 +29,7 @@ import UserManage from '@/views/system/UserManage.vue'
 import AIAssistant from '@/views/ai/AIAssistant.vue'
 import Knowledge from '@/views/knowledge/Knowledge.vue'
 
-const menuStore = useMenuStore()
-const { activeMenu } = storeToRefs(menuStore)
+const tabStore = useTabStore()
 
 const componentMap = {
   dashboard: Dashboard,
@@ -44,15 +46,44 @@ const componentMap = {
   prediction: AIPrediction,
   geo: Geographic,
   path: MajorTrainingPath,
-  knowledge: Knowledge
+  knowledge: Knowledge,
 }
 
-const currentComponent = computed(() => componentMap[activeMenu.value] || Dashboard)
+const keyToName = {
+  dashboard: 'Dashboard',
+  upload: 'ArchiveUpload',
+  process: 'OCRProcess',
+  report: 'ReportGenerate',
+  admission: 'AdmissionData',
+  studentstatus: 'StudentStatusData',
+  graduation: 'GraduationData',
+  meta: 'MetaDataManage',
+  users: 'UserManage',
+  'ai-assistant': 'AIAssistant',
+  trend: 'AddmissionTrend',
+  prediction: 'AIPrediction',
+  geo: 'Geographic',
+  path: 'MajorTrainingPath',
+  knowledge: 'Knowledge',
+}
+
+const currentComponent = computed(() => componentMap[tabStore.activeTab] || Dashboard)
+const componentNames = computed(() =>
+  tabStore.tabs.map((t) => keyToName[t.key]).filter(Boolean)
+)
 </script>
 
 <style scoped>
 .content {
-  padding: 20px;
+  padding: 0;
   background: var(--content-bg);
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  padding: 20px;
+  flex: 1;
+  overflow: auto;
 }
 </style>
