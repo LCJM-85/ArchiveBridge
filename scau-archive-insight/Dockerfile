@@ -12,7 +12,7 @@ WORKDIR /app
 
 # 1. 安装 Python 3 + pip + 基础依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 python3-pip python3-venv \
+    python3 python3-pip python3-venv curl \
     && rm -rf /var/lib/apt/lists/*
 
 # 2. 创建 Python 虚拟环境（与 Java 代码中的路径一致）

@@ -57,9 +57,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // 本地开发前端地址；后续上线可改为配置化
+        // 本地开发 + Docker 部署前端地址
         configuration.addAllowedOriginPattern("http://localhost:5173");
         configuration.addAllowedOriginPattern("http://localhost:5174");
+        configuration.addAllowedOriginPattern("http://localhost");
+        configuration.addAllowedOriginPattern("http://localhost:80");
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         // 允许携带凭证（如未来使用 Cookie/授权头等）

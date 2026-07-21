@@ -27,7 +27,7 @@
 |----|------|
 | 后端 | Spring Boot 3.5.13, MyBatis-Plus 3.5.13, PostgreSQL 15 + pgvector, PostGIS, Druid |
 | 前端 | Vue 3, Vite 8, Element Plus, ECharts 5, Pinia, Axios |
-| Python | FastAPI, LangChain, PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.2.2 (GPU), PyMuPDF, OpenCV, Playwright |
+| Python | FastAPI, LangChain, PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.2.2 (CPU), PyMuPDF, OpenCV, Playwright |
 | LLM | 智谱 GLM-4-Plus (聊天) / GLM-4V-Plus-0111 (视觉) / embedding-3 (向量), 通义千问 Qwen-VL-Plus |
 | AI | SSE 流式对话、RAG 知识库（向量检索）、联网搜索（Bing scraping + Playwright） |
 | 预测 | ARIMA + XGBoost 集成预测 |
@@ -46,15 +46,16 @@ PGPASSWORD=123456 psql -h localhost -U postgres -d scau_archive < backup.sql
 **2. 后端**（端口 8080）
 ```bash
 cd scau-archive-insight
-JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw spring-boot:run
+./mvnw spring-boot:run
 # API 文档: http://localhost:8080/swagger-ui.html
 ```
 
 **3. Python AI 助手**（端口 8765，AI 对话 + 知识库需要）
 ```bash
-HOME="D:/Ideaworkplace/SCAU/scau-archive-insight/models" \
-scau-archive-insight/src/main/python/.venv/Scripts/python.exe \
-  scau-archive-insight/src/main/python/ai_assistant/main.py
+# 需先配置 Python 虚拟环境，参考 src/main/python/requirements.txt
+cd scau-archive-insight
+HOME="./models" src/main/python/.venv/Scripts/python \
+  src/main/python/ai_assistant/main.py
 ```
 
 **4. 前端**（端口 5173）
@@ -67,17 +68,21 @@ npm run dev
 ### Docker 部署
 
 ```bash
-# 1. 导出数据库
+# 1. 配置环境变量（AI 助手需要 GLM_API_KEY）
+cp .env.example .env
+# 编辑 .env，填入 GLM_API_KEY=your_api_key
+
+# 2. 导出数据库
 PGPASSWORD=123456 pg_dump -h localhost -U postgres -d scau_archive > backup.sql
 
-# 2. 构建并启动
+# 3. 构建并启动（首次构建需下载 PaddlePaddle ~1.8GB，可能 10-20 分钟）
 docker compose up -d
 
-# 3. 导入数据
+# 4. 导入数据
 docker cp backup.sql scau-db:/tmp/
 docker exec scau-db psql -U postgres -d scau_archive -f /tmp/backup.sql
 
-# 4. 访问 http://localhost
+# 5. 访问 http://localhost
 ```
 
 ## 核心流程
@@ -124,13 +129,27 @@ OCR管道：精确匹配 → 去空白匹配 → 包含匹配 → Levenshtein距
 
 ## LLM 配置
 
-`application.yaml`:
-```yaml
-llm:
-  api-key: "your-api-key"
-  base-url: https://open.bigmodel.cn/api/paas/v4
-  model: glm-4v-plus-0111
+通过环境变量或 `.env` 文件配置：
+
+```bash
+# 复制环境变量模板并编辑
+cp .env.example .env
+# 填入 GLM_API_KEY=your_api_key
 ```
+
+或直接设置环境变量启动后端：
+
+```bash
+GLM_API_KEY=your_api_key ./mvnw spring-boot:run
+```
+
+可使用环境变量切换模型：
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `GLM_API_KEY` | — | API 密钥（必填） |
+| `LLM_BASE_URL` | `https://open.bigmodel.cn/api/paas/v4` | API 地址 |
+| `LLM_MODEL` | `glm-4v-plus-0111` | 模型名称 |
 
 推荐模型：智谱 GLM-4V-Plus-0111（付费，支持Base64）、通义千问 Qwen-VL-Plus
 
@@ -143,7 +162,9 @@ Header 右上角「脱敏/原始」开关控制。开启后身份证号、姓名
 ```
 SCAU/
 ├── docker-compose.yml              # Docker 编排（db + backend + frontend）
+├── .env.example                    # 环境变量模板（复制为 .env 使用）
 ├── scau-archive-insight/           # Spring Boot 后端
+│   ├── .dockerignore               # 构建上下文排除清单
 │   ├── Dockerfile                  # 后端镜像（Java 21 + Python 3 + PaddlePaddle）
 │   └── src/
 │       ├── main/java/edu/scau/scauarchiveinsight/
@@ -161,6 +182,7 @@ SCAU/
 │           ├── predict/            # ARIMA+XGBoost 预测
 │           └── seed/               # 假数据生成
 ├── scau_archive-frontend/          # Vue 3 前端
+│   ├── .dockerignore               # 构建上下文排除清单
 │   ├── Dockerfile                  # 前端镜像
 │   ├── nginx.conf                  # Nginx 反向代理配置
 │   └── src/

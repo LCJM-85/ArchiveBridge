@@ -49,18 +49,18 @@ server:
   tomcat:
     max-http-form-post-size: 500MB
 
-# LLM 配置（用于 LLM 智能提取，必须使用支持图片的多模态模型）
-# 当前使用 Ollama 本地部署 qwen2.5vl:7b
-# 备份见 application.yaml.llm_backup
+# LLM 配置（用于 LLM 智能提取 + AI 助手，必须使用支持图片的多模态模型）
+# 默认使用智谱 GLM-4V-Plus，需设置 GLM_API_KEY 环境变量
+# 可更换为其他兼容 OpenAI API 的模型
 llm:
    api-key: ${GLM_API_KEY:}
-   base-url: https://open.bigmodel.cn/api/paas/v4
-   model: glm-4v-plus-0111
+   base-url: ${LLM_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
+   model: ${LLM_MODEL:glm-4v-plus-0111}
 
 # 未登录被拦截时返回给前端的登录页地址（可与前端路由一致）
 app:
   security:
-    unauthorized-login-url: http://localhost:5173/login
+    unauthorized-login-url: http://localhost/login
 
 # SpringDoc Swagger 配置
 springdoc:

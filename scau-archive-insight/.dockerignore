@@ -1,0 +1,8 @@
+target/
+.venv/
+models/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+*.md

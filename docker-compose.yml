@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_DB: scau_archive
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
+      POSTGRES_PASSWORD: ${DB_PASS:-123456}
     ports:
       - "5432:5432"
     volumes:
@@ -27,19 +27,27 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    ports:
+      - "8080:8080"
     environment:
       DB_HOST: db
       DB_PORT: 5432
       DB_NAME: scau_archive
       DB_USER: postgres
-      DB_PASS: 123456
-      LLM_API_KEY: ""
-      LLM_BASE_URL: https://open.bigmodel.cn/api/paas/v4
-      LLM_MODEL: glm-4v-plus-0111
+      DB_PASS: ${DB_PASS:-123456}
+      GLM_API_KEY: ${GLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
+      LLM_MODEL: ${LLM_MODEL:-glm-4v-plus-0111}
     volumes:
       - storage_data:/app/storage
       # PaddlePaddle 模型缓存（持久化，避免每次下载 1.8GB）
       - paddle_models:/app/models/.paddlex
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/v3/api-docs > /dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # Vue 3 前端（Nginx）
   frontend:
@@ -47,7 +55,8 @@ services:
     container_name: scau-frontend
     restart: unless-stopped
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "80:80"
 
