@@ -49,6 +49,13 @@
         <el-table-column prop="className" label="班级" min-width="200" />
 
         <el-table-column prop="admissionDate" label="入学日期" width="110" align="center" />
+        <el-table-column label="毕业状态" width="80" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.graduated ? 'success' : 'primary'" size="small" effect="plain">
+              {{ row.graduated ? '已毕业' : '在读' }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="来源文件" min-width="140">
           <template #default="{ row }">
             <span style="font-size:12px;color:var(--text-secondary)">{{ row.fileName || '-' }}</span>

@@ -20,6 +20,7 @@ public class DashboardController {
     private DashboardService dashboardService;
 
     @GetMapping("/stats")
+    @Operation(summary = "获取首页统计卡片数据")
     public R<Map<String, Object>> stats() {
         return R.ok(dashboardService.getStats());
     }

@@ -21,6 +21,7 @@ public class StudentVO {
     private String majorName;
     private Integer classId;
     private String className;
+    private Boolean graduated;
     private Integer fileId;
     private String fileName;
     private LocalDate admissionDate;

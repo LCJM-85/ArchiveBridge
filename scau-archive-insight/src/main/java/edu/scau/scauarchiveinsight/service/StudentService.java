@@ -134,6 +134,7 @@ public class StudentService {
         vo.setName(fact.getName());
         vo.setIdCard(fact.getIdCard());
         vo.setGender(fact.getGender());
+        vo.setGraduated(fact.getGraduated());
         vo.setAdmissionDate(fact.getAdmissionDate());
         vo.setCreateTime(fact.getCreateTime());
         vo.setUpdateTime(fact.getUpdateTime());

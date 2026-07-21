@@ -43,7 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authorization = request.getHeader(AUTHORIZATION_HEADER);
 
-        if (authorization == null || !authorization.startsWith(TOKEN_PREFIX)) {
+       if (authorization == null || !authorization.startsWith(TOKEN_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
         }
