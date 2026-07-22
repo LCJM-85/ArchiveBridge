@@ -1,0 +1,274 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://archive.scau.edu.cn/schemas/archive-metadata.json",
+  "title": "华南农业大学学生档案元数据标准",
+  "description": "参考 DA/T 31-2017 设计的学生档案元数据 JSON Schema，覆盖录取、学籍、毕业三种档案实体。",
+
+  "definitions": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dateString": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "dateTimeString": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}"
+    },
+
+    "baseElements": {
+      "type": "object",
+      "properties": {
+        "identifier": {
+          "description": "M1 实体标识符",
+          "type": "integer",
+          "minimum": 1
+        },
+        "title": {
+          "description": "M2 题名",
+          "type": "string",
+          "maxLength": 200
+        },
+        "archiveDate": {
+          "description": "M3 归档日期",
+          "$ref": "#/definitions/dateTimeString"
+        },
+        "archiveCode": {
+          "description": "M4 档号（年度-类型-序号）",
+          "type": "string",
+          "pattern": "^\\d{4}-(AD|SS|GR)-\\d{6}$"
+        },
+        "studentNo": {
+          "description": "SCAU-C01 学号",
+          "$ref": "#/definitions/nonEmptyString",
+          "maxLength": 32
+        },
+        "name": {
+          "description": "SCAU-C02 姓名",
+          "$ref": "#/definitions/nonEmptyString",
+          "maxLength": 30
+        },
+        "idCard": {
+          "description": "SCAU-C03 身份证号",
+          "type": "string",
+          "pattern": "^\\d{17}[\\dXx]$",
+          "maxLength": 18
+        },
+        "gender": {
+          "description": "SCAU-C04 性别",
+          "type": "string",
+          "enum": ["男", "女", "未知"]
+        },
+        "college": {
+          "description": "SCAU-C05 学院名称",
+          "$ref": "#/definitions/nonEmptyString",
+          "maxLength": 50
+        },
+        "major": {
+          "description": "SCAU-C06 专业名称",
+          "$ref": "#/definitions/nonEmptyString",
+          "maxLength": 50
+        },
+        "majorCode": {
+          "description": "SCAU-C07 专业代码",
+          "type": "string",
+          "maxLength": 20
+        },
+        "province": {
+          "description": "SCAU-C08 生源省份",
+          "type": "string",
+          "maxLength": 30
+        },
+        "nation": {
+          "description": "SCAU-C09 民族",
+          "type": "string",
+          "maxLength": 20
+        },
+        "politicalStatus": {
+          "description": "SCAU-C10 政治面貌",
+          "type": "string",
+          "maxLength": 20
+        }
+      },
+      "required": ["identifier", "archiveDate", "studentNo", "name"],
+      "allOf": [
+        { "if": { "required": ["idCard"] }, "then": { "properties": { "idCard": { "pattern": "^\\d{17}[\\dXx]$" } } } }
+      ]
+    },
+
+    "admissionElements": {
+      "type": "object",
+      "properties": {
+        "examNo": {
+          "description": "SCAU-A01 考生号",
+          "type": "string",
+          "maxLength": 32
+        },
+        "admissionScore": {
+          "description": "SCAU-A02 录取分数",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 900
+        },
+        "admissionDate": {
+          "description": "SCAU-A03 录取日期",
+          "$ref": "#/definitions/dateString"
+        }
+      }
+    },
+
+    "studentStatusElements": {
+      "type": "object",
+      "properties": {
+        "className": {
+          "description": "SCAU-S01 班级名称",
+          "type": "string",
+          "maxLength": 50
+        },
+        "grade": {
+          "description": "SCAU-S02 年级",
+          "type": "string",
+          "pattern": "^\\d{4}$"
+        },
+        "studyLength": {
+          "description": "SCAU-S03 学制（年）",
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 5
+        },
+        "startDate": {
+          "description": "SCAU-S04 入学日期",
+          "$ref": "#/definitions/dateString"
+        },
+        "graduated": {
+          "description": "SCAU-S05 是否毕业",
+          "type": "boolean"
+        },
+        "endDate": {
+          "description": "SCAU-S06 离校日期",
+          "$ref": "#/definitions/dateString"
+        }
+      }
+    },
+
+    "graduationElements": {
+      "type": "object",
+      "properties": {
+        "degree": {
+          "description": "SCAU-G01 学位名称",
+          "type": "string",
+          "maxLength": 30
+        },
+        "graduationDate": {
+          "description": "SCAU-G02 毕业日期",
+          "$ref": "#/definitions/dateString"
+        },
+        "destination": {
+          "description": "SCAU-G03 毕业去向",
+          "type": "string",
+          "maxLength": 30
+        },
+        "graduationDecision": {
+          "description": "SCAU-G04 毕业结论",
+          "type": "string",
+          "maxLength": 200
+        }
+      }
+    },
+
+    "AdmissionRecord": {
+      "description": "录取档案实体",
+      "type": "object",
+      "properties": {
+        "entityType": {
+          "const": "AdmissionRecord"
+        },
+        "elements": {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/baseElements" },
+            { "$ref": "#/definitions/admissionElements" }
+          ],
+          "required": ["identifier", "archiveDate", "studentNo", "name", "entityType"]
+        }
+      },
+      "required": ["entityType", "elements"]
+    },
+
+    "StudentStatusRecord": {
+      "description": "学籍档案实体",
+      "type": "object",
+      "properties": {
+        "entityType": {
+          "const": "StudentStatusRecord"
+        },
+        "elements": {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/baseElements" },
+            { "$ref": "#/definitions/studentStatusElements" }
+          ],
+          "required": ["identifier", "archiveDate", "studentNo", "name", "entityType"]
+        }
+      },
+      "required": ["entityType", "elements"]
+    },
+
+    "GraduationRecord": {
+      "description": "毕业档案实体",
+      "type": "object",
+      "properties": {
+        "entityType": {
+          "const": "GraduationRecord"
+        },
+        "elements": {
+          "type": "object",
+          "allOf": [
+            { "$ref": "#/definitions/baseElements" },
+            { "$ref": "#/definitions/graduationElements" }
+          ],
+          "required": ["identifier", "archiveDate", "studentNo", "name", "graduationDate", "entityType"]
+        }
+      },
+      "required": ["entityType", "elements"]
+    },
+
+    "ArchivePackage": {
+      "description": "档案交换包：包含档案头信息和记录列表",
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "generator": {
+          "description": "生成方标识",
+          "type": "string"
+        },
+        "generatedAt": {
+          "$ref": "#/definitions/dateTimeString"
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "$ref": "#/definitions/AdmissionRecord" },
+              { "$ref": "#/definitions/StudentStatusRecord" },
+              { "$ref": "#/definitions/GraduationRecord" }
+            ]
+          },
+          "minItems": 1
+        }
+      },
+      "required": ["schemaVersion", "generatedAt", "records"]
+    }
+  },
+
+  "oneOf": [
+    { "$ref": "#/definitions/AdmissionRecord" },
+    { "$ref": "#/definitions/StudentStatusRecord" },
+    { "$ref": "#/definitions/GraduationRecord" },
+    { "$ref": "#/definitions/ArchivePackage" }
+  ]
+}

@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:scau="http://archive.scau.edu.cn/schemas/archive-metadata"
+    targetNamespace="http://archive.scau.edu.cn/schemas/archive-metadata"
+    elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+  <xs:annotation>
+    <xs:documentation>华南农业大学学生档案元数据标准 — 参考 DA/T 31-2017 设计
+版本 1.0 (2026-07)
+覆盖：录取档案 (AdmissionRecord)、学籍档案 (StudentStatusRecord)、毕业档案 (GraduationRecord)</xs:documentation>
+  </xs:annotation>
+
+  <!-- ==================== 简单类型 ==================== -->
+
+  <xs:simpleType name="DateString">
+    <xs:restriction base="xs:date">
+      <xs:pattern value="\d{4}-\d{2}-\d{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="DateTimeString">
+    <xs:restriction base="xs:dateTime">
+      <xs:pattern value="\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GenderType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="男"/>
+      <xs:enumeration value="女"/>
+      <xs:enumeration value="未知"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ArchiveCodeType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{4}-(AD|SS|GR)-\d{6}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="GradeType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{4}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="IdCardType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d{17}[\dXx]"/>
+      <xs:length value="18"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EntityTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="AdmissionRecord"/>
+      <xs:enumeration value="StudentStatusRecord"/>
+      <xs:enumeration value="GraduationRecord"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ==================== 公共元素组 ==================== -->
+
+  <xs:group name="baseElements">
+    <xs:sequence>
+      <xs:element name="identifier" type="xs:integer" minOccurs="1" maxOccurs="1">
+        <xs:annotation><xs:documentation>M1 实体标识符</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="title" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>M2 题名</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="archiveDate" type="scau:DateTimeString" minOccurs="1" maxOccurs="1">
+        <xs:annotation><xs:documentation>M3 归档日期</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="archiveCode" type="scau:ArchiveCodeType" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>M4 档号</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="studentNo" type="scau:NonEmptyString32" minOccurs="1" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C01 学号</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="name" type="scau:NonEmptyString30" minOccurs="1" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C02 姓名</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="idCard" type="scau:IdCardType" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C03 身份证号</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="gender" type="scau:GenderType" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C04 性别</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="college" type="scau:NonEmptyString50" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C05 学院名称</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="major" type="scau:NonEmptyString50" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C06 专业名称</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="majorCode" type="scau:NonEmptyString20" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C07 专业代码</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="province" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C08 生源省份</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="nation" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C09 民族</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="politicalStatus" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-C10 政治面貌</xs:documentation></xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+
+  <!-- ==================== 长度受限字符串类型 ==================== -->
+
+  <xs:simpleType name="NonEmptyString32">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="32"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="NonEmptyString30">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="30"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="NonEmptyString50">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="50"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="NonEmptyString20">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1"/>
+      <xs:maxLength value="20"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ==================== 录取档案特有元素 ==================== -->
+
+  <xs:group name="admissionElements">
+    <xs:sequence>
+      <xs:element name="examNo" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-A01 考生号</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="admissionScore" type="scau:ScoreType" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-A02 录取分数</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="admissionDate" type="scau:DateString" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-A03 录取日期</xs:documentation></xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+
+  <xs:simpleType name="ScoreType">
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="0"/>
+      <xs:maxInclusive value="900"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ==================== 学籍档案特有元素 ==================== -->
+
+  <xs:group name="studentStatusElements">
+    <xs:sequence>
+      <xs:element name="className" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-S01 班级名称</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="grade" type="scau:GradeType" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-S02 年级</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="studyLength" type="scau:StudyLengthType" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-S03 学制（年）</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="startDate" type="scau:DateString" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-S04 入学日期</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="graduated" type="xs:boolean" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-S05 是否毕业</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="endDate" type="scau:DateString" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-S06 离校日期</xs:documentation></xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+
+  <xs:simpleType name="StudyLengthType">
+    <xs:restriction base="xs:integer">
+      <xs:minInclusive value="2"/>
+      <xs:maxInclusive value="5"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- ==================== 毕业档案特有元素 ==================== -->
+
+  <xs:group name="graduationElements">
+    <xs:sequence>
+      <xs:element name="degree" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-G01 学位名称</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="graduationDate" type="scau:DateString" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-G02 毕业日期</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="destination" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-G03 毕业去向</xs:documentation></xs:annotation>
+      </xs:element>
+      <xs:element name="graduationDecision" type="xs:string" minOccurs="0" maxOccurs="1">
+        <xs:annotation><xs:documentation>SCAU-G04 毕业结论</xs:documentation></xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:group>
+
+  <!-- ==================== 实体类型定义 ==================== -->
+
+  <xs:complexType name="AdmissionRecordType">
+    <xs:annotation><xs:documentation>录取档案实体</xs:documentation></xs:annotation>
+    <xs:sequence>
+      <xs:group ref="scau:baseElements"/>
+      <xs:group ref="scau:admissionElements"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="StudentStatusRecordType">
+    <xs:annotation><xs:documentation>学籍档案实体</xs:documentation></xs:annotation>
+    <xs:sequence>
+      <xs:group ref="scau:baseElements"/>
+      <xs:group ref="scau:studentStatusElements"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="GraduationRecordType">
+    <xs:annotation><xs:documentation>毕业档案实体</xs:documentation></xs:annotation>
+    <xs:sequence>
+      <xs:group ref="scau:baseElements"/>
+      <xs:group ref="scau:graduationElements"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ==================== 档案交换包 ==================== -->
+
+  <xs:complexType name="RecordChoiceType">
+    <xs:choice>
+      <xs:element name="AdmissionRecord" type="scau:AdmissionRecordType"/>
+      <xs:element name="StudentStatusRecord" type="scau:StudentStatusRecordType"/>
+      <xs:element name="GraduationRecord" type="scau:GraduationRecordType"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="ArchivePackageType">
+    <xs:annotation><xs:documentation>档案交换包</xs:documentation></xs:annotation>
+    <xs:sequence>
+      <xs:element name="schemaVersion" type="xs:string" fixed="1.0" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="generator" type="xs:string" minOccurs="0" maxOccurs="1"/>
+      <xs:element name="generatedAt" type="scau:DateTimeString" minOccurs="1" maxOccurs="1"/>
+      <xs:element name="records" minOccurs="1" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="record" type="scau:RecordChoiceType" minOccurs="1" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- ==================== 顶层元素 ==================== -->
+
+  <xs:element name="ArchivePackage" type="scau:ArchivePackageType"/>
+  <xs:element name="AdmissionRecord" type="scau:AdmissionRecordType"/>
+  <xs:element name="StudentStatusRecord" type="scau:StudentStatusRecordType"/>
+  <xs:element name="GraduationRecord" type="scau:GraduationRecordType"/>
+
+</xs:schema>
