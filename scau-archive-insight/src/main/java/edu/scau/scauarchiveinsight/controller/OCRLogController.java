@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Tag(name = "OCR日志", description = "OCR 处理日志管理")
 @RestController
-@RequestMapping("/ocr/log")
+@RequestMapping("/api/ocr/log")
 public class OCRLogController {
 
     @Autowired

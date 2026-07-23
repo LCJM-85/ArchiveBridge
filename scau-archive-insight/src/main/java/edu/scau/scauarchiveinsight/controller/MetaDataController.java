@@ -16,7 +16,7 @@ import java.util.Map;
 
 @Tag(name = "元数据管理", description = "元数据标准管理")
 @RestController
-@RequestMapping("/metadata")
+@RequestMapping("/api/metadata")
 public class MetaDataController {
 
     @Autowired

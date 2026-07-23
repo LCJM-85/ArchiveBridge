@@ -18,6 +18,9 @@ public class PythonProcessManager implements InitializingBean {
     private static final Logger log = LoggerFactory.getLogger(PythonProcessManager.class);
     private Process pythonProcess;
 
+    @Value("${python.venv-path:}")
+    private String customVenvPath;
+
     @Value("${llm.api-key}")
     private String llmApiKey;
 
@@ -51,8 +54,10 @@ public class PythonProcessManager implements InitializingBean {
             return;
         }
 
-        String venvPython = scriptFile.getParentFile().getParentFile().getAbsolutePath()
-                + "/.venv/Scripts/python.exe";
+        String venvPython = customVenvPath != null && !customVenvPath.isEmpty()
+                ? customVenvPath
+                : scriptFile.getParentFile().getParentFile().getAbsolutePath()
+                    + "/.venv/Scripts/python.exe";
 
         ProcessBuilder pb = new ProcessBuilder(venvPython, scriptFile.getAbsolutePath());
         pb.redirectErrorStream(true);

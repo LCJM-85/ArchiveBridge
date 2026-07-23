@@ -1,19 +1,19 @@
 import request from '../request'
 
 export function syncOcrLogs() {
-  return request.post('/ocr/log/sync')
+  return request.post('/api/ocr/log/sync')
 }
 
 export function fetchTodayOcrLogs() {
-  return request.get('/ocr/log/today')
+  return request.get('/api/ocr/log/today')
 }
 
 export function fetchOcrLogHistory(params) {
-  return request.get('/ocr/log/history', { params })
+  return request.get('/api/ocr/log/history', { params })
 }
 
 export function deleteOcrLog(logId) {
-  return request.delete(`/ocr/log/delete/${logId}`)
+  return request.delete(`/api/ocr/log/delete/${logId}`)
 }
 
 export function fetchQualityScores(fileIds) {
@@ -21,5 +21,5 @@ export function fetchQualityScores(fileIds) {
 }
 
 export function fetchProcessingCount() {
-  return request.get('/storage/processing-count')
+  return request.get('/api/storage/processing-count')
 }

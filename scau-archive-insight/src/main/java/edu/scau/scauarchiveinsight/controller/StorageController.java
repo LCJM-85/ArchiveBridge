@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 
 @Tag(name = "存储状态", description = "文件存储状态监控")
 @RestController
-@RequestMapping("/storage")
+@RequestMapping("/api/storage")
 public class StorageController {
 
     private static final Path STORAGE_ROOT = Paths.get(System.getProperty("user.dir"), "storage");

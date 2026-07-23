@@ -8,6 +8,7 @@ services:
     container_name: scau-db
     restart: unless-stopped
     environment:
+      TZ: Asia/Shanghai
       POSTGRES_DB: scau_archive
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASS:-123456}
@@ -30,11 +31,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      ai-assistant:
-        condition: service_started
     ports:
       - "8080:8080"
     environment:
+      TZ: Asia/Shanghai
       DB_HOST: ${DB_HOST:-db}
       DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME:-scau_archive}
@@ -43,7 +43,7 @@ services:
       GLM_API_KEY: ${GLM_API_KEY:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
       LLM_MODEL: ${LLM_MODEL:-glm-4v-plus-0111}
-      AI_BASE_URL: http://ai-assistant:8765
+      python.venv-path: /app/src/main/python/.venv/bin/python3
     volumes:
       # 文件上传存储（Docker 命名卷，换机器自动创建）
       - storage_data:/app/storage
@@ -55,25 +55,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  # Python AI 助手服务（FastAPI，端口 8765）
-  ai-assistant:
-    build: ./scau-archive-insight
-    container_name: scau-ai
-    restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
-    command: /app/.venv/bin/python3 /app/src/main/python/ai_assistant/main.py
-    environment:
-      DB_HOST: ${DB_HOST:-db}
-      DB_PORT: ${DB_PORT:-5432}
-      DB_NAME: ${DB_NAME:-scau_archive}
-      DB_USER: ${DB_USER:-postgres}
-      DB_PASS: ${DB_PASS:-123456}
-      GLM_API_KEY: ${GLM_API_KEY:-}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
-      LLM_MODEL: ${LLM_MODEL:-glm-4v-plus-0111}
 
   # Vue 3 前端（Nginx）
   frontend:

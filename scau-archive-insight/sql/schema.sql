@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS public.college_dim (
 CREATE SEQUENCE IF NOT EXISTS public.college_dim_college_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.college_dim_college_id_seq OWNED BY public.college_dim.college_id;
+ALTER TABLE public.college_dim ALTER COLUMN college_id SET DEFAULT nextval('public.college_dim_college_id_seq');
 
 -- 专业
 CREATE TABLE IF NOT EXISTS public.major_dim (
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS public.major_dim (
 CREATE SEQUENCE IF NOT EXISTS public.major_dim_major_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.major_dim_major_id_seq OWNED BY public.major_dim.major_id;
+ALTER TABLE public.major_dim ALTER COLUMN major_id SET DEFAULT nextval('public.major_dim_major_id_seq');
 CREATE INDEX IF NOT EXISTS idx_major_college_id ON public.major_dim (college_id);
 CREATE INDEX IF NOT EXISTS idx_major_name      ON public.major_dim (major_name);
 
@@ -57,6 +59,7 @@ CREATE TABLE IF NOT EXISTS public.class_dim (
 CREATE SEQUENCE IF NOT EXISTS public.class_dim_class_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.class_dim_class_id_seq OWNED BY public.class_dim.class_id;
+ALTER TABLE public.class_dim ALTER COLUMN class_id SET DEFAULT nextval('public.class_dim_class_id_seq');
 CREATE INDEX IF NOT EXISTS idx_class_major_id ON public.class_dim (major_id);
 CREATE INDEX IF NOT EXISTS idx_class_name     ON public.class_dim (class_name);
 
@@ -68,6 +71,7 @@ CREATE TABLE IF NOT EXISTS public.nation_dim (
 CREATE SEQUENCE IF NOT EXISTS public.nation_dim_nation_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.nation_dim_nation_id_seq OWNED BY public.nation_dim.nation_id;
+ALTER TABLE public.nation_dim ALTER COLUMN nation_id SET DEFAULT nextval('public.nation_dim_nation_id_seq');
 
 -- 政治面貌
 CREATE TABLE IF NOT EXISTS public.political_dim (
@@ -77,6 +81,7 @@ CREATE TABLE IF NOT EXISTS public.political_dim (
 CREATE SEQUENCE IF NOT EXISTS public.political_dim_political_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.political_dim_political_id_seq OWNED BY public.political_dim.political_id;
+ALTER TABLE public.political_dim ALTER COLUMN political_id SET DEFAULT nextval('public.political_dim_political_id_seq');
 
 -- 省份（含地理边界数据）
 CREATE TABLE IF NOT EXISTS public.province_dim (
@@ -88,6 +93,7 @@ CREATE TABLE IF NOT EXISTS public.province_dim (
 CREATE SEQUENCE IF NOT EXISTS public.province_dim_province_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.province_dim_province_id_seq OWNED BY public.province_dim.province_id;
+ALTER TABLE public.province_dim ALTER COLUMN province_id SET DEFAULT nextval('public.province_dim_province_id_seq');
 
 -- 学位
 CREATE TABLE IF NOT EXISTS public.degree_dim (
@@ -97,6 +103,7 @@ CREATE TABLE IF NOT EXISTS public.degree_dim (
 CREATE SEQUENCE IF NOT EXISTS public.degree_dim_degree_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.degree_dim_degree_id_seq OWNED BY public.degree_dim.degree_id;
+ALTER TABLE public.degree_dim ALTER COLUMN degree_id SET DEFAULT nextval('public.degree_dim_degree_id_seq');
 
 -- 毕业去向
 CREATE TABLE IF NOT EXISTS public.destination_dim (
@@ -106,6 +113,7 @@ CREATE TABLE IF NOT EXISTS public.destination_dim (
 CREATE SEQUENCE IF NOT EXISTS public.destination_dim_dest_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.destination_dim_dest_id_seq OWNED BY public.destination_dim.dest_id;
+ALTER TABLE public.destination_dim ALTER COLUMN dest_id SET DEFAULT nextval('public.destination_dim_dest_id_seq');
 
 -- ============================================================
 -- 事实表
@@ -127,6 +135,7 @@ CREATE TABLE IF NOT EXISTS public.student_dim (
 CREATE SEQUENCE IF NOT EXISTS public.student_dim_dim_id_seq
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.student_dim_dim_id_seq OWNED BY public.student_dim.dim_id;
+ALTER TABLE public.student_dim ALTER COLUMN dim_id SET DEFAULT nextval('public.student_dim_dim_id_seq');
 CREATE INDEX IF NOT EXISTS idx_student_dim_no       ON public.student_dim (student_no);
 CREATE INDEX IF NOT EXISTS idx_student_dim_nation    ON public.student_dim (nation_id);
 CREATE INDEX IF NOT EXISTS idx_student_dim_political ON public.student_dim (political_id);
@@ -227,6 +236,7 @@ CREATE TABLE IF NOT EXISTS public.metadata_standard (
 CREATE SEQUENCE IF NOT EXISTS public.metadata_standard_metadata_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.metadata_standard_metadata_id_seq OWNED BY public.metadata_standard.metadata_id;
+ALTER TABLE public.metadata_standard ALTER COLUMN metadata_id SET DEFAULT nextval('public.metadata_standard_metadata_id_seq');
 
 -- 归档文件记录
 CREATE TABLE IF NOT EXISTS public.archive_file_dim (
@@ -238,6 +248,7 @@ CREATE TABLE IF NOT EXISTS public.archive_file_dim (
 CREATE SEQUENCE IF NOT EXISTS public.archive_file_dim_file_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.archive_file_dim_file_id_seq OWNED BY public.archive_file_dim.file_id;
+ALTER TABLE public.archive_file_dim ALTER COLUMN file_id SET DEFAULT nextval('public.archive_file_dim_file_id_seq');
 CREATE INDEX IF NOT EXISTS idx_archive_file_type ON public.archive_file_dim (file_type);
 CREATE INDEX IF NOT EXISTS idx_archive_upload_time ON public.archive_file_dim (upload_time);
 
@@ -255,6 +266,7 @@ CREATE TABLE IF NOT EXISTS public.ocr_log_dim (
 CREATE SEQUENCE IF NOT EXISTS public.ocr_log_dim_log_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.ocr_log_dim_log_id_seq OWNED BY public.ocr_log_dim.log_id;
+ALTER TABLE public.ocr_log_dim ALTER COLUMN log_id SET DEFAULT nextval('public.ocr_log_dim_log_id_seq');
 CREATE INDEX IF NOT EXISTS idx_ocr_log_file_id    ON public.ocr_log_dim (file_id);
 CREATE INDEX IF NOT EXISTS idx_ocr_log_time       ON public.ocr_log_dim (recognize_time DESC);
 CREATE INDEX IF NOT EXISTS idx_ocr_log_file_status ON public.ocr_log_dim (file_name, recognize_status);
@@ -278,6 +290,7 @@ CREATE TABLE IF NOT EXISTS public.quality_score_dim (
 CREATE SEQUENCE IF NOT EXISTS public.quality_score_dim_score_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER SEQUENCE public.quality_score_dim_score_id_seq OWNED BY public.quality_score_dim.score_id;
+ALTER TABLE public.quality_score_dim ALTER COLUMN score_id SET DEFAULT nextval('public.quality_score_dim_score_id_seq');
 CREATE INDEX IF NOT EXISTS idx_quality_file_id ON public.quality_score_dim (file_id);
 
 -- ============================================================

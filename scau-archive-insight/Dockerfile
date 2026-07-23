@@ -30,19 +30,19 @@ RUN echo 'deb http://deb.debian.org/debian trixie main' > /etc/apt/sources.list 
 # 3. 先复制 Python 脚本（.dockerignore 已排除 .venv，避免覆盖软链接）
 COPY src/main/python ./src/main/python
 
-# 4. 创建 Python 虚拟环境
-RUN mkdir -p src/main/python/.venv/Scripts && \
-    python3 -m venv /app/.venv && \
-    ln -sf /app/.venv/bin/python3 src/main/python/.venv/Scripts/python.exe && \
-    ln -sf /app/.venv/bin/pip3 src/main/python/.venv/Scripts/pip3.exe
+# 4. 创建 Python 虚拟环境（直接在 Java 代码预期的路径，避免软链接 sys.path 问题）
+RUN python3 -m venv /app/src/main/python/.venv && \
+    mkdir -p /app/src/main/python/.venv/Scripts && \
+    ln -sf /app/src/main/python/.venv/bin/python3 /app/src/main/python/.venv/Scripts/python.exe && \
+    ln -sf /app/src/main/python/.venv/bin/pip3 /app/src/main/python/.venv/Scripts/pip3.exe
 
 # 5. 安装 Python 依赖
 COPY src/main/python/requirements.txt /tmp/
-RUN /app/.venv/bin/pip3 install --no-cache-dir --upgrade pip && \
-    /app/.venv/bin/pip3 install --no-cache-dir \
+RUN /app/src/main/python/.venv/bin/pip3 install --no-cache-dir --upgrade pip && \
+    /app/src/main/python/.venv/bin/pip3 install --no-cache-dir \
     --extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cpu/ \
     paddlepaddle==3.0.0 && \
-    /app/.venv/bin/pip3 install --no-cache-dir -r /tmp/requirements.txt
+    /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -r /tmp/requirements.txt
 
 # 6. 创建 models 目录（PaddlePaddle 模型缓存）
 RUN mkdir -p models/.paddlex
