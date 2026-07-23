@@ -1,8 +1,10 @@
 import axios from 'axios'
 
+import { APP_CONFIG } from '@/config'
+
 const request = axios.create({
-  baseURL: 'http://localhost:8080',
-  timeout: 10000,
+  baseURL: APP_CONFIG.baseURL,
+  timeout: APP_CONFIG.timeout,
   withCredentials: true,
 })
 

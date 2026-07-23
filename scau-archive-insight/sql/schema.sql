@@ -292,6 +292,7 @@ CREATE TABLE IF NOT EXISTS public.sys_user (
     phone       VARCHAR(20),
     email       VARCHAR(100),
     status      INTEGER DEFAULT 1,
+    role        VARCHAR(20) DEFAULT 'user',
     create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     remark      VARCHAR(255)
@@ -308,3 +309,38 @@ DROP TRIGGER IF EXISTS trg_update_time ON public.sys_user;
 CREATE TRIGGER trg_update_time
     BEFORE UPDATE ON public.sys_user
     FOR EACH ROW EXECUTE FUNCTION public.update_time_trigger();
+
+-- ============================================================
+-- 知识库（RAG）
+-- ============================================================
+
+-- 启用 pgvector 扩展（用于向量相似度搜索）
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- 知识库文档表
+CREATE TABLE IF NOT EXISTS public.knowledge_base (
+    id           SERIAL PRIMARY KEY,
+    title        VARCHAR(255) NOT NULL,
+    file_type    VARCHAR(20),
+    file_path    TEXT,
+    source       VARCHAR(50),
+    url          TEXT,
+    chunk_count  INTEGER DEFAULT 0,
+    status       VARCHAR(20) DEFAULT 'parsing',
+    error_msg    TEXT,
+    create_time  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 知识库文本块表（含向量）
+CREATE TABLE IF NOT EXISTS public.knowledge_chunks (
+    id           SERIAL PRIMARY KEY,
+    kb_id        INTEGER NOT NULL REFERENCES public.knowledge_base(id) ON DELETE CASCADE,
+    chunk_index  INTEGER NOT NULL,
+    content      TEXT NOT NULL,
+    metadata     JSONB DEFAULT '{}',
+    embedding    vector(1024)
+);
+
+-- 索引
+CREATE INDEX IF NOT EXISTS idx_kb_chunks_kb_id ON public.knowledge_chunks (kb_id);
+CREATE INDEX IF NOT EXISTS idx_kb_status ON public.knowledge_base (status);

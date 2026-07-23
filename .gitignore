@@ -27,5 +27,6 @@ CLAUDE.md
 .claude/
 paper-draft.md
 
+# 环境变量（包含 API Key 等敏感信息）
+.env
 
-论文

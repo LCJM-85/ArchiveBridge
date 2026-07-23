@@ -1,0 +1,4 @@
+--------windows环境--------
+安装pgsql数据库时需要勾选postGIS扩展，安装完成后
+进入pgvector_file文件夹，复制所有文件直接粘贴进pgsql安装目录，点击替换目标文件。
+然后依次运行schema.sql、province-geo.sql.seed-data.sql中的sql语句。

@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 public class AIAssistantClient {
 
     private static final Logger log = LoggerFactory.getLogger(AIAssistantClient.class);
-    private static final String BASE_URL = "http://127.0.0.1:8765";
+    private static final String BASE_URL = System.getenv().getOrDefault("AI_BASE_URL", "http://127.0.0.1:8765");
     private static final int TIMEOUT_SECONDS = 120;
 
     private final HttpClient httpClient = HttpClient.newBuilder()

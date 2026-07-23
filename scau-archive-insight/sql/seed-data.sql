@@ -133,4 +133,4 @@ INSERT INTO public.metadata_standard VALUES ('exam_no', '考生号', 'varchar', 
 INSERT INTO public.metadata_standard VALUES ('admission_score', '录取分数', 'varchar', '录取分数', 'direct', '', false, 13);
 
 -- ----- 系统用户（密码 BCrypt 加密）-----
-INSERT INTO public.sys_user VALUES (1, 'admin', '$2a$10$A.tIFkVGXxDxE8WMHGseiOXwxKfSDgL7EKfMUM26VvJYSqFjr5p6.', '管理员', '13692258486', '858558192@qq.com', 1, '2026-04-24 11:24:15.515268', '2026-05-01 17:34:44.566752', NULL);
+INSERT INTO public.sys_user (id, username, password, real_name, phone, email, role, create_time, update_time) VALUES (1, 'admin', '$2a$10$A.tIFkVGXxDxE8WMHGseiOXwxKfSDgL7EKfMUM26VvJYSqFjr5p6.', '管理员', '13692258486', '858558192@qq.com', '1', '2026-04-24 11:24:15.515268', '2026-05-01 17:34:44.566752');

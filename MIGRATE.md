@@ -17,41 +17,59 @@
 | 目录 | 位置 | 说明 |
 |------|------|------|
 | **storage/** | `storage/` | 运行时文件存储，新机器自动创建空目录 |
+| **.env** | `.env` | 环境变量（含 API Key），新机器需从 `.env.example` 重新创建 |
 | **.git/** | `.git/` | Git 版本历史，新机器不需要 |
-| **docs/** | `docs/` | Claude Code 工具文件，与项目无关 |
-| **.claude/** | `.claude/` | Claude Code 配置文件，不影响运行 |
 
 ## 最终拷贝清单
 
 ```
 SCAU/
+├── .env.example          ← 到新机器后复制为 .env 并填入 API Key
+├── .gitignore
 ├── docker-compose.yml
+├── Dockerfile.db
 ├── README.md
 ├── CLAUDE.md
 ├── scau-archive-insight/
 │   ├── Dockerfile
 │   ├── pom.xml
 │   ├── .mvn/
-│   └── src/           ← Java + Python 源码 + 配置文件
+│   └── src/              ← Java + Python 源码 + 配置文件
 ├── scau_archive-frontend/
 │   ├── Dockerfile
 │   ├── nginx.conf
 │   ├── package.json
 │   ├── vite.config.js
-│   └── src/           ← Vue 源码
-├── .gitignore
-└── backup.sql         ← 数据库导出文件（自行准备）
+│   └── src/              ← Vue 源码
 ```
 
-## 新机器部署步骤
+## 新机器部署步骤（Docker）
 
 ```bash
 # 1. 安装 Docker
 # 2. 拷贝上述清单的文件到新机器
-# 3. 在 SCAU 目录下执行
+# 3. 创建环境变量配置
+cp .env.example .env
+# 编辑 .env，填入 GLM_API_KEY（AI 助手 + 智能提取需要）
+# 4. 启动所有服务（数据库自动初始化表结构 + 种子数据）
 docker compose up -d
-# 4. 导入数据库
-docker cp backup.sql scau-db:/tmp/
-docker exec scau-db psql -U postgres -d scau_archive -f /tmp/backup.sql
 # 5. 访问 http://localhost
+```
+
+## 本地开发部署（非 Docker，Windows）
+
+```bash
+# 后端
+cd scau-archive-insight
+JAVA_HOME="D:/java/jdk-21.0.5" ./mvnw spring-boot:run
+
+# 前端（新开终端）
+cd scau_archive-frontend
+npm install
+npm run dev
+
+# AI 助手（可选，新开终端）
+HOME="D:/Ideaworkplace/SCAU/scau-archive-insight/models" \
+scau-archive-insight/src/main/python/.venv/Scripts/python.exe \
+  scau-archive-insight/src/main/python/ai_assistant/main.py
 ```

@@ -1,5 +1,6 @@
 export const APP_CONFIG = {
-  baseURL: 'http://localhost:8080',
+  // 空字符串 = 走同源代理（Nginx / Vite dev proxy），支持局域网访问
+  baseURL: '',
   timeout: 10000,
 }
 

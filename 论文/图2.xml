@@ -1,0 +1,163 @@
+<mxfile host="Electron" agent="Cursor">
+  <diagram id="fig2-tech-stack" name="图2-技术栈总览">
+    <mxGraphModel dx="1201" dy="828" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="960" pageHeight="520" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="frame" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#FAFBFC;strokeColor=#D5D8DC;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="420" width="904" x="28" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#1B4F72;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;" value="&lt;font style=&quot;font-size:18px;letter-spacing:4px;&quot;&gt;&lt;b&gt;技 术 栈 总 览&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="48" width="880" x="40" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-card" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#1E8449;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="305" width="136" x="40" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1E8449;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;" value="&lt;font style=&quot;font-size:14px;&quot;&gt;&lt;b&gt;前端&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size:10px;color:#D5F5E3;&quot;&gt;Frontend&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="136" x="40" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-i1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#E8F8F5;strokeColor=#1E8449;strokeWidth=1;fontColor=#145A32;fontFamily=Microsoft YaHei;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" value="Vue 3" vertex="1">
+          <mxGeometry height="32" width="112" x="52" y="176" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-i2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#E8F8F5;strokeColor=#27AE60;strokeWidth=1;fontColor=#145A32;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="Element Plus" vertex="1">
+          <mxGeometry height="32" width="112" x="52" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-i3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#E8F8F5;strokeColor=#27AE60;strokeWidth=1;fontColor=#145A32;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="ECharts" vertex="1">
+          <mxGeometry height="32" width="112" x="52" y="264" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-i4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#E8F8F5;strokeColor=#27AE60;strokeWidth=1;fontColor=#145A32;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="Vite 8" vertex="1">
+          <mxGeometry height="32" width="112" x="52" y="308" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-foot" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#7DCEA0;fontStyle=2;" value="SPA · 标签页路由" vertex="1">
+          <mxGeometry height="24" width="120" x="48" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="c1-bar" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#27AE60;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="3" width="136" x="40" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-card" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#1B4F72;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="308" width="136" x="188" y="112" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1B4F72;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;" value="&lt;font style=&quot;font-size:14px;&quot;&gt;&lt;b&gt;后端&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size:10px;color:#D4E6F1;&quot;&gt;Backend&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="136" x="188" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-bar" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#2E86AB;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="3" width="136" x="188" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-i1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=1;fontColor=#1A5276;fontFamily=Microsoft YaHei;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;" value="Spring Boot 3.5" vertex="1">
+          <mxGeometry height="32" width="112" x="200" y="176" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-i2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#EBF5FB;strokeColor=#2E86AB;strokeWidth=1;fontColor=#1A5276;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="MyBatis-Plus" vertex="1">
+          <mxGeometry height="32" width="112" x="200" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-i3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#EBF5FB;strokeColor=#2E86AB;strokeWidth=1;fontColor=#1A5276;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="JWT / Security" vertex="1">
+          <mxGeometry height="32" width="112" x="200" y="264" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-i4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#EBF5FB;strokeColor=#2E86AB;strokeWidth=1;fontColor=#1A5276;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="Maven" vertex="1">
+          <mxGeometry height="32" width="112" x="200" y="308" as="geometry" />
+        </mxCell>
+        <mxCell id="c2-foot" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#85C1E9;fontStyle=2;" value="REST · 无状态鉴权" vertex="1">
+          <mxGeometry height="24" width="120" x="196" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="c3-card" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#D35400;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="306" width="136" x="336" y="114" as="geometry" />
+        </mxCell>
+        <mxCell id="c3-head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#D35400;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;" value="&lt;font style=&quot;font-size:14px;&quot;&gt;&lt;b&gt;数据库&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size:10px;color:#FDEBD0;&quot;&gt;Database&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="136" x="336" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="c3-bar" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E67E22;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="3" width="136" x="336" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c3-i1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#FEF5E7;strokeColor=#D35400;strokeWidth=1;fontColor=#A04000;fontFamily=Microsoft YaHei;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" value="PostgreSQL" vertex="1">
+          <mxGeometry height="32" width="112" x="348" y="176" as="geometry" />
+        </mxCell>
+        <mxCell id="c3-i2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#FEF5E7;strokeColor=#E67E22;strokeWidth=1;fontColor=#A04000;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="pgvector" vertex="1">
+          <mxGeometry height="32" width="112" x="348" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="c3-i3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#FEF5E7;strokeColor=#E67E22;strokeWidth=1;fontColor=#A04000;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="PostGIS" vertex="1">
+          <mxGeometry height="32" width="112" x="348" y="264" as="geometry" />
+        </mxCell>
+        <mxCell id="c3-i4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#FEF5E7;strokeColor=#E67E22;strokeWidth=1;fontColor=#A04000;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="Druid" vertex="1">
+          <mxGeometry height="32" width="112" x="348" y="308" as="geometry" />
+        </mxCell>
+        <mxCell id="c3-foot" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#F5B041;fontStyle=2;" value="事实·维度·向量" vertex="1">
+          <mxGeometry height="24" width="120" x="344" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="c4-card" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#6C3483;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="299" width="136" x="484" y="121" as="geometry" />
+        </mxCell>
+        <mxCell id="c4-head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6C3483;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;" value="&lt;font style=&quot;font-size:14px;&quot;&gt;&lt;b&gt;AI 服务&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size:10px;color:#E8DAEF;&quot;&gt;AI Service&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="136" x="484" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="c4-bar" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#8E44AD;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="3" width="136" x="484" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c4-i1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F5EEF8;strokeColor=#6C3483;strokeWidth=1;fontColor=#4A235A;fontFamily=Microsoft YaHei;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" value="FastAPI" vertex="1">
+          <mxGeometry height="32" width="112" x="496" y="176" as="geometry" />
+        </mxCell>
+        <mxCell id="c4-i2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F5EEF8;strokeColor=#8E44AD;strokeWidth=1;fontColor=#4A235A;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="LangChain" vertex="1">
+          <mxGeometry height="32" width="112" x="496" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="c4-i3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F5EEF8;strokeColor=#8E44AD;strokeWidth=1;fontColor=#4A235A;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="PaddleOCR" vertex="1">
+          <mxGeometry height="32" width="112" x="496" y="264" as="geometry" />
+        </mxCell>
+        <mxCell id="c4-i4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F5EEF8;strokeColor=#8E44AD;strokeWidth=1;fontColor=#4A235A;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="Python" vertex="1">
+          <mxGeometry height="32" width="112" x="496" y="308" as="geometry" />
+        </mxCell>
+        <mxCell id="c4-foot" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#BB8FCE;fontStyle=2;" value="RAG · Agent · OCR" vertex="1">
+          <mxGeometry height="24" width="120" x="492" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="c5-card" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#566573;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="297" width="136" x="632" y="123" as="geometry" />
+        </mxCell>
+        <mxCell id="c5-head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#566573;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;" value="&lt;font style=&quot;font-size:14px;&quot;&gt;&lt;b&gt;部署&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size:10px;color:#D5D8DC;&quot;&gt;Deploy&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="136" x="632" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="c5-bar" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#7F8C8D;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="3" width="136" x="632" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c5-i1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F4F6F7;strokeColor=#566573;strokeWidth=1;fontColor=#2C3E50;fontFamily=Microsoft YaHei;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" value="Docker" vertex="1">
+          <mxGeometry height="32" width="112" x="644" y="176" as="geometry" />
+        </mxCell>
+        <mxCell id="c5-i2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F4F6F7;strokeColor=#7F8C8D;strokeWidth=1;fontColor=#2C3E50;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="Compose" vertex="1">
+          <mxGeometry height="32" width="112" x="644" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="c5-i3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F4F6F7;strokeColor=#7F8C8D;strokeWidth=1;fontColor=#2C3E50;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="Nginx" vertex="1">
+          <mxGeometry height="32" width="112" x="644" y="264" as="geometry" />
+        </mxCell>
+        <mxCell id="c5-i4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F4F6F7;strokeColor=#7F8C8D;strokeWidth=1;fontColor=#2C3E50;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="JDK 21" vertex="1">
+          <mxGeometry height="32" width="112" x="644" y="308" as="geometry" />
+        </mxCell>
+        <mxCell id="c5-foot" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#AAB7B8;fontStyle=2;" value="容器化一键部署" vertex="1">
+          <mxGeometry height="24" width="120" x="640" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="c6-card" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#C0392B;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="291" width="140" x="780" y="129" as="geometry" />
+        </mxCell>
+        <mxCell id="c6-head" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#C0392B;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;" value="&lt;font style=&quot;font-size:14px;&quot;&gt;&lt;b&gt;LLM&lt;/b&gt;&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size:10px;color:#FADBD8;&quot;&gt;Large Model&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="52" width="140" x="780" y="108" as="geometry" />
+        </mxCell>
+        <mxCell id="c6-bar" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E74C3C;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="3" width="140" x="780" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="c6-i1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#FDEDEC;strokeColor=#C0392B;strokeWidth=1;fontColor=#922B21;fontFamily=Microsoft YaHei;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;" value="GLM-4V-PLUS" vertex="1">
+          <mxGeometry height="32" width="112" x="794" y="176" as="geometry" />
+        </mxCell>
+        <mxCell id="c6-i2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#FDEDEC;strokeColor=#E74C3C;strokeWidth=1;fontColor=#922B21;fontFamily=Microsoft YaHei;fontSize=12;align=center;verticalAlign=middle;" value="GLM-4V-PLUS&lt;div&gt;-0111&lt;/div&gt;" vertex="1">
+          <mxGeometry height="32" width="112" x="794" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="c6-i3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#FDEDEC;strokeColor=#E74C3C;strokeWidth=1;fontColor=#922B21;fontFamily=Microsoft YaHei;fontSize=11;align=center;verticalAlign=middle;" value="embedding-3" vertex="1">
+          <mxGeometry height="32" width="112" x="794" y="264" as="geometry" />
+        </mxCell>
+        <mxCell id="c6-badge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#FADBD8;strokeColor=none;fontColor=#922B21;fontFamily=Microsoft YaHei;fontSize=10;fontStyle=1;align=center;verticalAlign=middle;" value="视觉 · 语义提取" vertex="1">
+          <mxGeometry height="28" width="112" x="794" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="c6-foot" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#F1948A;fontStyle=2;" value="云端 API 调用" vertex="1">
+          <mxGeometry height="24" width="120" x="790" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="footer" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#AEB6BF;fontStyle=2;" value="华南农业大学 · 数智档桥平台 · 全栈技术选型" vertex="1">
+          <mxGeometry height="20" width="880" x="40" y="426" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

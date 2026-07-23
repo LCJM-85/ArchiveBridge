@@ -62,6 +62,8 @@ public class SecurityConfig {
         configuration.addAllowedOriginPattern("http://localhost:5174");
         configuration.addAllowedOriginPattern("http://localhost");
         configuration.addAllowedOriginPattern("http://localhost:80");
+        // 局域网访问（手机/其他设备通过 IP 访问 Vite dev server / Nginx）
+        configuration.addAllowedOriginPattern("http://*:*");
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         // 允许携带凭证（如未来使用 Cookie/授权头等）

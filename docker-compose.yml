@@ -2,7 +2,9 @@ services:
 
   # PostgreSQL + PostGIS
   db:
-    image: postgis/postgis:15-3.3
+    build:
+      context: .
+      dockerfile: Dockerfile.db
     container_name: scau-db
     restart: unless-stopped
     environment:
@@ -13,6 +15,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./scau-archive-insight/sql:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -27,27 +30,50 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      ai-assistant:
+        condition: service_started
     ports:
       - "8080:8080"
     environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: scau_archive
-      DB_USER: postgres
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-scau_archive}
+      DB_USER: ${DB_USER:-postgres}
       DB_PASS: ${DB_PASS:-123456}
       GLM_API_KEY: ${GLM_API_KEY:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
       LLM_MODEL: ${LLM_MODEL:-glm-4v-plus-0111}
+      AI_BASE_URL: http://ai-assistant:8765
     volumes:
+      # 文件上传存储（Docker 命名卷，换机器自动创建）
       - storage_data:/app/storage
       # PaddlePaddle 模型缓存（持久化，避免每次下载 1.8GB）
       - paddle_models:/app/models/.paddlex
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/v3/api-docs > /dev/null 2>&1 || exit 1"]
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/v3/api-docs')"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  # Python AI 助手服务（FastAPI，端口 8765）
+  ai-assistant:
+    build: ./scau-archive-insight
+    container_name: scau-ai
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    command: /app/.venv/bin/python3 /app/src/main/python/ai_assistant/main.py
+    environment:
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-scau_archive}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASS: ${DB_PASS:-123456}
+      GLM_API_KEY: ${GLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
+      LLM_MODEL: ${LLM_MODEL:-glm-4v-plus-0111}
 
   # Vue 3 前端（Nginx）
   frontend:

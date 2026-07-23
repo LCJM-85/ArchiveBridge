@@ -1,0 +1,199 @@
+<mxfile host="Electron" agent="Cursor">
+  <diagram id="fig10-rag-ablation" name="图10-RAG消融实验对比">
+    <mxGraphModel dx="1201" dy="828" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="980" pageHeight="560" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#1B4F72;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;" value="&lt;font style=&quot;font-size:16px;&quot;&gt;&lt;b&gt;RAG 消融实验对比&lt;/b&gt;&lt;/font&gt;&lt;font style=&quot;font-size:11px;color:#AED6F1;&quot;&gt;　无 RAG vs 有 RAG · AI 助手问答质量&lt;/font&gt;" vertex="1">
+          <mxGeometry height="42" width="900" x="40" y="24" as="geometry" />
+        </mxCell>
+        <mxCell id="left" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D5D8DC;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="400" width="360" x="40" y="86" as="geometry" />
+        </mxCell>
+        <mxCell id="left-badge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#1B4F72;strokeColor=none;fontColor=#FFFFFF;fontFamily=Consolas;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;" value="(a)" vertex="1">
+          <mxGeometry height="22" width="32" x="56" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="left-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=13;fontStyle=1;fontColor=#1B4F72;" value="平均得分（1–5 分）" vertex="1">
+          <mxGeometry height="26" width="200" x="96" y="96" as="geometry" />
+        </mxCell>
+        <mxCell id="plot" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#EBEDEF;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="280" width="260" x="100" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="g5" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#E5E7E9;strokeWidth=1;dashed=1;dashPattern=3 3;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="140" as="sourcePoint" />
+            <mxPoint x="360" y="140" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g4" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#E5E7E9;strokeWidth=1;dashed=1;dashPattern=3 3;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="196" as="sourcePoint" />
+            <mxPoint x="360" y="196" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g3" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#E5E7E9;strokeWidth=1;dashed=1;dashPattern=3 3;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="252" as="sourcePoint" />
+            <mxPoint x="360" y="252" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g2" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#E5E7E9;strokeWidth=1;dashed=1;dashPattern=3 3;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="308" as="sourcePoint" />
+            <mxPoint x="360" y="308" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="g1" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#E5E7E9;strokeWidth=1;dashed=1;dashPattern=3 3;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="364" as="sourcePoint" />
+            <mxPoint x="360" y="364" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="yaxis" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#2C3E50;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="140" as="sourcePoint" />
+            <mxPoint x="100" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="xaxis" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#2C3E50;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="100" y="420" as="sourcePoint" />
+            <mxPoint x="360" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="y5" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=right;fontFamily=Consolas;fontSize=11;fontColor=#7F8C8D;" value="5" vertex="1">
+          <mxGeometry height="20" width="34" x="60" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="y4" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=right;fontFamily=Consolas;fontSize=11;fontColor=#7F8C8D;" value="4" vertex="1">
+          <mxGeometry height="20" width="34" x="60" y="186" as="geometry" />
+        </mxCell>
+        <mxCell id="y3" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=right;fontFamily=Consolas;fontSize=11;fontColor=#7F8C8D;" value="3" vertex="1">
+          <mxGeometry height="20" width="34" x="60" y="242" as="geometry" />
+        </mxCell>
+        <mxCell id="y2" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=right;fontFamily=Consolas;fontSize=11;fontColor=#7F8C8D;" value="2" vertex="1">
+          <mxGeometry height="20" width="34" x="60" y="298" as="geometry" />
+        </mxCell>
+        <mxCell id="y1" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=right;fontFamily=Consolas;fontSize=11;fontColor=#7F8C8D;" value="1" vertex="1">
+          <mxGeometry height="20" width="34" x="60" y="354" as="geometry" />
+        </mxCell>
+        <mxCell id="y0" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=right;fontFamily=Consolas;fontSize=11;fontColor=#7F8C8D;" value="0" vertex="1">
+          <mxGeometry height="20" width="34" x="60" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="bar-no" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#95A5A6;strokeColor=#7F8C8D;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="174" width="70" x="140" y="246" as="geometry" />
+        </mxCell>
+        <mxCell id="v-no" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Consolas;fontSize=12;fontStyle=1;fontColor=#566573;" value="3.1" vertex="1">
+          <mxGeometry height="22" width="70" x="140" y="222" as="geometry" />
+        </mxCell>
+        <mxCell id="xl-no" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Microsoft YaHei;fontSize=12;fontColor=#566573;" value="无 RAG" vertex="1">
+          <mxGeometry height="24" width="90" x="130" y="428" as="geometry" />
+        </mxCell>
+        <mxCell id="bar-yes" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#2E86AB;strokeColor=#1B4F72;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="258" width="70" x="260" y="162" as="geometry" />
+        </mxCell>
+        <mxCell id="v-yes" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Consolas;fontSize=13;fontStyle=1;fontColor=#1B4F72;" value="4.6" vertex="1">
+          <mxGeometry height="24" width="70" x="260" y="136" as="geometry" />
+        </mxCell>
+        <mxCell id="xl-yes" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Microsoft YaHei;fontSize=12;fontStyle=1;fontColor=#1B4F72;" value="有 RAG" vertex="1">
+          <mxGeometry height="24" width="90" x="250" y="428" as="geometry" />
+        </mxCell>
+        <mxCell id="delta1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#D5F5E3;strokeColor=#27AE60;strokeWidth=1;fontColor=#1E8449;fontFamily=Consolas;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;" value="+1.5 ↑" vertex="1">
+          <mxGeometry height="24" width="70" x="300" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="right1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D5D8DC;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="400" width="250" x="420" y="86" as="geometry" />
+        </mxCell>
+        <mxCell id="r1-badge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#1B4F72;strokeColor=none;fontColor=#FFFFFF;fontFamily=Consolas;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;" value="(b)" vertex="1">
+          <mxGeometry height="22" width="32" x="436" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="r1-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=13;fontStyle=1;fontColor=#1B4F72;" value="准确率（%）" vertex="1">
+          <mxGeometry height="26" width="140" x="476" y="96" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-no-bg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#EBEDEF;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="36" width="180" x="460" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-no" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#95A5A6;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="36" width="130" x="460" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-no-l" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Microsoft YaHei;fontSize=12;fontColor=#566573;" value="无 RAG" vertex="1">
+          <mxGeometry height="24" width="80" x="460" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-no-v" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Consolas;fontSize=13;fontStyle=1;fontColor=#FFFFFF;" value="72%" vertex="1">
+          <mxGeometry height="36" width="60" x="470" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-yes-bg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#D6EAF8;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="36" width="180" x="460" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-yes" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#2E86AB;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="36" width="169" x="460" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-yes-l" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Microsoft YaHei;fontSize=12;fontStyle=1;fontColor=#1B4F72;" value="有 RAG" vertex="1">
+          <mxGeometry height="24" width="80" x="460" y="250" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-yes-v" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Consolas;fontSize=13;fontStyle=1;fontColor=#FFFFFF;" value="94%" vertex="1">
+          <mxGeometry height="36" width="60" x="470" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-delta" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#D5F5E3;strokeColor=#27AE60;strokeWidth=1;fontColor=#1E8449;fontFamily=Microsoft YaHei;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;" value="准确率提升 +22 pp" vertex="1">
+          <mxGeometry height="32" width="180" x="460" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="acc-note" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#AEB6BF;fontStyle=2;" value="人工评测 50 题" vertex="1">
+          <mxGeometry height="20" width="180" x="460" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="right2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FAFBFC;strokeColor=#D5D8DC;strokeWidth=1.5;" value="" vertex="1">
+          <mxGeometry height="400" width="250" x="690" y="86" as="geometry" />
+        </mxCell>
+        <mxCell id="r2-badge" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=40;fillColor=#1B4F72;strokeColor=none;fontColor=#FFFFFF;fontFamily=Consolas;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;" value="(c)" vertex="1">
+          <mxGeometry height="22" width="32" x="706" y="98" as="geometry" />
+        </mxCell>
+        <mxCell id="r2-title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=13;fontStyle=1;fontColor=#1B4F72;" value="幻觉次数" vertex="1">
+          <mxGeometry height="26" width="120" x="746" y="96" as="geometry" />
+        </mxCell>
+        <mxCell id="hal-no" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#95A5A6;strokeColor=#7F8C8D;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="200" width="70" x="730" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="hal-no-v" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Consolas;fontSize=18;fontStyle=1;fontColor=#566573;" value="11" vertex="1">
+          <mxGeometry height="28" width="70" x="730" y="168" as="geometry" />
+        </mxCell>
+        <mxCell id="hal-no-l" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Microsoft YaHei;fontSize=11;fontColor=#566573;" value="无 RAG" vertex="1">
+          <mxGeometry height="24" width="90" x="720" y="408" as="geometry" />
+        </mxCell>
+        <mxCell id="hal-yes" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#2E86AB;strokeColor=#1B4F72;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="36" width="70" x="830" y="364" as="geometry" />
+        </mxCell>
+        <mxCell id="hal-yes-v" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Consolas;fontSize=18;fontStyle=1;fontColor=#1B4F72;" value="2" vertex="1">
+          <mxGeometry height="28" width="70" x="830" y="332" as="geometry" />
+        </mxCell>
+        <mxCell id="hal-yes-l" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontFamily=Microsoft YaHei;fontSize=11;fontStyle=1;fontColor=#1B4F72;" value="有 RAG" vertex="1">
+          <mxGeometry height="24" width="90" x="820" y="408" as="geometry" />
+        </mxCell>
+        <mxCell id="hal-base" edge="1" parent="1" style="endArrow=none;html=1;strokeColor=#2C3E50;strokeWidth=1.5;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="710" y="400" as="sourcePoint" />
+            <mxPoint x="920" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hal-delta" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#FADBD8;strokeColor=#E74C3C;strokeWidth=1;fontColor=#922B21;fontFamily=Microsoft YaHei;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;" value="幻觉 ↓ 81.8%" vertex="1">
+          <mxGeometry height="28" width="160" x="730" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="leg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#F8F9F9;strokeColor=#D5D8DC;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="36" width="900" x="40" y="504" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1" parent="1" style="rounded=0;fillColor=#95A5A6;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="14" width="16" x="280" y="514" as="geometry" />
+        </mxCell>
+        <mxCell id="lg1t" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Microsoft YaHei;fontSize=11;fontColor=#34495E;" value="无 RAG（仅 LLM）" vertex="1">
+          <mxGeometry height="22" width="130" x="302" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2" parent="1" style="rounded=0;fillColor=#2E86AB;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="14" width="16" x="460" y="514" as="geometry" />
+        </mxCell>
+        <mxCell id="lg2t" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Microsoft YaHei;fontSize=11;fontColor=#34495E;" value="有 RAG（检索增强）" vertex="1">
+          <mxGeometry height="22" width="150" x="482" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="lg3t" parent="1" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontFamily=Microsoft YaHei;fontSize=10;fontColor=#95A5A6;fontStyle=2;" value="人工评分量表 1–5 · 幻觉=与事实不符的陈述次数" vertex="1">
+          <mxGeometry height="22" width="260" x="660" y="510" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
