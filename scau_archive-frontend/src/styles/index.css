@@ -614,3 +614,115 @@ body {
   background: rgba(0, 0, 0, 0.35) !important;
   border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
+
+/* ===================== RESPONSIVE / MOBILE ===================== */
+
+/* 卡片头部：搜索/操作栏换行 */
+@media (max-width: 768px) {
+  .card-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+  .card-header-right {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+  }
+  .card-header-right .el-input,
+  .card-header-right .el-date-picker,
+  .card-header-right .el-select,
+  .card-header-right .el-button {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  .card-header-right .el-date-picker {
+    width: auto !important;
+  }
+  .card-header-right .el-input {
+    width: 100% !important;
+  }
+
+  /* 筛选栏 */
+  .filter-bar {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .filter-right {
+    width: 100% !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .filter-right .el-select,
+  .filter-right .el-button {
+    flex: 1 1 auto !important;
+  }
+
+  /* 图表高度缩小 */
+  .chart-container {
+    height: 260px !important;
+  }
+  .chart-body {
+    height: 220px !important;
+  }
+  .map-chart {
+    height: 300px !important;
+  }
+
+  /* 表格水平滚动 */
+  .el-table {
+    overflow-x: auto !important;
+  }
+  .el-table__body-wrapper {
+    overflow-x: auto !important;
+  }
+
+  /* 分页居中 */
+  .pagination-wrap {
+    justify-content: center !important;
+  }
+  .pagination-wrap .el-pagination {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+
+  /* el-row 内表单垂直排列 */
+  .el-row .el-col {
+    width: 100% !important;
+  }
+
+  /* 预览卡片网格 */
+  .overview-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* 指标卡片 */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* 预测概览 */
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-container {
+    height: 220px !important;
+  }
+  .chart-body {
+    height: 180px !important;
+  }
+  .map-chart {
+    height: 250px !important;
+  }
+  .overview-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .metrics-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

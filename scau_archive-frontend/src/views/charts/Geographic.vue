@@ -202,5 +202,23 @@ onBeforeUnmount(() => {
   .geo-container {
     grid-template-columns: 1fr;
   }
+  .map-chart {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .geo-container {
+    min-height: auto;
+  }
+  .map-section {
+    min-height: auto;
+  }
+  .map-chart {
+    height: 300px;
+  }
+  .rank-chart {
+    min-height: 300px;
+  }
 }
 </style>

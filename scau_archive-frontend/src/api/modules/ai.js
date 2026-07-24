@@ -8,7 +8,7 @@ export function sendChatMessageStream(data, { onStatus, onToken, onDone, onError
   const token = localStorage.getItem('token')
   const controller = new AbortController()
 
-  fetch('http://localhost:8080/api/ai/chat/stream', {
+  fetch('/api/ai/chat/stream', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

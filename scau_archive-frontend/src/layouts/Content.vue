@@ -86,4 +86,10 @@ const componentNames = computed(() =>
   flex: 1;
   overflow: auto;
 }
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: 12px;
+  }
+}
 </style>

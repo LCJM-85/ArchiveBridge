@@ -1,6 +1,9 @@
 <template>
   <el-header class="header">
     <div class="left">
+      <el-button text class="hamburger" @click="$emit('toggle-sidebar')">
+        <el-icon size="20"><Operation /></el-icon>
+      </el-button>
       <div class="logo">
         <el-icon size="20" class="logo-icon"><HomeFilled /></el-icon>
         <span class="title">招生学籍档案管理系统</span>
@@ -14,7 +17,7 @@
     </div>
 
     <div class="right">
-      <el-button text @click="toggleFullScreen">
+      <el-button text class="desktop-only" @click="toggleFullScreen">
         <el-icon size="18"><FullScreen /></el-icon>
       </el-button>
 
@@ -37,14 +40,14 @@
         />
       </el-tooltip>
 
-      <el-button text>
+      <el-button text class="desktop-only">
         <el-icon size="18"><Bell /></el-icon>
       </el-button>
 
       <el-dropdown>
         <div class="user-info">
           <el-icon size="18" class="user-icon"><User /></el-icon>
-          <span>{{ currentUsername || '管理员' }}</span>
+          <span class="desktop-only-inline">{{ currentUsername || '管理员' }}</span>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
@@ -76,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, inject } from 'vue'
 import { ElMessage } from 'element-plus'
 import { storeToRefs } from 'pinia'
 import { useMenuStore } from '@/store/menu'
@@ -92,7 +95,8 @@ import {
   Sunny,
   Moon,
   Bell,
-  User
+  User,
+  Operation
 } from '@element-plus/icons-vue'
 
 const menuStore = useMenuStore()
@@ -100,6 +104,8 @@ const tabStore = useTabStore()
 const userStore = useUserStore()
 const { activeTitle } = storeToRefs(menuStore)
 const { currentUsername } = storeToRefs(userStore)
+
+defineEmits(['toggle-sidebar'])
 
 const breadcrumbList = ref(['首页', activeTitle])
 
@@ -205,5 +211,34 @@ function logout() {
 
 .user-icon {
   color: var(--color-primary);
+}
+
+/* ===== Mobile responsive ===== */
+.hamburger {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: inline-flex;
+  }
+  .header {
+    padding: 0 12px;
+  }
+  .breadcrumb {
+    display: none;
+  }
+  .desktop-only {
+    display: none !important;
+  }
+  .desktop-only-inline {
+    display: none !important;
+  }
+  .title {
+    font-size: 14px !important;
+  }
+  .right {
+    gap: 2px;
+  }
 }
 </style>

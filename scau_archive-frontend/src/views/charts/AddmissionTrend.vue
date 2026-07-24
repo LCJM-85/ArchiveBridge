@@ -367,4 +367,10 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 768px) {
+  .chart-container {
+    height: 280px;
+  }
+}
 </style>

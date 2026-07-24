@@ -1,5 +1,5 @@
 <template>
-  <el-aside width="220px" class="sidebar">
+  <el-aside width="220px" class="sidebar" :class="{ 'sidebar-mobile': isMobile && visible }">
     <div class="logo">
       <div class="logo-icon">
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
@@ -107,12 +107,18 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, inject, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { DataLine, Files, House, Upload, Setting, DataBoard, Document, Cpu, Collection, ChatDotSquare } from '@element-plus/icons-vue'
 import { useMenuStore } from '@/store/menu'
 import { useTabStore } from '@/store/tab'
 import { useUserStore } from '@/store/user'
+
+const props = defineProps({
+  visible: { type: Boolean, default: true }
+})
+const emit = defineEmits(['close'])
+const isMobile = inject('isMobile', ref(false))
 
 const menuStore = useMenuStore()
 const tabStore = useTabStore()
@@ -192,5 +198,23 @@ const handleSelect = (menuKey) => {
   font-size: 11px;
   color: var(--sidebar-text);
   opacity: 0.5;
+}
+
+/* ===== Mobile responsive ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: none;
+  }
+  .sidebar.sidebar-mobile {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  }
 }
 </style>
