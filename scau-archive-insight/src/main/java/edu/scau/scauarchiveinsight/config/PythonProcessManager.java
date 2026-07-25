@@ -42,8 +42,15 @@ public class PythonProcessManager implements InitializingBean {
     @Value("${DB_PASS:123456}")
     private String dbPass;
 
+    private volatile boolean running = true;
+
     @Override
     public void afterPropertiesSet() {
+        startPythonProcess();
+        startWatchdog();
+    }
+
+    private void startPythonProcess() {
         String userDir = System.getProperty("user.dir");
         File scriptInSub = new File(userDir + "/src/main/python/ai_assistant/main.py");
         File scriptInRoot = new File(userDir + "/scau-archive-insight/src/main/python/ai_assistant/main.py");
@@ -71,8 +78,8 @@ public class PythonProcessManager implements InitializingBean {
 
         try {
             pythonProcess = pb.start();
+            log.info("AI 助手 Python 服务启动中 (pid={})...", pythonProcess.pid());
 
-            // 读取 Python 进程的输出和错误，写入日志
             Thread reader = new Thread(() -> {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()))) {
                     String line;
@@ -90,7 +97,6 @@ public class PythonProcessManager implements InitializingBean {
             reader.setDaemon(true);
             reader.start();
 
-            // 等一秒检查进程是否还活着
             Thread.sleep(1000);
             if (!pythonProcess.isAlive()) {
                 log.error("AI 助手 Python 服务启动后异常退出，请检查配置");
@@ -99,6 +105,27 @@ public class PythonProcessManager implements InitializingBean {
             log.error("启动 AI 助手 Python 服务失败", e);
         } catch (InterruptedException ignored) {
         }
+    }
+
+    private void startWatchdog() {
+        Thread watchdog = new Thread(() -> {
+            while (running) {
+                try {
+                    Thread.sleep(30_000);
+                } catch (InterruptedException ignored) {
+                    break;
+                }
+                if (!running) break;
+
+                if (pythonProcess != null && !pythonProcess.isAlive()) {
+                    log.warn("AI 助手 Python 服务已退出 (退出码: {})，正在重启...", pythonProcess.exitValue());
+                    startPythonProcess();
+                }
+            }
+        }, "python-watchdog");
+        watchdog.setDaemon(true);
+        watchdog.start();
+        log.debug("AI 助手 watchdog 已启动（每 30 秒检查一次）");
     }
 
     @PreDestroy

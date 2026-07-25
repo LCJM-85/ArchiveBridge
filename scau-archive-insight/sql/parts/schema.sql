@@ -334,14 +334,14 @@ CREATE EXTENSION IF NOT EXISTS vector;
 CREATE TABLE IF NOT EXISTS public.knowledge_base (
     id           SERIAL PRIMARY KEY,
     title        VARCHAR(255) NOT NULL,
-    file_type    VARCHAR(20),
-    file_path    TEXT,
-    source       VARCHAR(50),
+    file_type    VARCHAR(20) NOT NULL,
+    source       VARCHAR(50) DEFAULT 'upload',
     url          TEXT,
     chunk_count  INTEGER DEFAULT 0,
     status       VARCHAR(20) DEFAULT 'parsing',
+    create_time  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     error_msg    TEXT,
-    create_time  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    file_path    TEXT
 );
 
 -- 知识库文本块表（含向量）

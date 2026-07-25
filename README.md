@@ -25,26 +25,24 @@ cd scau-archive-insight
 cp .env.example .env
 # 编辑 .env，填入 GLM_API_KEY=your_api_key
 
-# 3. 准备数据库备份
-PGPASSWORD=123456 pg_dump -h localhost -U postgres -d scau_archive > backup.sql
-
-# 4. 启动（首次构建需下载 PaddlePaddle ~1.8GB，约 10-20 分钟）
+# 3. 启动（首次构建需下载 PaddlePaddle ~1.8GB，约 10-20 分钟）
 docker compose up -d
 
-# 5. 导入数据
-docker cp backup.sql scau-db:/tmp/
-docker exec scau-db psql -U postgres -d scau_archive -f /tmp/backup.sql
-
-# 6. 打开 http://localhost
+# 4. 打开 http://localhost
+# 登录：admin / 123456
 ```
+
+> 首次启动时，数据库会自动初始化表结构、维度数据及演示业务数据（280 条录取、215 条毕业、280 条学籍），无需手动导入。
 
 ### 方式二：本地开发
 
 **1. 数据库**
 ```bash
 # 需要 PostgreSQL 15+ + PostGIS
-PGPASSWORD=123456 psql -h localhost -U postgres -d scau_archive < backup.sql
+PGPASSWORD=123456 psql -h localhost -U postgres -f scau-archive-insight/sql/init.sql
 ```
+
+> 数据库初始化 SQL 文件位于 `sql/` 目录，`init.sql` 为主入口，通过 `\ir` 依次加载 `parts/` 下的表结构、维度数据、地理数据和演示业务数据。
 
 **2. 后端**（端口 8080）
 ```bash
@@ -129,6 +127,13 @@ Header 右上角「脱敏/原始」开关 — 后端 Jackson 注解驱动，不�
 SCAU/
 ├── docker-compose.yml              # Docker 编排（db + backend + frontend）
 ├── .env.example                    # 环境变量模板
+├── sql/                            # 数据库初始化
+│   ├── init.sql                    #   主入口，Docker 首次启动自动执行
+│   └── parts/
+│       ├── schema.sql              #   表结构（DDL）
+│       ├── seed-data.sql           #   维度表 + 系统用户
+│       ├── province-geo.sql        #   省份地理边界（PostGIS）
+│       └── demo-data.sql           #   演示业务数据
 ├── scau-archive-insight/           # Spring Boot 后端
 │   ├── Dockerfile
 │   └── src/main/
