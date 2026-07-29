@@ -39,7 +39,7 @@ public class PythonProcessManager implements InitializingBean {
     @Value("${DB_USER:postgres}")
     private String dbUser;
 
-    @Value("${DB_PASS:123456}")
+    @Value("${DB_PASS}")
     private String dbPass;
 
     private volatile boolean running = true;

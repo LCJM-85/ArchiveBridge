@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:scau_archive}
     username: ${DB_USER:postgres}
-    password: ${DB_PASS:123456}
+    password: ${DB_PASS}
     type: com.alibaba.druid.pool.DruidDataSource
 
     druid:
@@ -78,7 +78,7 @@ springdoc:
 # JWT 核心配置（和之前的 JwtUtils 工具类对应）
 jwt:
   # 密钥：必须32位以上（生产环境建议用环境变量注入，不要硬编码）
-  secret: 8Z7x9sKpR2tG5bN3aQ6dF1cV4wH7jY0u
+  secret: ${JWT_SECRET}
   # Token 过期时间：单位秒（默认7天=604800秒）
   expiration: 86400
   # Token 前缀（前端请求头携带时用，如 Bearer xxxxx）
