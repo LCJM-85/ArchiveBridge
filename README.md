@@ -21,9 +21,10 @@
 git clone https://github.com/your/scau-archive-insight.git
 cd scau-archive-insight
 
-# 2. 配置 AI 密钥（如不需要 AI 对话可跳过）
+# 2. 配置 AI 密钥和DB_PASS(数据库密码)
 cp .env.example .env
 # 编辑 .env，填入 GLM_API_KEY=your_api_key
+# 填入DB_PASS(必填！！)
 
 # 3. 启动（首次构建需下载 PaddlePaddle ~1.8GB，约 10-20 分钟）
 docker compose up -d
