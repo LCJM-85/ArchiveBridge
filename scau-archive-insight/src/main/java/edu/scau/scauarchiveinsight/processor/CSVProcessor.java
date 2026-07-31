@@ -40,6 +40,10 @@ public class CSVProcessor {
     }
 
     public Map<String, Object> process(String filePath, String archiveType, String provinceName, String admissionDate) {
+        return process(filePath, archiveType, provinceName, admissionDate, null);
+    }
+
+    public Map<String, Object> process(String filePath, String archiveType, String provinceName, String admissionDate, String degreeName) {
         List<Map<String, String>> rows = new ArrayList<>();
         String fileType = "CSV";
 
@@ -108,6 +112,11 @@ public class CSVProcessor {
                 if (admissionDate != null && !admissionDate.isBlank()) {
                     for (Map<String, String> record : mappedData) {
                         record.putIfAbsent("admission_date", admissionDate);
+                    }
+                }
+                if (degreeName != null && !degreeName.isBlank()) {
+                    for (Map<String, String> record : mappedData) {
+                        record.putIfAbsent("degree_name", degreeName);
                     }
                 }
                 for (Map<String, String> record : mappedData) {

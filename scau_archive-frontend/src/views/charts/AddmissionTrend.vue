@@ -14,6 +14,9 @@
           <el-select v-model="endYear" placeholder="结束年" clearable style="width:120px;margin-right:12px">
             <el-option v-for="y in yearOptions" :key="y" :label="y" :value="y" />
           </el-select>
+          <el-select v-model="degreeName" placeholder="培养层次" clearable style="width:130px;margin-right:12px">
+            <el-option v-for="d in degrees" :key="d.degreeId" :label="d.degreeName" :value="d.degreeName" />
+          </el-select>
           <el-button type="primary" :loading="loading" @click="fetchData">刷新</el-button>
         </div>
       </div>
@@ -50,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
+import { ref, onMounted, onActivated, onBeforeUnmount, watch } from 'vue'
 import { TrendCharts } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import {
@@ -59,10 +62,13 @@ import {
   fetchTrendProvince,
   fetchTrendScore,
   fetchTrendGender,
+  fetchDegrees,
 } from '@/api/modules/admission'
 
 const startYear = ref(null)
 const endYear = ref(null)
+const degreeName = ref(null)
+const degrees = ref([])
 const loading = ref(false)
 
 const currentYear = new Date().getFullYear()
@@ -74,7 +80,7 @@ const provinceChartRef = ref(null)
 const scoreChartRef = ref(null)
 const genderChartRef = ref(null)
 
-const chartInstances = reactive({})
+const chartInstances = {}
 
 function getOrCreateChart(key, dom) {
   if (!dom) return null
@@ -271,11 +277,19 @@ function updateGenderChart(data) {
   })
 }
 
+async function fetchDegreesList() {
+  try {
+    const res = await fetchDegrees()
+    degrees.value = res.data.data || []
+  } catch { degrees.value = [] }
+}
+
 async function fetchData() {
   loading.value = true
   const params = {}
   if (startYear.value) params.startYear = startYear.value
   if (endYear.value) params.endYear = endYear.value
+  if (degreeName.value) params.degreeName = degreeName.value
 
   try {
     const [yearly, major, province, score, gender] = await Promise.all([
@@ -301,10 +315,17 @@ function handleResize() {
   Object.values(chartInstances).forEach(chart => chart?.resize())
 }
 
-watch([startYear, endYear], fetchData)
+watch([startYear, endYear, degreeName], fetchData)
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  fetchDegreesList()
+  fetchData()
+})
+
+onActivated(() => {
+  // keep-alive 从缓存恢复时：刷新数据 + 重设图表尺寸（否则切回页面数据是旧的、图表可能错位）
+  handleResize()
   fetchData()
 })
 

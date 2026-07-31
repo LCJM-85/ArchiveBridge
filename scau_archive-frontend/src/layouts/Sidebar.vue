@@ -94,6 +94,15 @@
         <el-menu-item index="meta">
           <span>元数据管理</span>
         </el-menu-item>
+        <el-menu-item index="college">
+          <span>学院管理</span>
+        </el-menu-item>
+        <el-menu-item index="major">
+          <span>专业管理</span>
+        </el-menu-item>
+        <el-menu-item index="class">
+          <span>班级管理</span>
+        </el-menu-item>
         <el-menu-item index="users" v-if="userRole === 'admin'">
           <span>用户管理</span>
         </el-menu-item>

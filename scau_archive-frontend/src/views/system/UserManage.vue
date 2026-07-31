@@ -118,7 +118,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { fetchUserList, createUser, updateUser, setUserStatus, deleteUser, resetUserPassword } from '@/api/modules/user'
 
@@ -261,6 +261,10 @@ async function handleDelete(row) {
 }
 
 onMounted(() => {
+  fetchData()
+})
+
+onActivated(() => {
   fetchData()
 })
 </script>

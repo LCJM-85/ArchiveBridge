@@ -42,6 +42,7 @@ public class DashboardService {
         result.put("totalGraduates", Optional.ofNullable(admissionFactMapper.dashboardTotalGraduates()).orElse(0));
         result.put("majorCount", Optional.ofNullable(admissionFactMapper.dashboardMajorCount()).orElse(0));
         result.put("avgScore", Optional.ofNullable(admissionFactMapper.dashboardAvgScore()).orElse(0));
+        result.put("degreeDistribution", admissionFactMapper.degreeDistribution());
 
         // 趋势
         result.put("trend", admissionFactMapper.yearlyAdmissionCounts());

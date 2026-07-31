@@ -94,7 +94,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { Plus, Edit, Delete, Search, Refresh, Management } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { fetchMetaDataPage, addMetaData, updateMetaData, deleteMetaData } from '@/api/modules/metadata'
@@ -230,6 +230,8 @@ function handlePageChange(p) {
 }
 
 onMounted(() => fetchPage())
+
+onActivated(() => fetchPage())
 </script>
 
 <style scoped>

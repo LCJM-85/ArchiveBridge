@@ -28,8 +28,9 @@ public class GraduationController {
             @RequestParam(required = false) String createTimeStart,
             @RequestParam(required = false) String createTimeEnd,
             @RequestParam(required = false) String updateTimeStart,
-            @RequestParam(required = false) String updateTimeEnd) {
-        var page = graduationService.page(current, size, keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd);
+            @RequestParam(required = false) String updateTimeEnd,
+            @RequestParam(required = false) String degreeName) {
+        var page = graduationService.page(current, size, keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd, degreeName);
         Map<String, Object> data = new HashMap<>();
         data.put("records", page.getRecords());
         data.put("total", page.getTotal());

@@ -70,6 +70,10 @@ public class PDFProcessor {
     }
 
     public List<Map<String, Object>> process(String pdfPath, String archiveType, String provinceName, String admissionDate) {
+        return process(pdfPath, archiveType, provinceName, admissionDate, null);
+    }
+
+    public List<Map<String, Object>> process(String pdfPath, String archiveType, String provinceName, String admissionDate, String degreeName) {
         List<Map<String, Object>> results = new ArrayList<>();
         String fileName = Paths.get(pdfPath).getFileName().toString();
         String fileType = "PDF";
@@ -177,6 +181,11 @@ public class PDFProcessor {
                 if (admissionDate != null && !admissionDate.isBlank()) {
                     for (Map<String, String> record : allData) {
                         record.putIfAbsent("admission_date", admissionDate);
+                    }
+                }
+                if (degreeName != null && !degreeName.isBlank()) {
+                    for (Map<String, String> record : allData) {
+                        record.putIfAbsent("degree_name", degreeName);
                     }
                 }
 

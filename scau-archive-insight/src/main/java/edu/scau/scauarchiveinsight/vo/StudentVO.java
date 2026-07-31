@@ -15,6 +15,8 @@ public class StudentVO {
     @Sensitive(DesensitizeUtil.SensitiveType.ID_CARD)
     private String idCard;
     private String gender;
+    private Integer degreeId;
+    private String degreeName;
     private Integer provinceId;
     private String provinceName;
     private Integer majorId;

@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onActivated, onBeforeUnmount } from 'vue'
 import { Connection, ArrowRight } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { fetchSankeyData } from '@/api/modules/admission'
@@ -144,6 +144,11 @@ function handleResize() {
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  fetchData()
+})
+
+onActivated(() => {
+  handleResize()
   fetchData()
 })
 

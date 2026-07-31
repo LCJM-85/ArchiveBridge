@@ -21,10 +21,10 @@
 git clone https://github.com/your/scau-archive-insight.git
 cd scau-archive-insight
 
-# 2. 配置 AI 密钥和DB_PASS(数据库密码)
+# 2. 配置 AI 密钥和 DB_PASSWORD(数据库密码)
 cp .env.example .env
 # 编辑 .env，填入 GLM_API_KEY=your_api_key
-# 填入DB_PASS(必填！！)
+# 填入DB_PASSWORD(必填！！)
 
 # 3. 启动（首次构建需下载 PaddlePaddle ~1.8GB，约 10-20 分钟）
 docker compose up -d
@@ -85,6 +85,7 @@ HOME="./models" src/main/python/.venv/Scripts/python \
 | **AI 助手** | SSE 流式对话，自动检索知识库，支持联网搜索 + 19 种数据库查询 |
 | **知识库 (RAG)** | 上传文件或网页链接，自动分块向量化，增强 AI 回答 |
 | **元数据管理** | 自定义字段编码与映射规则 |
+| **学院/专业/班级管理** | 系统管理下维护「学院→专业→班级」三级维度挂载，专业可选培养层次，删除带引用保护 |
 | **数据脱敏** | 身份证号、姓名等敏感信息一键遮挡，不修改原始数据 |
 | **API 文档** | Swagger UI 在线接口文档与调试 |
 
@@ -139,7 +140,7 @@ SCAU/
 │   ├── Dockerfile
 │   └── src/main/
 │       ├── java/edu/scau/scauarchiveinsight/
-│       │   ├── controller/         # 14 个 REST 控制器
+│       │   ├── controller/         # 17 个 REST 控制器
 │       │   ├── service/            # 业务逻辑 + 文件处理器
 │       │   ├── config/             # Security, Swagger, 脱敏等配置
 │       │   ├── processor/          # CSV/Excel/PDF/图片/LLM 处理器

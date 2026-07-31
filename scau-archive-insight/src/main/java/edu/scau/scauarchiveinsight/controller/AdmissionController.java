@@ -46,8 +46,9 @@ public class AdmissionController {
             @RequestParam(required = false) String createTimeStart,
             @RequestParam(required = false) String createTimeEnd,
             @RequestParam(required = false) String updateTimeStart,
-            @RequestParam(required = false) String updateTimeEnd) {
-        var page = admissionService.page(current, size, keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd);
+            @RequestParam(required = false) String updateTimeEnd,
+            @RequestParam(required = false) Integer degreeId) {
+        var page = admissionService.page(current, size, keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd, degreeId);
         Map<String, Object> data = new HashMap<>();
         data.put("records", page.getRecords());
         data.put("total", page.getTotal());
@@ -90,59 +91,70 @@ public class AdmissionController {
         return R.ok(admissionService.listMajors());
     }
 
+    @Operation(summary = "获取学历层次列表")
+    @GetMapping("/degrees")
+    public R<?> degrees() {
+        return R.ok(admissionService.listDegrees());
+    }
+
     @Operation(summary = "年度录取趋势分析")
     @GetMapping("/trend/yearly")
     public R<List<Map<String, Object>>> yearlyTrend(
             @RequestParam(required = false) Integer startYear,
-            @RequestParam(required = false) Integer endYear) {
+            @RequestParam(required = false) Integer endYear,
+            @RequestParam(required = false) String degreeName) {
         if (startYear != null && endYear != null && startYear > endYear) {
             return R.error("startYear must not be greater than endYear");
         }
-        return R.ok(trendAnalysisService.yearlyTrend(startYear, endYear));
+        return R.ok(trendAnalysisService.yearlyTrend(startYear, endYear, degreeName));
     }
 
     @Operation(summary = "专业录取趋势分析")
     @GetMapping("/trend/major")
     public R<List<Map<String, Object>>> majorTrend(
             @RequestParam(required = false) Integer startYear,
-            @RequestParam(required = false) Integer endYear) {
+            @RequestParam(required = false) Integer endYear,
+            @RequestParam(required = false) String degreeName) {
         if (startYear != null && endYear != null && startYear > endYear) {
             return R.error("startYear must not be greater than endYear");
         }
-        return R.ok(trendAnalysisService.majorTrend(startYear, endYear));
+        return R.ok(trendAnalysisService.majorTrend(startYear, endYear, degreeName));
     }
 
     @Operation(summary = "省份录取趋势分析")
     @GetMapping("/trend/province")
     public R<List<Map<String, Object>>> provinceTrend(
             @RequestParam(required = false) Integer startYear,
-            @RequestParam(required = false) Integer endYear) {
+            @RequestParam(required = false) Integer endYear,
+            @RequestParam(required = false) String degreeName) {
         if (startYear != null && endYear != null && startYear > endYear) {
             return R.error("startYear must not be greater than endYear");
         }
-        return R.ok(trendAnalysisService.provinceTrend(startYear, endYear));
+        return R.ok(trendAnalysisService.provinceTrend(startYear, endYear, degreeName));
     }
 
     @Operation(summary = "分数录取趋势分析")
     @GetMapping("/trend/score")
     public R<List<Map<String, Object>>> scoreTrend(
             @RequestParam(required = false) Integer startYear,
-            @RequestParam(required = false) Integer endYear) {
+            @RequestParam(required = false) Integer endYear,
+            @RequestParam(required = false) String degreeName) {
         if (startYear != null && endYear != null && startYear > endYear) {
             return R.error("startYear must not be greater than endYear");
         }
-        return R.ok(trendAnalysisService.scoreTrend(startYear, endYear));
+        return R.ok(trendAnalysisService.scoreTrend(startYear, endYear, degreeName));
     }
 
     @Operation(summary = "性别录取趋势分析")
     @GetMapping("/trend/gender")
     public R<List<Map<String, Object>>> genderTrend(
             @RequestParam(required = false) Integer startYear,
-            @RequestParam(required = false) Integer endYear) {
+            @RequestParam(required = false) Integer endYear,
+            @RequestParam(required = false) String degreeName) {
         if (startYear != null && endYear != null && startYear > endYear) {
             return R.error("startYear must not be greater than endYear");
         }
-        return R.ok(trendAnalysisService.genderTrend(startYear, endYear));
+        return R.ok(trendAnalysisService.genderTrend(startYear, endYear, degreeName));
     }
 
     @Operation(summary = "省份录取统计")
@@ -165,9 +177,10 @@ public class AdmissionController {
 
     @Operation(summary = "预测未来录取人数")
     @GetMapping("/predict/next-years")
-    public R<Map<String, Object>> predict(@RequestParam(defaultValue = "3") int years) {
+    public R<Map<String, Object>> predict(@RequestParam(defaultValue = "3") int years,
+                                          @RequestParam(required = false) String degreeName) {
         try {
-            return R.ok(predictionService.predictNextYears(years));
+            return R.ok(predictionService.predictNextYears(years, degreeName));
         } catch (Exception e) {
             return R.error("预测失败: " + e.getMessage());
         }

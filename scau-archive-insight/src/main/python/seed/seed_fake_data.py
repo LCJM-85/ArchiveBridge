@@ -57,16 +57,19 @@ for y in years:
         score_map = {1:580, 2:575, 3:565, 4:555, 5:560, 6:570, 7:550, 8:545}
         score = score_map.get(maj_id, 560) + random.randint(0, 29)
 
+        # 培养层次：本科为主，少量硕士/博士（确定性分配，不消耗 random 序列）
+        level_id = 1 if base_stu % 10 < 8 else (2 if base_stu % 10 == 8 else 3)
+
         # 录取
         cur.execute(
-            "INSERT INTO admission_fact (student_no, exam_no, name, id_card, gender, province_id, major_id, admission_score, admission_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-            (student_no, exam_no, name, id_card, gender, prov_id, maj_id, score, f"{y}-09-01")
+            "INSERT INTO admission_fact (student_no, exam_no, name, id_card, gender, province_id, major_id, admission_score, admission_date, degree_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+            (student_no, exam_no, name, id_card, gender, prov_id, maj_id, score, f"{y}-09-01", level_id)
         )
 
         # 学籍
         cur.execute(
-            "INSERT INTO student_fact (student_no, name, id_card, gender, major_id, province_id, admission_date) VALUES (%s,%s,%s,%s,%s,%s,%s)",
-            (student_no, name, id_card, gender, maj_id, prov_id, f"{y}-09-01")
+            "INSERT INTO student_fact (student_no, name, id_card, gender, major_id, province_id, admission_date, degree_id) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+            (student_no, name, id_card, gender, maj_id, prov_id, f"{y}-09-01", level_id)
         )
 
         # 毕业（2020-2023届）

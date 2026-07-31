@@ -23,6 +23,8 @@ public class StudentFact {
 
     private String gender;
 
+    private Integer degreeId;
+
     private Integer majorId;
 
     private Integer classId;

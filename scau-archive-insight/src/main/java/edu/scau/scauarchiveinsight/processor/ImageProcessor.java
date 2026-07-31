@@ -74,6 +74,10 @@ public class ImageProcessor {
     }
 
     public List<Map<String, Object>> process(List<String> imagePaths, String archiveType, String provinceName, String admissionDate) {
+        return process(imagePaths, archiveType, provinceName, admissionDate, null);
+    }
+
+    public List<Map<String, Object>> process(List<String> imagePaths, String archiveType, String provinceName, String admissionDate, String degreeName) {
         List<Map<String, Object>> results = new ArrayList<>();
 
         for (String imagePath : imagePaths) {
@@ -178,6 +182,11 @@ public class ImageProcessor {
                             if (admissionDate != null && !admissionDate.isBlank()) {
                                 for (Map<String, String> record : dataList) {
                                     record.putIfAbsent("admission_date", admissionDate);
+                                }
+                            }
+                            if (degreeName != null && !degreeName.isBlank()) {
+                                for (Map<String, String> record : dataList) {
+                                    record.putIfAbsent("degree_name", degreeName);
                                 }
                             }
 

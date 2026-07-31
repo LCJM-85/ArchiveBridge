@@ -7,6 +7,9 @@
           <span class="filter-title">智能预测分析</span>
         </div>
         <div class="filter-right">
+          <el-select v-model="degreeName" placeholder="培养层次" clearable style="width:130px;margin-right:8px">
+            <el-option v-for="d in degrees" :key="d.degreeId" :label="d.degreeName" :value="d.degreeName" />
+          </el-select>
           <el-button type="primary" :loading="loading" @click="fetchData">重新预测</el-button>
         </div>
       </div>
@@ -59,14 +62,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onActivated, onBeforeUnmount, watch } from 'vue'
 import { DataAnalysis } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
-import { fetchPrediction } from '@/api/modules/admission'
+import { fetchPrediction, fetchDegrees } from '@/api/modules/admission'
 
 const chartRef = ref(null)
 let chart = null
 const loading = ref(false)
+const degreeName = ref(null)
+const degrees = ref([])
 const historical = ref([])
 const predictions = ref([])
 const metrics = ref({})
@@ -172,7 +177,7 @@ function renderChart(hist, preds) {
 async function fetchData() {
   loading.value = true
   try {
-    const res = await fetchPrediction(3)
+    const res = await fetchPrediction(3, degreeName.value)
     const data = res.data?.data || {}
     historical.value = data.historical || []
     predictions.value = data.predictions || []
@@ -199,8 +204,22 @@ function handleResize() {
   chart?.resize()
 }
 
+async function fetchDegreesList() {
+  try {
+    const res = await fetchDegrees()
+    degrees.value = res.data.data || []
+  } catch { degrees.value = [] }
+}
+
+watch(degreeName, fetchData)
+
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  fetchDegreesList()
+  fetchData()
+})
+
+onActivated(() => {
   fetchData()
 })
 

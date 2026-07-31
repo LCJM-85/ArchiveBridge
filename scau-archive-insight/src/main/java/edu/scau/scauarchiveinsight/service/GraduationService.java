@@ -34,9 +34,10 @@ public class GraduationService {
 
     public IPage<GraduationVO> page(int current, int size, String keyword,
                                     String createTimeStart, String createTimeEnd,
-                                    String updateTimeStart, String updateTimeEnd) {
+                                    String updateTimeStart, String updateTimeEnd,
+                                    String degreeName) {
         Page<GraduationFact> page = new Page<>(current, size);
-        LambdaQueryWrapper<GraduationFact> wrapper = buildQueryWrapper(keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd);
+        LambdaQueryWrapper<GraduationFact> wrapper = buildQueryWrapper(keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd, degreeName);
         wrapper.orderByDesc(GraduationFact::getGraduationDate);
 
         IPage<GraduationFact> result = graduationFactMapper.selectPage(page, wrapper);
@@ -69,8 +70,19 @@ public class GraduationService {
     }
 
     private LambdaQueryWrapper<GraduationFact> buildQueryWrapper(String keyword,
-            String createTimeStart, String createTimeEnd, String updateTimeStart, String updateTimeEnd) {
+            String createTimeStart, String createTimeEnd, String updateTimeStart, String updateTimeEnd,
+            String degreeName) {
         LambdaQueryWrapper<GraduationFact> wrapper = new LambdaQueryWrapper<>();
+        if (degreeName != null && !degreeName.isBlank()) {
+            List<DegreeDim> matchedDegrees = degreeDimMapper.selectList(
+                    new LambdaQueryWrapper<DegreeDim>().like(DegreeDim::getDegreeName, degreeName));
+            if (matchedDegrees.isEmpty()) {
+                wrapper.eq(GraduationFact::getDegreeId, -1);
+            } else {
+                wrapper.in(GraduationFact::getDegreeId,
+                        matchedDegrees.stream().map(DegreeDim::getDegreeId).collect(Collectors.toList()));
+            }
+        }
         if (keyword != null && !keyword.isBlank()) {
             wrapper.and(w -> {
                 w.like(GraduationFact::getStudentNo, keyword)

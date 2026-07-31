@@ -20,7 +20,21 @@
         <span v-if="!archiveType" class="archive-type-hint">请先选择档案类型</span>
         <template v-if="archiveType === 'admission'">
           <span class="archive-type-divider"></span>
-          <span class="archive-type-label">省份：</span>
+          <span class="archive-type-label">
+            培养层次
+            <span style="display:inline-block;color:#f56c6c;font-size:12px;border:1px solid #f56c6c;border-radius:4px;padding:0 5px;margin-left:6px;line-height:16px">必填</span>：
+          </span>
+          <el-select
+            v-model="selectedDegreeName"
+            placeholder="选择培养层次（必选）"
+            size="small"
+            style="width: 150px"
+          >
+            <el-option label="学士" value="学士" />
+            <el-option label="硕士" value="硕士" />
+            <el-option label="博士" value="博士" />
+          </el-select>
+          <span class="archive-type-label">省份<span style="color:#909399;font-size:12px;margin-left:2px">(可选)</span>：</span>
           <el-select
             v-model="selectedProvince"
             placeholder="选择省份（可选）"
@@ -35,7 +49,7 @@
               :value="p.provinceName"
             />
           </el-select>
-          <span class="archive-type-label">录取年份：</span>
+          <span class="archive-type-label">录取年份<span style="color:#909399;font-size:12px;margin-left:2px">(可选)</span>：</span>
           <el-select
             v-model="selectedAdmissionYear"
             placeholder="选择年份（可选）"
@@ -221,6 +235,7 @@ const files = reactive([])
 const provinces = ref([])
 const selectedProvince = ref('')
 const selectedAdmissionYear = ref('')
+const selectedDegreeName = ref('')
 const useLlm = ref(false)
 const llmConfigured = ref(false)
 const admissionYears = computed(() => {
@@ -245,6 +260,7 @@ watch(archiveType, (val) => {
   if (val !== 'admission') {
     selectedProvince.value = ''
     selectedAdmissionYear.value = ''
+    selectedDegreeName.value = ''
   }
 })
 
@@ -350,6 +366,10 @@ async function handleUpload() {
     ElMessage.warning('请先选择档案类型')
     return
   }
+  if (archiveType.value === 'admission' && !selectedDegreeName.value) {
+    ElMessage.warning('请选择培养层次（招生档案必选）')
+    return
+  }
   isUploading.value = true
 
   const toUpload = files.filter((f) => f.status !== 'done')
@@ -369,6 +389,7 @@ async function handleUpload() {
       archiveType.value,
       selectedProvince.value,
       admissionDate,
+      selectedDegreeName.value,
       useLlm.value
     )
 

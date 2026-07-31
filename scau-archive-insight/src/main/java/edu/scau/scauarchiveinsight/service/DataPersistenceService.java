@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import edu.scau.scauarchiveinsight.mapper.AdmissionFactMapper;
 import edu.scau.scauarchiveinsight.mapper.ArchiveFileDimMapper;
 import edu.scau.scauarchiveinsight.mapper.ClassDimMapper;
+import edu.scau.scauarchiveinsight.mapper.CollegeDimMapper;
 import edu.scau.scauarchiveinsight.mapper.DegreeDimMapper;
 import edu.scau.scauarchiveinsight.mapper.DestinationDimMapper;
 import edu.scau.scauarchiveinsight.mapper.GraduationFactMapper;
@@ -13,6 +14,7 @@ import edu.scau.scauarchiveinsight.mapper.StudentFactMapper;
 import edu.scau.scauarchiveinsight.pojo.AdmissionFact;
 import edu.scau.scauarchiveinsight.pojo.ArchiveFileDim;
 import edu.scau.scauarchiveinsight.pojo.ClassDim;
+import edu.scau.scauarchiveinsight.pojo.CollegeDim;
 import edu.scau.scauarchiveinsight.pojo.DegreeDim;
 import edu.scau.scauarchiveinsight.pojo.DestinationDim;
 import edu.scau.scauarchiveinsight.pojo.GraduationFact;
@@ -49,6 +51,8 @@ public class DataPersistenceService {
     private StudentFactMapper studentFactMapper;
     @Autowired
     private ClassDimMapper classDimMapper;
+    @Autowired
+    private CollegeDimMapper collegeDimMapper;
     @Autowired
     private GraduationFactMapper graduationFactMapper;
     @Autowired
@@ -97,7 +101,9 @@ public class DataPersistenceService {
         MajorDim major = fuzzyLookupMajor(majorName);
 
         String className = data.get("class_name");
-        ClassDim classObj = fuzzyLookupClass(className);
+        ClassDim classObj = fuzzyLookupClass(className, major != null ? major.getMajorId() : null);
+
+        DegreeDim degree = resolveDegreeLevel(data.get("degree_name"));
 
         String dateStr = data.get("admission_date");
         LocalDate admissionDate = DateUtil.convertToLocalDate(dateStr);
@@ -113,7 +119,7 @@ public class DataPersistenceService {
         LocalDateTime now = LocalDateTime.now();
 
         // ========== student_fact：去重匹配 student_no → id_card ==========
-        StudentFact studentFact = buildStudentFact(data, province, major, classObj, admissionDate, fileId);
+        StudentFact studentFact = buildStudentFact(data, province, major, classObj, degree, admissionDate, fileId);
         StudentFact existingStudent = null;
 
         String studentNo = data.get("student_no");
@@ -142,7 +148,7 @@ public class DataPersistenceService {
         }
 
         // ========== admission_fact：去重匹配 student_no → id_card → exam_no ==========
-        AdmissionFact admissionFact = buildAdmissionFact(data, province, major, admissionDate, admissionScore, fileId);
+        AdmissionFact admissionFact = buildAdmissionFact(data, province, major, degree, admissionDate, admissionScore, fileId);
 
         AdmissionFact existingAdmission = null;
         if (studentNo != null && !studentNo.isBlank()) {
@@ -259,13 +265,14 @@ public class DataPersistenceService {
     // ===================== 实体构建方法 =====================
 
     private StudentFact buildStudentFact(Map<String, String> data, ProvinceDim province,
-                                          MajorDim major, ClassDim classObj, LocalDate admissionDate,
+                                          MajorDim major, ClassDim classObj, DegreeDim degree, LocalDate admissionDate,
                                           Integer fileId) {
         StudentFact fact = new StudentFact();
         fact.setStudentNo(data.get("student_no"));
         fact.setName(data.get("name"));
         fact.setIdCard(data.get("id_card"));
         fact.setGender(data.get("gender"));
+        if (degree != null) fact.setDegreeId(degree.getDegreeId());
         if (province != null) fact.setProvinceId(province.getProvinceId());
         if (major != null) fact.setMajorId(major.getMajorId());
         if (classObj != null) fact.setClassId(classObj.getClassId());
@@ -275,7 +282,7 @@ public class DataPersistenceService {
     }
 
     private AdmissionFact buildAdmissionFact(Map<String, String> data, ProvinceDim province,
-                                              MajorDim major, LocalDate admissionDate,
+                                              MajorDim major, DegreeDim degree, LocalDate admissionDate,
                                               Integer admissionScore, Integer fileId) {
         AdmissionFact fact = new AdmissionFact();
         fact.setStudentNo(data.get("student_no"));
@@ -283,6 +290,7 @@ public class DataPersistenceService {
         fact.setName(data.get("name"));
         fact.setIdCard(data.get("id_card"));
         fact.setGender(data.get("gender"));
+        if (degree != null) fact.setDegreeId(degree.getDegreeId());
         if (province != null) fact.setProvinceId(province.getProvinceId());
         if (major != null) fact.setMajorId(major.getMajorId());
         if (admissionDate != null) fact.setAdmissionDate(admissionDate);
@@ -334,13 +342,26 @@ public class DataPersistenceService {
         if (dim == null && isValidDimValue(majorName, "专业")) {
             dim = new MajorDim();
             dim.setMajorName(majorName.trim());
+            dim.setCollegeId(ensureDefaultCollege());
+            dim.setMajorCode("GEN" + System.currentTimeMillis());
             majorDimMapper.insert(dim);
             log.warn("自动创建维度记录 [专业]: {} → major_id={}", majorName, dim.getMajorId());
         }
         return dim;
     }
 
-    private ClassDim fuzzyLookupClass(String className) {
+    private Integer ensureDefaultCollege() {
+        CollegeDim college = collegeDimMapper.selectOne(
+                Wrappers.<CollegeDim>lambdaQuery().eq(CollegeDim::getCollegeName, "未知学院"));
+        if (college == null) {
+            college = new CollegeDim();
+            college.setCollegeName("未知学院");
+            collegeDimMapper.insert(college);
+        }
+        return college.getCollegeId();
+    }
+
+    private ClassDim fuzzyLookupClass(String className, Integer majorId) {
         if (className == null || className.isBlank()) return null;
         ClassDim dim = classDimMapper.selectOne(
                 Wrappers.<ClassDim>lambdaQuery().eq(ClassDim::getClassName, className.trim()));
@@ -354,12 +375,39 @@ public class DataPersistenceService {
             }
         }
         if (dim == null && isValidDimValue(className, "班级")) {
+            if (majorId == null) {
+                log.warn("班级 [{}] 无关联专业，跳过自动创建", className);
+                return null;
+            }
             dim = new ClassDim();
             dim.setClassName(className.trim());
+            dim.setMajorId(majorId);
+            dim.setGrade(String.valueOf(LocalDate.now().getYear()));
+            dim.setStudyLength(4);
             classDimMapper.insert(dim);
             log.warn("自动创建维度记录 [班级]: {} → class_id={}", className, dim.getClassId());
         }
         return dim;
+    }
+
+    /**
+     * 招生培养层次 → degree_dim 维度（本科↔学士, 硕士↔硕士, 博士↔博士）
+     */
+    private DegreeDim resolveDegreeLevel(String level) {
+        if (level == null || level.isBlank()) return null;
+        String v = level.trim();
+        String dimName = switch (v) {
+            case "本科", "本科生", "普通本科生", "学士" -> "学士";
+            case "硕士", "硕士研究生" -> "硕士";
+            case "博士", "博士研究生" -> "博士";
+            default -> null;
+        };
+        if (dimName != null) {
+            DegreeDim dim = degreeDimMapper.selectOne(
+                    Wrappers.<DegreeDim>lambdaQuery().eq(DegreeDim::getDegreeName, dimName));
+            if (dim != null) return dim;
+        }
+        return fuzzyLookupDegree(v);
     }
 
     private DegreeDim fuzzyLookupDegree(String degreeName) {

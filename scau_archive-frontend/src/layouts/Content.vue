@@ -26,6 +26,9 @@ import Geographic from '@/views/charts/Geographic.vue'
 import MajorTrainingPath from '@/views/charts/MajorTrainingPath.vue'
 import MetaDataManage from '@/views/system/MetaDataManage.vue'
 import UserManage from '@/views/system/UserManage.vue'
+import CollegeManage from '@/views/system/CollegeManage.vue'
+import MajorManage from '@/views/system/MajorManage.vue'
+import ClassManage from '@/views/system/ClassManage.vue'
 import AIAssistant from '@/views/ai/AIAssistant.vue'
 import Knowledge from '@/views/knowledge/Knowledge.vue'
 
@@ -41,6 +44,9 @@ const componentMap = {
   graduation: GraduationData,
   meta: MetaDataManage,
   users: UserManage,
+  college: CollegeManage,
+  major: MajorManage,
+  class: ClassManage,
   'ai-assistant': AIAssistant,
   trend: AddmissionTrend,
   prediction: AIPrediction,
@@ -59,6 +65,9 @@ const keyToName = {
   graduation: 'GraduationData',
   meta: 'MetaDataManage',
   users: 'UserManage',
+  college: 'CollegeManage',
+  major: 'MajorManage',
+  class: 'ClassManage',
   'ai-assistant': 'AIAssistant',
   trend: 'AddmissionTrend',
   prediction: 'AIPrediction',

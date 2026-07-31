@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onActivated, onBeforeUnmount } from 'vue'
 import { MapLocation } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { fetchProvinceStats } from '@/api/modules/admission'
@@ -133,6 +133,11 @@ function handleResize() {
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  fetchData()
+})
+
+onActivated(() => {
+  handleResize()
   fetchData()
 })
 

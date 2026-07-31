@@ -11,7 +11,7 @@ services:
       TZ: Asia/Shanghai
       POSTGRES_DB: scau_archive
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -39,10 +39,11 @@ services:
       DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME:-scau_archive}
       DB_USER: ${DB_USER:-postgres}
-      DB_PASS: ${DB_PASS}
+      DB_PASS: ${DB_PASSWORD}
       GLM_API_KEY: ${GLM_API_KEY:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
       LLM_MODEL: ${LLM_MODEL:-glm-4v-plus-0111}
+      JWT_SECRET: ${JWT_SECRET}
       python.venv-path: /app/src/main/python/.venv/bin/python3
     volumes:
       # 文件上传存储（Docker 命名卷，换机器自动创建）

@@ -6,10 +6,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.scau.scauarchiveinsight.dto.AdmissionDTO;
 import edu.scau.scauarchiveinsight.mapper.AdmissionFactMapper;
 import edu.scau.scauarchiveinsight.mapper.ArchiveFileDimMapper;
+import edu.scau.scauarchiveinsight.mapper.DegreeDimMapper;
 import edu.scau.scauarchiveinsight.mapper.MajorDimMapper;
 import edu.scau.scauarchiveinsight.mapper.ProvinceDimMapper;
 import edu.scau.scauarchiveinsight.pojo.AdmissionFact;
 import edu.scau.scauarchiveinsight.pojo.ArchiveFileDim;
+import edu.scau.scauarchiveinsight.pojo.DegreeDim;
 import edu.scau.scauarchiveinsight.pojo.MajorDim;
 import edu.scau.scauarchiveinsight.pojo.ProvinceDim;
 import edu.scau.scauarchiveinsight.vo.AdmissionVO;
@@ -37,11 +39,15 @@ public class AdmissionService {
     @Autowired
     private ArchiveFileDimMapper archiveFileDimMapper;
 
+    @Autowired
+    private DegreeDimMapper degreeDimMapper;
+
     public IPage<AdmissionVO> page(int current, int size, String keyword,
                                    String createTimeStart, String createTimeEnd,
-                                   String updateTimeStart, String updateTimeEnd) {
+                                   String updateTimeStart, String updateTimeEnd,
+                                   Integer degreeId) {
         Page<AdmissionFact> page = new Page<>(current, size);
-        LambdaQueryWrapper<AdmissionFact> wrapper = buildQueryWrapper(keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd);
+        LambdaQueryWrapper<AdmissionFact> wrapper = buildQueryWrapper(keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd, degreeId);
         wrapper.orderByDesc(AdmissionFact::getAdmissionDate);
 
         IPage<AdmissionFact> result = admissionFactMapper.selectPage(page, wrapper);
@@ -73,9 +79,18 @@ public class AdmissionService {
         return majorDimMapper.selectList(null);
     }
 
+    public List<DegreeDim> listDegrees() {
+        // 招生/学籍只需层次（学士/硕士/博士），不展示具体学位
+        return degreeDimMapper.selectList(
+                new LambdaQueryWrapper<DegreeDim>().in(DegreeDim::getDegreeName, "学士", "硕士", "博士")
+                        .orderByAsc(DegreeDim::getDegreeId));
+    }
+
     private LambdaQueryWrapper<AdmissionFact> buildQueryWrapper(String keyword,
-            String createTimeStart, String createTimeEnd, String updateTimeStart, String updateTimeEnd) {
+            String createTimeStart, String createTimeEnd, String updateTimeStart, String updateTimeEnd,
+            Integer degreeId) {
         LambdaQueryWrapper<AdmissionFact> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(degreeId != null, AdmissionFact::getDegreeId, degreeId);
         if (keyword != null && !keyword.isBlank()) {
             wrapper.and(w -> {
                 w.like(AdmissionFact::getStudentNo, keyword)
@@ -129,6 +144,11 @@ public class AdmissionService {
         vo.setName(fact.getName());
         vo.setIdCard(fact.getIdCard());
         vo.setGender(fact.getGender());
+        if (fact.getDegreeId() != null) {
+            vo.setDegreeId(fact.getDegreeId());
+            DegreeDim d = degreeDimMapper.selectById(fact.getDegreeId());
+            vo.setDegreeName(d != null ? d.getDegreeName() : null);
+        }
         vo.setAdmissionScore(fact.getAdmissionScore());
         vo.setAdmissionDate(fact.getAdmissionDate());
         vo.setCreateTime(fact.getCreateTime());
@@ -160,6 +180,7 @@ public class AdmissionService {
         entity.setName(dto.getName());
         entity.setIdCard(dto.getIdCard());
         entity.setGender(dto.getGender());
+        entity.setDegreeId(dto.getDegreeId());
         entity.setExamNo(dto.getExamNo());
         entity.setProvinceId(dto.getProvinceId());
         entity.setMajorId(dto.getMajorId());

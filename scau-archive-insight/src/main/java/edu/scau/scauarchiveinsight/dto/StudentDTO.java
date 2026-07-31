@@ -10,8 +10,12 @@ public class StudentDTO {
     private String name;
     private String idCard;
     private String gender;
+    private Integer degreeId;
     private Integer provinceId;
     private Integer majorId;
     private Integer classId;
     private LocalDate admissionDate;
+    private Boolean graduated;
+    private String majorName;
+    private String className;
 }

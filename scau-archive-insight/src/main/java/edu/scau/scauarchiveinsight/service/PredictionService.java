@@ -21,9 +21,11 @@ public class PredictionService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public Map<String, Object> predictNextYears(int yearsAhead) throws Exception {
-        // 1. 获取历史数据
-        List<Map<String, Object>> raw = admissionFactMapper.yearlyAdmissionCounts();
+    public Map<String, Object> predictNextYears(int yearsAhead, String degreeName) throws Exception {
+        // 1. 获取历史数据（可按培养层次模糊筛选）
+        List<Map<String, Object>> raw = degreeName != null && !degreeName.isBlank()
+                ? admissionFactMapper.yearlyAdmissionCountsByDegreeName(degreeName)
+                : admissionFactMapper.yearlyAdmissionCounts();
         if (raw.isEmpty()) {
             Map<String, Object> empty = new HashMap<>();
             empty.put("historical", Collections.emptyList());

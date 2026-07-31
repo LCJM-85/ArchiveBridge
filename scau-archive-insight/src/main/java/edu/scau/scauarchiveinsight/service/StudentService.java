@@ -34,11 +34,18 @@ public class StudentService {
     @Autowired
     private ArchiveFileDimMapper archiveFileDimMapper;
 
+    @Autowired
+    private DegreeDimMapper degreeDimMapper;
+
+    @Autowired
+    private CollegeDimMapper collegeDimMapper;
+
     public IPage<StudentVO> page(int current, int size, String keyword,
                                  String createTimeStart, String createTimeEnd,
-                                 String updateTimeStart, String updateTimeEnd) {
+                                 String updateTimeStart, String updateTimeEnd,
+                                 Integer degreeId) {
         Page<StudentFact> page = new Page<>(current, size);
-        LambdaQueryWrapper<StudentFact> wrapper = buildQueryWrapper(keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd);
+        LambdaQueryWrapper<StudentFact> wrapper = buildQueryWrapper(keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd, degreeId);
         wrapper.orderByDesc(StudentFact::getAdmissionDate);
 
         IPage<StudentFact> result = studentFactMapper.selectPage(page, wrapper);
@@ -47,6 +54,8 @@ public class StudentService {
 
     public void add(StudentDTO dto) {
         StudentFact entity = toEntity(dto);
+        entity.setMajorId(resolveMajorId(dto.getMajorId(), dto.getMajorName()));
+        entity.setClassId(resolveClassId(dto.getClassId(), dto.getClassName(), entity.getMajorId()));
         entity.setCreateTime(LocalDateTime.now());
         entity.setUpdateTime(LocalDateTime.now());
         studentFactMapper.insert(entity);
@@ -54,8 +63,68 @@ public class StudentService {
 
     public void update(StudentDTO dto) {
         StudentFact entity = toEntity(dto);
+        entity.setMajorId(resolveMajorId(dto.getMajorId(), dto.getMajorName()));
+        entity.setClassId(resolveClassId(dto.getClassId(), dto.getClassName(), entity.getMajorId()));
         entity.setUpdateTime(LocalDateTime.now());
         studentFactMapper.updateById(entity);
+    }
+
+    private Integer resolveMajorId(Integer majorId, String majorName) {
+        if (majorName != null && !majorName.isBlank()) {
+            MajorDim dim = majorDimMapper.selectOne(
+                    new LambdaQueryWrapper<MajorDim>().eq(MajorDim::getMajorName, majorName.trim()));
+            if (dim == null) {
+                dim = new MajorDim();
+                dim.setMajorName(majorName.trim());
+                dim.setCollegeId(ensureDefaultCollege());
+                dim.setMajorCode("GEN" + System.currentTimeMillis());
+                majorDimMapper.insert(dim);
+            }
+            return dim.getMajorId();
+        }
+        return majorId;
+    }
+
+    private Integer ensureDefaultCollege() {
+        CollegeDim college = collegeDimMapper.selectOne(
+                new LambdaQueryWrapper<CollegeDim>().eq(CollegeDim::getCollegeName, "未知学院"));
+        if (college == null) {
+            college = new CollegeDim();
+            college.setCollegeName("未知学院");
+            collegeDimMapper.insert(college);
+        }
+        return college.getCollegeId();
+    }
+
+    private Integer resolveClassId(Integer classId, String className, Integer majorId) {
+        if (className != null && !className.isBlank()) {
+            ClassDim dim = classDimMapper.selectOne(
+                    new LambdaQueryWrapper<ClassDim>().eq(ClassDim::getClassName, className.trim()));
+            if (dim == null) {
+                if (majorId == null) majorId = ensureDefaultMajor();
+                dim = new ClassDim();
+                dim.setClassName(className.trim());
+                dim.setMajorId(majorId);
+                dim.setGrade(String.valueOf(LocalDate.now().getYear()));
+                dim.setStudyLength(4);
+                classDimMapper.insert(dim);
+            }
+            return dim.getClassId();
+        }
+        return classId;
+    }
+
+    private Integer ensureDefaultMajor() {
+        MajorDim major = majorDimMapper.selectOne(
+                new LambdaQueryWrapper<MajorDim>().eq(MajorDim::getMajorName, "未定专业"));
+        if (major == null) {
+            major = new MajorDim();
+            major.setMajorName("未定专业");
+            major.setCollegeId(ensureDefaultCollege());
+            major.setMajorCode("GEN" + System.currentTimeMillis());
+            majorDimMapper.insert(major);
+        }
+        return major.getMajorId();
     }
 
     public void delete(Long id) {
@@ -74,9 +143,18 @@ public class StudentService {
         return classDimMapper.selectList(null);
     }
 
+    public List<DegreeDim> listDegrees() {
+        // 招生/学籍只需层次（学士/硕士/博士），不展示具体学位
+        return degreeDimMapper.selectList(
+                new LambdaQueryWrapper<DegreeDim>().in(DegreeDim::getDegreeName, "学士", "硕士", "博士")
+                        .orderByAsc(DegreeDim::getDegreeId));
+    }
+
     private LambdaQueryWrapper<StudentFact> buildQueryWrapper(String keyword,
-            String createTimeStart, String createTimeEnd, String updateTimeStart, String updateTimeEnd) {
+            String createTimeStart, String createTimeEnd, String updateTimeStart, String updateTimeEnd,
+            Integer degreeId) {
         LambdaQueryWrapper<StudentFact> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(degreeId != null, StudentFact::getDegreeId, degreeId);
         if (keyword != null && !keyword.isBlank()) {
             wrapper.and(w -> {
                 w.like(StudentFact::getStudentNo, keyword)
@@ -134,6 +212,11 @@ public class StudentService {
         vo.setName(fact.getName());
         vo.setIdCard(fact.getIdCard());
         vo.setGender(fact.getGender());
+        if (fact.getDegreeId() != null) {
+            vo.setDegreeId(fact.getDegreeId());
+            DegreeDim d = degreeDimMapper.selectById(fact.getDegreeId());
+            vo.setDegreeName(d != null ? d.getDegreeName() : null);
+        }
         vo.setGraduated(fact.getGraduated());
         vo.setAdmissionDate(fact.getAdmissionDate());
         vo.setCreateTime(fact.getCreateTime());
@@ -170,10 +253,12 @@ public class StudentService {
         entity.setName(dto.getName());
         entity.setIdCard(dto.getIdCard());
         entity.setGender(dto.getGender());
+        entity.setDegreeId(dto.getDegreeId());
         entity.setProvinceId(dto.getProvinceId());
         entity.setMajorId(dto.getMajorId());
         entity.setClassId(dto.getClassId());
         entity.setAdmissionDate(dto.getAdmissionDate());
+        entity.setGraduated(dto.getGraduated());
         return entity;
     }
 }

@@ -20,17 +20,17 @@
         <el-card shadow="never" class="stat-card">
           <div class="stat-label">招生总数</div>
           <div class="stat-value">{{ reportData.overview?.total || 0 }}</div>
-          <div class="stat-unit">人</div>
+          <div class="stat-unit">人 · 含硕博</div>
         </el-card>
         <el-card shadow="never" class="stat-card">
-          <div class="stat-label">平均分</div>
+          <div class="stat-label">本科生录取均分</div>
           <div class="stat-value">{{ reportData.score?.avgscore || '-' }}</div>
           <div class="stat-unit">分</div>
         </el-card>
         <el-card shadow="never" class="stat-card">
           <div class="stat-label">覆盖省份</div>
           <div class="stat-value">{{ reportData.overview?.provincecount || 0 }}</div>
-          <div class="stat-unit">个</div>
+          <div class="stat-unit">个 · 含硕博</div>
         </el-card>
         <el-card shadow="never" class="stat-card">
           <div class="stat-label">男女比例</div>
@@ -39,38 +39,38 @@
             <span class="sep">:</span>
             <span class="female">{{ reportData.overview?.femalePct || 0 }}%</span>
           </div>
-          <div class="stat-unit">男 : 女</div>
+          <div class="stat-unit">男 : 女 · 含硕博</div>
         </el-card>
       </div>
 
       <div class="chart-grid">
         <el-card shadow="never" class="chart-card">
-          <template #header><span>专业分布</span></template>
+          <template #header><span>专业分布 <span class="scope-note">含硕博</span></span></template>
           <div ref="majorChartRef" class="chart-body"></div>
         </el-card>
         <el-card shadow="never" class="chart-card">
-          <template #header><span>省份排名</span></template>
+          <template #header><span>省份排名 <span class="scope-note">含硕博</span></span></template>
           <div ref="provinceChartRef" class="chart-body"></div>
         </el-card>
         <el-card shadow="never" class="chart-card">
           <template #header><span>分数线</span></template>
           <div class="score-box">
             <div class="score-item">
-              <div class="score-label">最高分</div>
+              <div class="score-label">本科生最高分</div>
               <div class="score-val max">{{ reportData.score?.maxscore || '-' }}</div>
             </div>
             <div class="score-item">
-              <div class="score-label">平均分</div>
+              <div class="score-label">本科生平均分</div>
               <div class="score-val avg">{{ reportData.score?.avgscore || '-' }}</div>
             </div>
             <div class="score-item">
-              <div class="score-label">最低分</div>
+              <div class="score-label">本科生最低分</div>
               <div class="score-val min">{{ reportData.score?.minscore || '-' }}</div>
             </div>
           </div>
         </el-card>
         <el-card shadow="never" class="chart-card">
-          <template #header><span>毕业去向</span></template>
+          <template #header><span>毕业去向 <span class="scope-note">含硕博</span></span></template>
           <div ref="destChartRef" class="chart-body"></div>
         </el-card>
       </div>
@@ -109,12 +109,13 @@
           <div class="poster-title">{{ selectedYear }}年招生质量报告</div>
           <div class="poster-subtitle">华南农业大学  ·  档案智能分析平台</div>
           <div class="poster-stats">
-            <div class="ps-item"><strong>{{ reportData.overview?.total || 0 }}</strong><span>招生总数（人）</span></div>
-            <div class="ps-item"><strong>{{ reportData.score?.avgscore || '-' }}</strong><span>平均分</span></div>
-            <div class="ps-item"><strong>{{ reportData.overview?.provincecount || 0 }}</strong><span>生源省份</span></div>
-            <div class="ps-item"><strong>{{ reportData.overview?.femalePct || 0 }}%</strong><span>女生比例</span></div>
+            <div class="ps-item"><strong>{{ reportData.overview?.total || 0 }}</strong><span>招生总数（人·含硕博）</span></div>
+            <div class="ps-item"><strong>{{ reportData.score?.avgscore || '-' }}</strong><span>本科生录取均分</span></div>
+            <div class="ps-item"><strong>{{ reportData.overview?.provincecount || 0 }}</strong><span>生源省份（含硕博）</span></div>
+            <div class="ps-item"><strong>{{ reportData.overview?.femalePct || 0 }}%</strong><span>女生比例（含硕博）</span></div>
           </div>
           <div class="poster-table">
+            <div class="poster-table-title">专业分布（含硕博）</div>
             <table>
               <thead><tr><th>专业</th><th>人数</th><th>占比</th></tr></thead>
               <tbody>
@@ -149,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, watch, onMounted, onActivated, onBeforeUnmount, nextTick } from 'vue'
 import { Files } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
 import { fetchReportData } from '@/api/modules/admission'
@@ -282,6 +283,14 @@ onMounted(() => {
   }
 })
 
+onActivated(() => {
+  if (reportData.value) {
+    nextTick(() => renderCharts(reportData.value))
+  } else {
+    generateReport()
+  }
+})
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   disposeCharts()
@@ -313,6 +322,7 @@ onBeforeUnmount(() => {
 .stat-inline .sep { color: #dcdfe6; margin: 0 4px; font-size: 18px; }
 .stat-inline .female { color: #f56c6c; }
 .stat-unit { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.scope-note { font-size: 12px; color: var(--text-secondary); font-weight: 400; margin-left: 4px; }
 
 .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .chart-card { min-height: 280px; }
@@ -345,6 +355,7 @@ onBeforeUnmount(() => {
 .ps-item strong { display: block; font-size: 36px; font-weight: 700; }
 .ps-item span { display: block; font-size: 13px; opacity: 0.8; margin-top: 4px; }
 .poster-table { background: rgba(255,255,255,0.1); border-radius: 10px; padding: 20px; margin-bottom: 20px; }
+.poster-table-title { font-size: 13px; font-weight: 600; margin-bottom: 8px; opacity: 0.8; }
 .poster-table table { width: 100%; border-collapse: collapse; font-size: 14px; }
 .poster-table th, .poster-table td { padding: 8px 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.15); }
 .poster-table th { opacity: 0.7; font-weight: 500; }

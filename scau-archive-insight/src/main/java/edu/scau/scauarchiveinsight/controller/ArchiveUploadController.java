@@ -48,6 +48,7 @@ public class ArchiveUploadController {
             @RequestParam("archiveType") String archiveType,
             @RequestParam(value = "provinceName", required = false) String provinceName,
             @RequestParam(value = "admissionDate", required = false) String admissionDate,
+            @RequestParam(value = "degreeName", required = false) String degreeName,
             @RequestParam(value = "useLlm", defaultValue = "false") boolean useLlm) {
 
         Map<String, Object> result = storageService.saveFiles(files, type);
@@ -69,11 +70,11 @@ public class ArchiveUploadController {
 
             switch (ext) {
                 case "csv" -> {
-                    Map<String, Object> csvResult = csvProcessor.process(path, archiveType, provinceName, admissionDate);
+                    Map<String, Object> csvResult = csvProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
                     allResults.add(Map.of("file", name, "type", "csv", "data", csvResult.get("data"), "errors", csvResult.get("errors")));
                 }
                 case "xls", "xlsx" -> {
-                    Map<String, Object> excelResult = excelProcessor.process(path, archiveType, provinceName, admissionDate);
+                    Map<String, Object> excelResult = excelProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
                     allResults.add(Map.of("file", name, "type", "excel", "data", excelResult.get("data"), "errors", excelResult.get("errors")));
                 }
                 case "pdf" -> {
@@ -83,7 +84,7 @@ public class ArchiveUploadController {
                             List<String> pageImages = pdfToImage(path);
                             // 统一处理所有页面，只归档一次 PDF 原始文件（计数只 +1/-1）
                             List<Map<String, Object>> pdfResult = llmProcessor.processPdfPages(
-                                    path, pageImages, archiveType, provinceName, admissionDate);
+                                    path, pageImages, archiveType, provinceName, admissionDate, degreeName);
                             allResults.add(Map.of("file", name, "type", "pdf-llm", "data", pdfResult));
                         } catch (Exception e) {
                             Map<String, Object> entry = new LinkedHashMap<>();
@@ -94,7 +95,7 @@ public class ArchiveUploadController {
                             allResults.add(entry);
                         }
                     } else {
-                        List<Map<String, Object>> pages = pdfProcessor.process(path, archiveType, provinceName, admissionDate);
+                        List<Map<String, Object>> pages = pdfProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
                         allResults.add(Map.of("file", name, "type", "pdf", "data", pages));
                     }
                 }
@@ -117,11 +118,11 @@ public class ArchiveUploadController {
                 try {
                     if (useLlm) {
                         List<Map<String, Object>> llmResults = llmProcessor.process(List.of(imgPath), archiveType,
-                                provinceName, admissionDate);
+                                provinceName, admissionDate, degreeName);
                         imageResults.addAll(llmResults);
                     } else {
                         List<Map<String, Object>> ocrResults = imageProcessor.process(
-                                List.of(imgPath), archiveType, provinceName, admissionDate);
+                                List.of(imgPath), archiveType, provinceName, admissionDate, degreeName);
                         imageResults.addAll(ocrResults);
                     }
                 } catch (Exception e) {

@@ -8,6 +8,9 @@
             <span>招生数据管理</span>
           </div>
           <div class="card-header-right">
+            <el-select v-model="degreeFilter" placeholder="培养层次" clearable style="width:130px" @change="handleSearch">
+              <el-option v-for="d in degrees" :key="d.degreeId" :label="levelMap[d.degreeName] || d.degreeName" :value="d.degreeId" />
+            </el-select>
             <el-input v-model="searchText" placeholder="搜索所有字段" clearable style="width:160px" @keyup.enter="handleSearch" @clear="handleClear" />
             <el-date-picker
               v-model="createTimeRange"
@@ -41,6 +44,11 @@
         <el-table-column prop="gender" label="性别" width="60" align="center">
           <template #default="{ row }">
             <span :style="{ color: row.gender === '男' ? 'var(--color-primary)' : '#e84393' }">{{ row.gender }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="培养层次" width="90" align="center">
+          <template #default="{ row }">
+            {{ levelMap[row.degreeName] || row.degreeName }}
           </template>
         </el-table-column>
         <el-table-column prop="idCard" label="身份证号" min-width="190" show-overflow-tooltip />
@@ -123,6 +131,13 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
+            <el-form-item label="培养层次" prop="degreeId">
+              <el-select v-model="form.degreeId" placeholder="请选择" clearable filterable style="width:100%">
+                <el-option v-for="d in degrees" :key="d.degreeId" :label="d.degreeName" :value="d.degreeId" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="考生号" prop="examNo">
               <el-input v-model="form.examNo" placeholder="请输入考生号" />
             </el-form-item>
@@ -167,10 +182,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { Plus, Edit, Delete, Search, DataBoard, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchAdmissionPage, addAdmission, updateAdmission, deleteAdmission, fetchProvinces, fetchMajors } from '@/api/modules/admission'
+import { fetchAdmissionPage, addAdmission, updateAdmission, deleteAdmission, fetchProvinces, fetchMajors, fetchDegrees } from '@/api/modules/admission'
 
 const tableData = ref([])
 const loading = ref(false)
@@ -179,9 +194,13 @@ const pageSize = ref(15)
 const total = ref(0)
 const pages = ref(0)
 const keyword = ref('')
+const degreeFilter = ref(null)
 const createTimeRange = ref([])
 const updateTimeRange = ref([])
+const levelMap = { 学士: '本科生', 硕士: '硕士研究生', 博士: '博士研究生' }
+
 const provinces = ref([])
+const degrees = ref([])
 const majors = ref([])
 
 async function fetchPage() {
@@ -189,6 +208,7 @@ async function fetchPage() {
   try {
     const params = { current: current.value, size: pageSize.value }
     if (keyword.value) params.keyword = keyword.value
+    if (degreeFilter.value) params.degreeId = degreeFilter.value
     if (createTimeRange.value && createTimeRange.value.length === 2) {
       params.createTimeStart = createTimeRange.value[0]
       params.createTimeEnd = createTimeRange.value[1]
@@ -214,6 +234,13 @@ async function fetchProvincesList() {
     const res = await fetchProvinces()
     provinces.value = res.data.data || []
   } catch { provinces.value = [] }
+}
+
+async function fetchDegreesList() {
+  try {
+    const res = await fetchDegrees()
+    degrees.value = res.data.data || []
+  } catch { degrees.value = [] }
 }
 
 async function fetchMajorsList() {
@@ -255,6 +282,7 @@ const defaultForm = {
   studentNo: '',
   name: '',
   gender: '',
+  degreeId: null,
   idCard: '',
   examNo: '',
   admissionDate: '',
@@ -285,6 +313,7 @@ function handleClear() {
 function resetFilters() {
   searchText.value = ''
   keyword.value = ''
+  degreeFilter.value = null
   clearTimeRanges()
   current.value = 1
   fetchPage()
@@ -303,6 +332,7 @@ function openEditDialog(row) {
     studentNo: row.studentNo,
     name: row.name,
     gender: row.gender || '',
+    degreeId: row.degreeId ?? null,
     idCard: row.idCard || '',
     examNo: row.examNo || '',
     admissionDate: row.admissionDate || '',
@@ -364,6 +394,14 @@ function handleSizeChange(size) {
 onMounted(() => {
   fetchPage()
   fetchProvincesList()
+  fetchDegreesList()
+  fetchMajorsList()
+})
+
+onActivated(() => {
+  fetchPage()
+  fetchProvincesList()
+  fetchDegreesList()
   fetchMajorsList()
 })
 </script>

@@ -10,6 +10,7 @@ public class AdmissionDTO {
     private String name;
     private String idCard;
     private String gender;
+    private Integer degreeId;
     private String examNo;
     private Integer provinceId;
     private Integer majorId;

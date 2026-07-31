@@ -28,8 +28,9 @@ public class StudentController {
             @RequestParam(required = false) String createTimeStart,
             @RequestParam(required = false) String createTimeEnd,
             @RequestParam(required = false) String updateTimeStart,
-            @RequestParam(required = false) String updateTimeEnd) {
-        var page = studentService.page(current, size, keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd);
+            @RequestParam(required = false) String updateTimeEnd,
+            @RequestParam(required = false) Integer degreeId) {
+        var page = studentService.page(current, size, keyword, createTimeStart, createTimeEnd, updateTimeStart, updateTimeEnd, degreeId);
         Map<String, Object> data = new HashMap<>();
         data.put("records", page.getRecords());
         data.put("total", page.getTotal());
@@ -76,5 +77,11 @@ public class StudentController {
     @GetMapping("/classes")
     public R<?> classes() {
         return R.ok(studentService.listClasses());
+    }
+
+    @Operation(summary = "获取学历层次列表")
+    @GetMapping("/degrees")
+    public R<?> degrees() {
+        return R.ok(studentService.listDegrees());
     }
 }

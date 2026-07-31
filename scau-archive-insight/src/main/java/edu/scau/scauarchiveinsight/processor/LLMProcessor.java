@@ -39,6 +39,11 @@ public class LLMProcessor {
 
     public List<Map<String, Object>> process(List<String> imagePaths, String archiveType,
                                               String provinceName, String admissionDate) {
+        return process(imagePaths, archiveType, provinceName, admissionDate, null);
+    }
+
+    public List<Map<String, Object>> process(List<String> imagePaths, String archiveType,
+                                              String provinceName, String admissionDate, String degreeName) {
         List<Map<String, Object>> results = new ArrayList<>();
 
         for (String imagePath : imagePaths) {
@@ -66,6 +71,9 @@ public class LLMProcessor {
                         }
                         if (admissionDate != null && !admissionDate.isBlank()) {
                             flatRecord.putIfAbsent("admission_date", admissionDate);
+                        }
+                        if (degreeName != null && !degreeName.isBlank()) {
+                            flatRecord.putIfAbsent("degree_name", degreeName);
                         }
                         dataPersistenceService.saveExtractedData(archiveType, flatRecord, fileId);
                     }
@@ -113,7 +121,8 @@ public class LLMProcessor {
      * 处理 PDF 的所有页面图片，合并为一条记录归档（避免每张图独立计数和日志）
      */
     public List<Map<String, Object>> processPdfPages(String pdfPath, List<String> pagePaths,
-                                                      String archiveType, String provinceName, String admissionDate) {
+                                                      String archiveType, String provinceName, String admissionDate,
+                                                      String degreeName) {
         List<Map<String, Object>> results = new ArrayList<>();
         String pdfFileName = Paths.get(pdfPath).getFileName().toString();
 
@@ -133,6 +142,9 @@ public class LLMProcessor {
                         }
                         if (admissionDate != null && !admissionDate.isBlank()) {
                             flat.putIfAbsent("admission_date", admissionDate);
+                        }
+                        if (degreeName != null && !degreeName.isBlank()) {
+                            flat.putIfAbsent("degree_name", degreeName);
                         }
                         if (!flat.isEmpty()) allData.add(flat);
                     }

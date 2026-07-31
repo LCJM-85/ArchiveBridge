@@ -27,3 +27,7 @@ export function fetchMajors() {
 export function fetchClasses() {
   return request.get('/api/student/classes')
 }
+
+export function fetchDegrees() {
+  return request.get('/api/student/degrees')
+}

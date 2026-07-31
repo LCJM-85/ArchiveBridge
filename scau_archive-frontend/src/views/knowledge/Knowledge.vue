@@ -117,7 +117,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import {
@@ -261,6 +261,8 @@ async function handleDelete(id) {
 }
 
 onMounted(fetchList)
+
+onActivated(() => fetchList())
 </script>
 
 <style scoped>

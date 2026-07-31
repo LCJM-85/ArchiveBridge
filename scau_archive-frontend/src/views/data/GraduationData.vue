@@ -8,6 +8,9 @@
             <span>毕业数据管理</span>
           </div>
           <div class="card-header-right">
+            <el-select v-model="degreeFilter" placeholder="学历" clearable style="width:130px" @change="handleSearch">
+              <el-option v-for="d in degreeOptions" :key="d" :label="d" :value="d" />
+            </el-select>
             <el-input v-model="searchText" placeholder="搜索所有字段" clearable style="width:160px" @keyup.enter="handleSearch" @clear="handleClear" />
             <el-date-picker
               v-model="createTimeRange"
@@ -153,7 +156,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { Plus, Edit, Delete, Search, School, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { fetchGraduationPage, addGraduation, updateGraduation, deleteGraduation, fetchDegrees, fetchDestinations } from '@/api/modules/graduation'
@@ -165,16 +168,19 @@ const pageSize = ref(15)
 const total = ref(0)
 const pages = ref(0)
 const keyword = ref('')
+const degreeFilter = ref(null)
 const createTimeRange = ref([])
 const updateTimeRange = ref([])
 const degrees = ref([])
 const destinations = ref([])
+const degreeOptions = ['学士', '硕士', '博士']
 
 async function fetchPage() {
   loading.value = true
   try {
     const params = { current: current.value, size: pageSize.value }
     if (keyword.value) params.keyword = keyword.value
+    if (degreeFilter.value) params.degreeName = degreeFilter.value
     if (createTimeRange.value && createTimeRange.value.length === 2) {
       params.createTimeStart = createTimeRange.value[0]
       params.createTimeEnd = createTimeRange.value[1]
@@ -269,6 +275,7 @@ function handleClear() {
 function resetFilters() {
   searchText.value = ''
   keyword.value = ''
+  degreeFilter.value = null
   clearTimeRanges()
   current.value = 1
   fetchPage()
@@ -343,6 +350,12 @@ function handleSizeChange(size) {
 }
 
 onMounted(() => {
+  fetchPage()
+  fetchDegreesList()
+  fetchDestinationsList()
+})
+
+onActivated(() => {
   fetchPage()
   fetchDegreesList()
   fetchDestinationsList()

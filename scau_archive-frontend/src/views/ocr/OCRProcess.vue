@@ -125,7 +125,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onActivated, onUnmounted } from 'vue'
 import { Refresh, Monitor, Timer, Delete } from '@element-plus/icons-vue'
 import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog, fetchQualityScores, fetchProcessingCount } from '@/api/modules/ocr'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -253,6 +253,10 @@ onMounted(() => {
   fetchToday()
   pollProcessingCount()
   pollTimer = setInterval(pollProcessingCount, 3000)
+})
+
+onActivated(() => {
+  fetchToday()
 })
 
 onUnmounted(() => {

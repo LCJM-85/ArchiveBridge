@@ -24,6 +24,10 @@ export function fetchMajors() {
   return request.get('/api/admission/majors')
 }
 
+export function fetchDegrees() {
+  return request.get('/api/admission/degrees')
+}
+
 export function fetchTrendYearly(params) {
   return request.get('/api/admission/trend/yearly', { params })
 }
@@ -52,8 +56,10 @@ export function fetchSankeyData() {
   return request.get('/api/admission/training-path/sankey')
 }
 
-export function fetchPrediction(years = 3) {
-  return request.get('/api/admission/predict/next-years', { params: { years } })
+export function fetchPrediction(years = 3, degreeName = null) {
+  const params = { years }
+  if (degreeName) params.degreeName = degreeName
+  return request.get('/api/admission/predict/next-years', { params })
 }
 
 export function fetchReportData(year) {

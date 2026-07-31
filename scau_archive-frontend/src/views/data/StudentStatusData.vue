@@ -8,6 +8,9 @@
             <span>学籍数据管理</span>
           </div>
           <div class="card-header-right">
+            <el-select v-model="degreeFilter" placeholder="培养层次" clearable style="width:130px" @change="handleSearch">
+              <el-option v-for="d in degrees" :key="d.degreeId" :label="levelMap[d.degreeName] || d.degreeName" :value="d.degreeId" />
+            </el-select>
             <el-input v-model="searchText" placeholder="搜索所有字段" clearable style="width:160px" @keyup.enter="handleSearch" @clear="handleClear" />
             <el-date-picker
               v-model="createTimeRange"
@@ -41,6 +44,11 @@
         <el-table-column prop="gender" label="性别" width="60" align="center">
           <template #default="{ row }">
             <span :style="{ color: row.gender === '男' ? 'var(--color-primary)' : '#e84393' }">{{ row.gender }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="培养层次" width="90" align="center">
+          <template #default="{ row }">
+            {{ levelMap[row.degreeName] || row.degreeName }}
           </template>
         </el-table-column>
         <el-table-column prop="idCard" label="身份证号" min-width="190" show-overflow-tooltip />
@@ -130,6 +138,13 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
+            <el-form-item label="培养层次" prop="degreeId">
+              <el-select v-model="form.degreeId" placeholder="请选择" clearable filterable style="width:100%">
+                <el-option v-for="d in degrees" :key="d.degreeId" :label="d.degreeName" :value="d.degreeId" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
             <el-form-item label="生源省份" prop="provinceId">
               <el-select v-model="form.provinceId" placeholder="请选择" style="width:100%" filterable clearable>
                 <el-option v-for="p in provinces" :key="p.provinceId" :label="p.provinceName" :value="p.provinceId" />
@@ -138,7 +153,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="专业" prop="majorId">
-              <el-select v-model="form.majorId" placeholder="请选择" style="width:100%" filterable clearable>
+              <el-select v-model="form.majorId" placeholder="选择或输入" style="width:100%" filterable clearable allow-create default-first-option @input-value-change="onMajorInputChange" @blur="onMajorBlur" @change="onMajorChange">
                 <el-option v-for="m in majors" :key="m.majorId" :label="m.majorName" :value="m.majorId" />
               </el-select>
             </el-form-item>
@@ -148,7 +163,7 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="班级" prop="classId">
-              <el-select v-model="form.classId" placeholder="请选择" style="width:100%" filterable clearable>
+              <el-select v-model="form.classId" placeholder="选择或输入" style="width:100%" filterable clearable allow-create default-first-option @input-value-change="onClassInputChange" @blur="onClassBlur" @change="onClassChange">
                 <el-option v-for="c in classes" :key="c.classId" :label="c.className" :value="c.classId" />
               </el-select>
             </el-form-item>
@@ -156,6 +171,11 @@
           <el-col :span="12">
             <el-form-item label="入学日期" prop="admissionDate">
               <el-date-picker v-model="form.admissionDate" type="date" placeholder="选择日期" style="width:100%" value-format="YYYY-MM-DD" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="毕业状态" prop="graduated">
+              <el-switch v-model="form.graduated" active-text="已毕业" inactive-text="在读" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -169,10 +189,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { Plus, Edit, Delete, Search, UserFilled, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchStudentPage, addStudent, updateStudent, deleteStudent, fetchProvinces, fetchMajors, fetchClasses } from '@/api/modules/student'
+import { fetchStudentPage, addStudent, updateStudent, deleteStudent, fetchProvinces, fetchMajors, fetchClasses, fetchDegrees } from '@/api/modules/student'
 
 const tableData = ref([])
 const loading = ref(false)
@@ -181,9 +201,13 @@ const pageSize = ref(15)
 const total = ref(0)
 const pages = ref(0)
 const keyword = ref('')
+const degreeFilter = ref(null)
 const createTimeRange = ref([])
 const updateTimeRange = ref([])
+const levelMap = { 学士: '本科生', 硕士: '硕士研究生', 博士: '博士研究生' }
+
 const provinces = ref([])
+const degrees = ref([])
 const majors = ref([])
 const classes = ref([])
 
@@ -192,6 +216,7 @@ async function fetchPage() {
   try {
     const params = { current: current.value, size: pageSize.value }
     if (keyword.value) params.keyword = keyword.value
+    if (degreeFilter.value) params.degreeId = degreeFilter.value
     if (createTimeRange.value && createTimeRange.value.length === 2) {
       params.createTimeStart = createTimeRange.value[0]
       params.createTimeEnd = createTimeRange.value[1]
@@ -217,6 +242,13 @@ async function fetchProvincesList() {
     const res = await fetchProvinces()
     provinces.value = res.data.data || []
   } catch { provinces.value = [] }
+}
+
+async function fetchDegreesList() {
+  try {
+    const res = await fetchDegrees()
+    degrees.value = res.data.data || []
+  } catch { degrees.value = [] }
 }
 
 async function fetchMajorsList() {
@@ -265,13 +297,31 @@ const defaultForm = {
   studentNo: '',
   name: '',
   gender: '',
+  degreeId: null,
   idCard: '',
   provinceId: null,
   majorId: null,
   classId: null,
   admissionDate: '',
+  graduated: false,
 }
 const form = ref({ ...defaultForm })
+
+const pendingMajorText = ref('')
+const pendingClassText = ref('')
+
+function onMajorInputChange(val) { pendingMajorText.value = val || '' }
+function onClassInputChange(val) { pendingClassText.value = val || '' }
+function onMajorChange() { pendingMajorText.value = '' }
+function onClassChange() { pendingClassText.value = '' }
+function onMajorBlur() {
+  const text = pendingMajorText.value?.trim()
+  if (text) form.value.majorId = text
+}
+function onClassBlur() {
+  const text = pendingClassText.value?.trim()
+  if (text) form.value.classId = text
+}
 
 const rules = {
   studentNo: [{ required: true, message: '请输入学号', trigger: 'blur' }],
@@ -294,6 +344,7 @@ function handleClear() {
 function resetFilters() {
   searchText.value = ''
   keyword.value = ''
+  degreeFilter.value = null
   clearTimeRanges()
   current.value = 1
   fetchPage()
@@ -302,6 +353,8 @@ function resetFilters() {
 function openAddDialog() {
   isEdit.value = false
   form.value = { ...defaultForm }
+  pendingMajorText.value = ''
+  pendingClassText.value = ''
   dialogVisible.value = true
 }
 
@@ -312,12 +365,16 @@ function openEditDialog(row) {
     studentNo: row.studentNo,
     name: row.name,
     gender: row.gender || '',
+    degreeId: row.degreeId ?? null,
     idCard: row.idCard || '',
     provinceId: row.provinceId ?? null,
     majorId: row.majorId ?? null,
     classId: row.classId ?? null,
     admissionDate: row.admissionDate || '',
+    graduated: row.graduated ?? false,
   }
+  pendingMajorText.value = ''
+  pendingClassText.value = ''
   dialogVisible.value = true
 }
 
@@ -325,16 +382,27 @@ async function handleSubmit() {
   const valid = await formRef.value.validate().catch(() => false)
   if (!valid) return
   submitting.value = true
+  const payload = { ...form.value }
+  if (typeof payload.majorId === 'string') {
+    payload.majorName = payload.majorId.trim()
+    payload.majorId = null
+  }
+  if (typeof payload.classId === 'string') {
+    payload.className = payload.classId.trim()
+    payload.classId = null
+  }
   try {
     if (isEdit.value) {
-      await update(form.value)
+      await update(payload)
       ElMessage.success('更新成功')
     } else {
-      await add(form.value)
+      await add(payload)
       ElMessage.success('添加成功')
     }
     dialogVisible.value = false
     await fetchPage()
+    await fetchMajorsList()
+    await fetchClassesList()
   } catch {
     ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
   } finally {
@@ -371,6 +439,15 @@ function handleSizeChange(size) {
 onMounted(() => {
   fetchPage()
   fetchProvincesList()
+  fetchDegreesList()
+  fetchMajorsList()
+  fetchClassesList()
+})
+
+onActivated(() => {
+  fetchPage()
+  fetchProvincesList()
+  fetchDegreesList()
   fetchMajorsList()
   fetchClassesList()
 })

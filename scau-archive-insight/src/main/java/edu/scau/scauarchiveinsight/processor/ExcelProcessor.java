@@ -42,6 +42,10 @@ public class ExcelProcessor {
     }
 
     public Map<String, Object> process(String filePath, String archiveType, String provinceName, String admissionDate) {
+        return process(filePath, archiveType, provinceName, admissionDate, null);
+    }
+
+    public Map<String, Object> process(String filePath, String archiveType, String provinceName, String admissionDate, String degreeName) {
         List<Map<String, String>> rows = new ArrayList<>();
         String fileType = "excel";
 
@@ -113,6 +117,11 @@ public class ExcelProcessor {
                 if (admissionDate != null && !admissionDate.isBlank()) {
                     for (Map<String, String> record : mappedData) {
                         record.putIfAbsent("admission_date", admissionDate);
+                    }
+                }
+                if (degreeName != null && !degreeName.isBlank()) {
+                    for (Map<String, String> record : mappedData) {
+                        record.putIfAbsent("degree_name", degreeName);
                     }
                 }
 

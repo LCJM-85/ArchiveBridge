@@ -147,6 +147,7 @@ CREATE TABLE IF NOT EXISTS public.student_fact (
     name           VARCHAR(30),
     id_card        VARCHAR(18) UNIQUE,
     gender         VARCHAR(4) DEFAULT '未知',
+    degree_id      INTEGER,
     major_id       INTEGER,
     class_id       INTEGER,
     province_id    INTEGER,
@@ -181,6 +182,7 @@ CREATE TABLE IF NOT EXISTS public.admission_fact (
     create_time     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     update_time     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     gender          VARCHAR(10),
+    degree_id       INTEGER,
     admission_score INTEGER
 );
 CREATE SEQUENCE IF NOT EXISTS public.admission_fact_id_seq
