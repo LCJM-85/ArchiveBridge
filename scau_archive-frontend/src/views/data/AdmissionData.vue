@@ -39,47 +39,43 @@
       </template>
 
       <el-table :data="tableData" v-loading="loading" stripe border style="width:100%">
-        <el-table-column prop="studentNo" label="学号" min-width="120" />
-        <el-table-column prop="name" label="姓名" min-width="80" />
+        <el-table-column prop="studentNo" label="学号" width="130" />
+        <el-table-column prop="name" label="姓名" width="90" />
         <el-table-column prop="gender" label="性别" width="60" align="center">
           <template #default="{ row }">
             <span :style="{ color: row.gender === '男' ? 'var(--color-primary)' : '#e84393' }">{{ row.gender }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="培养层次" width="90" align="center">
+        <el-table-column label="培养层次" width="100" align="center">
           <template #default="{ row }">
             {{ levelMap[row.degreeName] || row.degreeName }}
           </template>
         </el-table-column>
-        <el-table-column prop="idCard" label="身份证号" min-width="190" show-overflow-tooltip />
-        <el-table-column prop="examNo" label="考生号" min-width="140" />
-        <el-table-column prop="provinceName" label="生源省份" min-width="100" />
-        <el-table-column prop="majorName" label="录取专业" min-width="120" />
+        <el-table-column prop="idCard" label="身份证号" width="200" />
+        <el-table-column prop="examNo" label="考生号" width="150" />
+        <el-table-column prop="provinceName" label="生源省份" width="140" />
+        <el-table-column prop="majorName" label="录取专业" width="180" />
         <el-table-column prop="admissionDate" label="录取日期" width="110" align="center" />
         <el-table-column prop="admissionScore" label="录取分数" width="100" align="center" />
-        <el-table-column label="来源文件" min-width="140">
+        <el-table-column label="来源文件" width="160">
           <template #default="{ row }">
             <span style="font-size:12px;color:var(--text-secondary)">{{ row.fileName || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="录入时间" width="155" align="center">
+        <el-table-column prop="createTime" label="录入时间" width="175" align="center">
           <template #default="{ row }">
             <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ row.createTime ? row.createTime.replace('T', ' ').split('.')[0] : '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="updateTime" label="更新时间" width="155" align="center">
+        <el-table-column prop="updateTime" label="更新时间" width="175" align="center">
           <template #default="{ row }">
             <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ row.updateTime ? row.updateTime.replace('T', ' ').split('.')[0] : '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" align="center" fixed="right">
+        <el-table-column label="操作" width="180" align="center" fixed="right">
           <template #default="{ row }">
-            <el-tooltip content="编辑" placement="top">
-              <el-button size="small" circle :icon="Edit" @click="openEditDialog(row)" />
-            </el-tooltip>
-            <el-tooltip content="删除" placement="top">
-              <el-button size="small" circle type="danger" :icon="Delete" @click="handleDelete(row.id)" />
-            </el-tooltip>
+            <el-button size="small" :icon="Edit" @click="openEditDialog(row)">编辑</el-button>
+            <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -407,6 +403,10 @@ onActivated(() => {
 </script>
 
 <style scoped>
+:deep(.el-table .cell) {
+  white-space: nowrap;
+}
+
 .page-wrapper {
   display: flex;
   flex-direction: column;
