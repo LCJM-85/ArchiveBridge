@@ -13,7 +13,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/LCJM-85/ArchiveBridge/blob/main/LICENSE)
 
 
-> **AI-powered archive digitization and intelligent analysis platform**
+ ***AI-powered archive digitization and intelligent analysis platform***
 
 ArchiveBridge 是一套面向高校招生就业部门的 **AI 驱动档案数字化平台**。
 
