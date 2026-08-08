@@ -40,35 +40,35 @@
         <template #header><span>快捷入口</span></template>
         <div class="quick-links">
           <div class="quick-item" @click="goTo('upload')">
-            <el-icon color="#409eff"><Upload /></el-icon>
+            <el-icon color="var(--color-primary)"><Upload /></el-icon>
             <span>数据采集</span>
           </div>
           <div class="quick-item" @click="goTo('process')">
-            <el-icon color="#67c23a"><Document /></el-icon>
+            <el-icon color="var(--color-accent)"><Document /></el-icon>
             <span>OCR 识别</span>
           </div>
           <div class="quick-item" @click="goTo('admission')">
-            <el-icon color="#409eff"><DataBoard /></el-icon>
+            <el-icon color="var(--color-primary)"><DataBoard /></el-icon>
             <span>招生数据</span>
           </div>
           <div class="quick-item" @click="goTo('studentstatus')">
-            <el-icon color="#7c3aed"><UserFilled /></el-icon>
+            <el-icon color="var(--color-accent)"><UserFilled /></el-icon>
             <span>学籍数据</span>
           </div>
           <div class="quick-item" @click="goTo('graduation')">
-            <el-icon color="#e6a23c"><School /></el-icon>
+            <el-icon color="var(--color-primary)"><School /></el-icon>
             <span>毕业数据</span>
           </div>
           <div class="quick-item" @click="goTo('report')">
-            <el-icon color="#f56c6c"><Files /></el-icon>
+            <el-icon color="var(--color-accent)"><Files /></el-icon>
             <span>智能报告</span>
           </div>
           <div class="quick-item" @click="goTo('trend')">
-            <el-icon color="#e6a23c"><TrendCharts /></el-icon>
+            <el-icon color="var(--color-primary)"><TrendCharts /></el-icon>
             <span>趋势分析</span>
           </div>
           <div class="quick-item" @click="goTo('prediction')">
-            <el-icon color="#7c3aed"><DataAnalysis /></el-icon>
+            <el-icon color="var(--color-accent)"><DataAnalysis /></el-icon>
             <span>智能预测</span>
           </div>
         </div>
@@ -160,9 +160,11 @@ function renderCharts(data) {
       yAxis: { type: 'value', minInterval: 1 },
       series: [{
         type: 'line', smooth: true, data: trend.map(d => d.count),
-        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(64,158,255,0.3)'},{offset:1,color:'rgba(64,158,255,0.02)'}]) },
-        lineStyle: { color: '#409eff', width: 2 },
+        areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0,color:'rgba(26,122,78,0.3)'},{offset:1,color:'rgba(26,122,78,0.02)'}]) },
+        lineStyle: { color: '#1a7a4e', width: 2 },
         symbol: 'circle', symbolSize: 6,
+        animationDuration: 1200,
+        animationEasing: 'cubicOut',
       }],
     })
   }
@@ -240,16 +242,33 @@ onBeforeUnmount(() => {
 <style scoped>
 .page-wrapper { display: flex; flex-direction: column; gap: 16px; }
 
-.greeting-card { flex-shrink: 0; }
+.greeting-card {
+  flex-shrink: 0;
+  border: none !important;
+  background: linear-gradient(120deg, #14603d, #1a7a4e 55%, #238a5f) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden;
+}
 .greeting { display: flex; justify-content: space-between; align-items: center; }
-.greeting-text { font-size: 18px; font-weight: 600; }
-.greeting-date { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.greeting-text { font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px; }
+.greeting-date { font-size: 12px; color: rgba(255, 255, 255, 0.75); margin-top: 4px; }
+.greeting-card :deep(.el-button) { color: rgba(255, 255, 255, 0.85); }
+.greeting-card :deep(.el-button:hover) { color: #ffffff; background: rgba(255, 255, 255, 0.12); }
 
 .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .stat-card { text-align: center; padding: 16px 0; }
-.stat-num { font-size: 28px; font-weight: 700; color: var(--color-primary); }
+.stat-num { font-size: 28px; font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums; }
 .stat-label { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-.scope-note { font-size: 12px; color: var(--text-secondary); font-weight: 400; margin-left: 4px; }
+.scope-note {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-left: 6px;
+  background: var(--bg-tertiary);
+  padding: 1px 8px;
+  border-radius: 999px;
+  vertical-align: 2px;
+}
 
 .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .chart-card-full { grid-column: 1 / -1; }
@@ -261,17 +280,27 @@ onBeforeUnmount(() => {
 .info-key { color: var(--text-secondary); }
 .info-val { font-weight: 600; }
 .tag-good { color: #67c23a; }
-.tag-ok { color: #409eff; }
+.tag-ok { color: #238a5f; }
 .tag-medium { color: #e6a23c; }
 .tag-bad { color: #f56c6c; }
 
 .quick-links { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 4px 0; }
 .quick-item {
   display: flex; align-items: center; gap: 8px;
-  padding: 14px; border-radius: 8px; cursor: pointer;
-  transition: background 0.2s; font-size: 14px;
+  padding: 14px; border-radius: var(--radius-sm); cursor: pointer;
+  transition: all 0.2s ease; font-size: 14px;
 }
-.quick-item:hover { background: var(--bg-tertiary); }
+.quick-item:hover {
+  background: var(--bg-tertiary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quick-item { transition: none; }
+  .quick-item:hover { transform: none; box-shadow: none; }
+  .el-card { transition: none !important; }
+}
 
 @media (max-width: 900px) {
   .stats-grid, .chart-grid, .bottom-grid { grid-template-columns: 1fr; }
