@@ -27,6 +27,7 @@
 <script setup>
 import { ref, onMounted, onActivated, onBeforeUnmount } from 'vue'
 import { MapLocation } from '@element-plus/icons-vue'
+import { getChartTheme } from '@/utils/chartTheme'
 import * as echarts from 'echarts'
 import { fetchProvinceStats } from '@/api/modules/admission'
 import chinaGeo from '@/assets/geo/china.json'
@@ -39,16 +40,15 @@ const rankChartRef = ref(null)
 let mapChart = null
 let rankChart = null
 
-const COLORS = ['#409eff','#67c23a','#e6a23c','#f56c6c','#909399','#b37feb','#36cfc9','#ff85c0','#ffc53d','#5cdbd3']
-
 function renderMap(data) {
+  const t = getChartTheme()
   if (!mapChartRef.value) return
   if (!mapChart) mapChart = echarts.init(mapChartRef.value)
 
   if (!data.length) {
     mapChart.clear()
     mapChart.setOption({
-      graphic: { type: 'text', left: 'center', top: 'center', style: { text: '暂无数据', fill: '#bbb', fontSize: 14 } },
+      graphic: { type: 'text', left: 'center', top: 'center', style: { text: '暂无数据', fill: t.emptyText, fontSize: 14 } },
     })
     return
   }
@@ -80,13 +80,14 @@ function renderMap(data) {
 }
 
 function renderRank(data) {
+  const t = getChartTheme()
   if (!rankChartRef.value) return
   if (!rankChart) rankChart = echarts.init(rankChartRef.value)
 
   if (!data.length) {
     rankChart.clear()
     rankChart.setOption({
-      graphic: { type: 'text', left: 'center', top: 'center', style: { text: '暂无数据', fill: '#bbb', fontSize: 14 } },
+      graphic: { type: 'text', left: 'center', top: 'center', style: { text: '暂无数据', fill: t.emptyText, fontSize: 14 } },
     })
     return
   }
@@ -108,7 +109,7 @@ function renderRank(data) {
       type: 'bar',
       data: values.map((v, i) => ({
         value: v,
-        itemStyle: { color: COLORS[i % COLORS.length] },
+        itemStyle: { color: t.palette[i % t.palette.length] },
       })),
       label: { show: true, position: 'right', fontSize: 11 },
     }],

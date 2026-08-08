@@ -9,7 +9,7 @@
           <line x1="8" y1="11" x2="14" y2="11"/>
         </svg>
       </div>
-      <span class="logo-text">档案智能分析平台</span>
+      <span class="logo-text">数智档桥</span>
     </div>
     <el-menu
       :default-active="activeMenu"

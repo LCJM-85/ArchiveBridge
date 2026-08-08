@@ -40,10 +40,6 @@
         />
       </el-tooltip>
 
-      <el-button text class="desktop-only">
-        <el-icon size="18"><Bell /></el-icon>
-      </el-button>
-
       <el-dropdown>
         <div class="user-info">
           <el-icon size="18" class="user-icon"><User /></el-icon>
@@ -94,7 +90,6 @@ import {
   FullScreen,
   Sunny,
   Moon,
-  Bell,
   User,
   Operation
 } from '@element-plus/icons-vue'

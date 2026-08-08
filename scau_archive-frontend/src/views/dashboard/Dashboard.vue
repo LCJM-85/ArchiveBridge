@@ -39,35 +39,35 @@
       <el-card shadow="never">
         <template #header><span>快捷入口</span></template>
         <div class="quick-links">
-          <div class="quick-item" @click="goTo('upload')">
+          <div class="quick-item" tabindex="0" role="button" @click="goTo('upload')" @keydown.enter.prevent="goTo('upload')" @keydown.space.prevent="goTo('upload')">
             <el-icon color="var(--color-primary)"><Upload /></el-icon>
             <span>数据采集</span>
           </div>
-          <div class="quick-item" @click="goTo('process')">
+          <div class="quick-item" tabindex="0" role="button" @click="goTo('process')" @keydown.enter.prevent="goTo('process')" @keydown.space.prevent="goTo('process')">
             <el-icon color="var(--color-accent)"><Document /></el-icon>
             <span>OCR 识别</span>
           </div>
-          <div class="quick-item" @click="goTo('admission')">
+          <div class="quick-item" tabindex="0" role="button" @click="goTo('admission')" @keydown.enter.prevent="goTo('admission')" @keydown.space.prevent="goTo('admission')">
             <el-icon color="var(--color-primary)"><DataBoard /></el-icon>
             <span>招生数据</span>
           </div>
-          <div class="quick-item" @click="goTo('studentstatus')">
+          <div class="quick-item" tabindex="0" role="button" @click="goTo('studentstatus')" @keydown.enter.prevent="goTo('studentstatus')" @keydown.space.prevent="goTo('studentstatus')">
             <el-icon color="var(--color-accent)"><UserFilled /></el-icon>
             <span>学籍数据</span>
           </div>
-          <div class="quick-item" @click="goTo('graduation')">
+          <div class="quick-item" tabindex="0" role="button" @click="goTo('graduation')" @keydown.enter.prevent="goTo('graduation')" @keydown.space.prevent="goTo('graduation')">
             <el-icon color="var(--color-primary)"><School /></el-icon>
             <span>毕业数据</span>
           </div>
-          <div class="quick-item" @click="goTo('report')">
+          <div class="quick-item" tabindex="0" role="button" @click="goTo('report')" @keydown.enter.prevent="goTo('report')" @keydown.space.prevent="goTo('report')">
             <el-icon color="var(--color-accent)"><Files /></el-icon>
             <span>智能报告</span>
           </div>
-          <div class="quick-item" @click="goTo('trend')">
+          <div class="quick-item" tabindex="0" role="button" @click="goTo('trend')" @keydown.enter.prevent="goTo('trend')" @keydown.space.prevent="goTo('trend')">
             <el-icon color="var(--color-primary)"><TrendCharts /></el-icon>
             <span>趋势分析</span>
           </div>
-          <div class="quick-item" @click="goTo('prediction')">
+          <div class="quick-item" tabindex="0" role="button" @click="goTo('prediction')" @keydown.enter.prevent="goTo('prediction')" @keydown.space.prevent="goTo('prediction')">
             <el-icon color="var(--color-accent)"><DataAnalysis /></el-icon>
             <span>智能预测</span>
           </div>
@@ -101,6 +101,7 @@
 <script setup>
 import { ref, nextTick, onMounted, onActivated, onBeforeUnmount, computed } from 'vue'
 import { Refresh, Document, DataAnalysis, TrendCharts, Upload, DataBoard, UserFilled, School, Files } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import { fetchDashboardStats } from '@/api/modules/admission'
 import { useMenuStore } from '@/store/menu'
@@ -208,6 +209,7 @@ async function refresh() {
     renderCharts(dashboardData.value)
   } catch (e) {
     console.error('获取仪表盘数据失败:', e)
+    ElMessage.error('获取仪表盘数据失败，请检查后端服务是否正常')
   }
 }
 

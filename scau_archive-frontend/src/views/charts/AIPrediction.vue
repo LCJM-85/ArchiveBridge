@@ -64,6 +64,8 @@
 <script setup>
 import { ref, onMounted, onActivated, onBeforeUnmount, watch } from 'vue'
 import { DataAnalysis } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { getChartTheme } from '@/utils/chartTheme'
 import * as echarts from 'echarts'
 import { fetchPrediction, fetchDegrees } from '@/api/modules/admission'
 
@@ -77,6 +79,7 @@ const predictions = ref([])
 const metrics = ref({})
 
 function renderChart(hist, preds) {
+  const t = getChartTheme()
   if (!chartRef.value) return
   if (!chart) chart = echarts.init(chartRef.value)
 
@@ -124,7 +127,7 @@ function renderChart(hist, preds) {
     xAxis: {
       type: 'category',
       data: allYears,
-      axisLine: { lineStyle: { color: '#dcdfe6' } },
+      axisLine: { lineStyle: { color: t.axisLine } },
     },
     yAxis: { type: 'value', minInterval: 1 },
     series: [
@@ -135,8 +138,8 @@ function renderChart(hist, preds) {
         smooth: true,
         symbol: 'circle',
         symbolSize: 8,
-        lineStyle: { color: '#409eff', width: 2 },
-        itemStyle: { color: '#409eff' },
+        lineStyle: { color: t.primary, width: 2 },
+        itemStyle: { color: t.primary },
         connectNulls: false,
       },
       {
@@ -189,12 +192,13 @@ async function fetchData() {
       if (chart) {
         chart.clear()
         chart.setOption({
-          graphic: { type: 'text', left: 'center', top: 'center', style: { text: '暂无数据，请先导入招生数据', fill: '#bbb', fontSize: 14 } },
+          graphic: { type: 'text', left: 'center', top: 'center', style: { text: '暂无数据，请先导入招生数据', fill: t.emptyText, fontSize: 14 } },
         })
       }
     }
   } catch (e) {
     console.error('获取预测数据失败:', e)
+    ElMessage.error('获取预测数据失败，请稍后重试')
   } finally {
     loading.value = false
   }

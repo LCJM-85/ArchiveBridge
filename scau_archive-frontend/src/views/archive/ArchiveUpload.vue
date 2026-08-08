@@ -92,7 +92,12 @@
           :key="t.key"
           class="type-card"
           :class="{ active: activeType === t.key, 'type-card--disabled': !archiveType }"
+          tabindex="0"
+          role="button"
+          :aria-disabled="!archiveType"
           @click="switchType(t.key)"
+          @keydown.enter.prevent="switchType(t.key)"
+          @keydown.space.prevent="switchType(t.key)"
         >
           <div class="type-card-icon" :style="{ background: t.bg }">
             <el-icon :size="20" :color="t.color">
@@ -214,6 +219,7 @@ import {
   CircleCheck,
   CircleClose,
   Close,
+  QuestionFilled,
 } from '@element-plus/icons-vue'
 
 const fileTypes = [

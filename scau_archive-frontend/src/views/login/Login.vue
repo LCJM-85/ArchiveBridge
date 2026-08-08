@@ -94,8 +94,12 @@
               <img
                 :src="captchaUrl"
                 class="captcha-img"
-                alt="验证码"
+                alt="验证码，点击刷新"
+                tabindex="0"
+                role="button"
                 @click="refreshCaptcha"
+                @keydown.enter.prevent="refreshCaptcha"
+                @keydown.space.prevent="refreshCaptcha"
               />
             </div>
           </div>

@@ -318,7 +318,7 @@ onBeforeUnmount(() => {
 .stat-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
 .stat-value { font-size: 32px; font-weight: 700; color: var(--color-primary); }
 .stat-inline { font-size: 24px; }
-.stat-inline .male { color: #409eff; }
+.stat-inline .male { color: #1a7a4e; }
 .stat-inline .sep { color: #dcdfe6; margin: 0 4px; font-size: 18px; }
 .stat-inline .female { color: #f56c6c; }
 .stat-unit { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
@@ -333,7 +333,7 @@ onBeforeUnmount(() => {
 .score-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
 .score-val { font-size: 36px; font-weight: 700; }
 .score-val.max { color: #f56c6c; }
-.score-val.avg { color: #409eff; }
+.score-val.avg { color: #1a7a4e; }
 .score-val.min { color: #67c23a; }
 
 .print-card { page-break-inside: avoid; }

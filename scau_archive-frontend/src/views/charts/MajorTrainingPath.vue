@@ -29,11 +29,11 @@
       </div>
 
       <div class="legend-bar">
-        <span class="legend-item"><span class="dot" style="background:#409eff"></span>专业</span>
+        <span class="legend-item"><span class="dot" style="background:var(--color-primary)"></span>专业</span>
         <el-icon><ArrowRight /></el-icon>
-        <span class="legend-item"><span class="dot" style="background:#67c23a"></span>学位</span>
+        <span class="legend-item"><span class="dot" style="background:var(--color-accent)"></span>学位</span>
         <el-icon><ArrowRight /></el-icon>
-        <span class="legend-item"><span class="dot" style="background:#e6a23c"></span>去向</span>
+        <span class="legend-item"><span class="dot" style="background:#57c493"></span>去向</span>
       </div>
     </el-card>
   </div>
@@ -42,6 +42,7 @@
 <script setup>
 import { ref, onMounted, onActivated, onBeforeUnmount } from 'vue'
 import { Connection, ArrowRight } from '@element-plus/icons-vue'
+import { getChartTheme } from '@/utils/chartTheme'
 import * as echarts from 'echarts'
 import { fetchSankeyData } from '@/api/modules/admission'
 
@@ -85,14 +86,15 @@ function renderChart(data) {
     .filter(l => !data.links.some(ll => ll.target === l.source))
     .map(l => l.source)
 
+  const t = getChartTheme()
   const nodeColors = {}
   data.nodes.forEach(n => {
     if (majorNames.includes(n.name)) {
-      nodeColors[n.name] = '#409eff'
+      nodeColors[n.name] = t.primary
     } else if (['就业','升学','毕业','结业'].includes(n.name)) {
-      nodeColors[n.name] = '#e6a23c'
+      nodeColors[n.name] = '#57c493'
     } else {
-      nodeColors[n.name] = '#67c23a'
+      nodeColors[n.name] = t.accent
     }
   })
 
@@ -112,7 +114,7 @@ function renderChart(data) {
       nodeGap: 12,
       lineStyle: { curveness: 0.5, opacity: 0.25 },
       label: { fontSize: 12 },
-      data: data.nodes.map(n => ({ ...n, itemStyle: { color: nodeColors[n.name] || '#909399' } })),
+      data: data.nodes.map(n => ({ ...n, itemStyle: { color: nodeColors[n.name] || t.textTertiary } })),
       links: data.links,
     }],
   })

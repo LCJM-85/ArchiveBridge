@@ -58,6 +58,12 @@ function handleClick(tab) {
   color: var(--el-color-primary);
 }
 
+/* 深色模式下亮绿底+绿字对比度不足（≈2.5:1），改用深绿底 + 亮绿字 */
+.dark .tab-bar :deep(.el-tabs__item.is-active) {
+  background: var(--el-color-primary-light-7);
+  color: var(--color-primary);
+}
+
 .tab-bar :deep(.el-tabs__item:hover) {
   color: var(--el-color-primary);
 }

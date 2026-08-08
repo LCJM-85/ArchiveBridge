@@ -55,6 +55,8 @@
 <script setup>
 import { ref, onMounted, onActivated, onBeforeUnmount, watch } from 'vue'
 import { TrendCharts } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+import { getChartTheme } from '@/utils/chartTheme'
 import * as echarts from 'echarts'
 import {
   fetchTrendYearly,
@@ -91,6 +93,7 @@ function getOrCreateChart(key, dom) {
 }
 
 function getEmptyOption(msg) {
+  const t = getChartTheme()
   return {
     xAxis: { show: false },
     yAxis: { show: false },
@@ -98,12 +101,13 @@ function getEmptyOption(msg) {
       type: 'text',
       left: 'center',
       top: 'center',
-      style: { text: msg, fill: '#bbb', fontSize: 14 },
+      style: { text: msg, fill: t.emptyText, fontSize: 14 },
     },
   }
 }
 
 function updateYearlyChart(data) {
+  const t = getChartTheme()
   const chart = getOrCreateChart('yearly', yearlyChartRef.value)
   if (!chart) return
   if (!data.length) {
@@ -119,13 +123,14 @@ function updateYearlyChart(data) {
     series: [{
       type: 'bar',
       data: data.map(d => d.count),
-      itemStyle: { color: '#409eff', borderRadius: [4, 4, 0, 0] },
+      itemStyle: { color: t.primary, borderRadius: [4, 4, 0, 0] },
       label: { show: true, position: 'top', fontSize: 11 },
     }],
   })
 }
 
 function updateMajorChart(data) {
+  const t = getChartTheme()
   const chart = getOrCreateChart('major', majorChartRef.value)
   if (!chart) return
   if (!data.length) {
@@ -142,7 +147,7 @@ function updateMajorChart(data) {
     .slice(0, 10)
     .map(([name]) => name)
 
-  const colors = ['#409eff','#67c23a','#e6a23c','#f56c6c','#909399','#b37feb','#36cfc9','#ff85c0','#ffc53d','#5cdbd3']
+  const colors = getChartTheme().palette
 
   const series = topMajors.map((name, i) => ({
     name,
@@ -164,7 +169,7 @@ function updateMajorChart(data) {
     return Math.max(0, yearTotal - topTotal)
   })
   if (otherData.some(v => v > 0)) {
-    series.push({ name: '其他', type: 'bar', stack: 'total', itemStyle: { color: '#dcdfe6' }, data: otherData })
+    series.push({ name: '其他', type: 'bar', stack: 'total', itemStyle: { color: t.borderColor }, data: otherData })
   }
 
   chart.setOption({
@@ -246,6 +251,7 @@ function updateScoreChart(data) {
 }
 
 function updateGenderChart(data) {
+  const t = getChartTheme()
   const chart = getOrCreateChart('gender', genderChartRef.value)
   if (!chart) return
   if (!data.length) {
@@ -271,8 +277,8 @@ function updateGenderChart(data) {
     xAxis: { type: 'category', data: years.map(String), axisLabel: { fontSize: 12 } },
     yAxis: { type: 'value', minInterval: 1 },
     series: [
-      { name: '男', type: 'bar', stack: 'gender', data: maleData, itemStyle: { color: '#409eff' } },
-      { name: '女', type: 'bar', stack: 'gender', data: femaleData, itemStyle: { color: '#f56c6c' } },
+      { name: '男', type: 'bar', stack: 'gender', data: maleData, itemStyle: { color: t.maleColor } },
+      { name: '女', type: 'bar', stack: 'gender', data: femaleData, itemStyle: { color: t.femaleColor } },
     ],
   })
 }
@@ -306,6 +312,7 @@ async function fetchData() {
     updateGenderChart(gender.data?.data || [])
   } catch (e) {
     console.error('获取趋势数据失败:', e)
+    ElMessage.error('获取趋势数据失败，请检查后端服务是否正常')
   } finally {
     loading.value = false
   }
