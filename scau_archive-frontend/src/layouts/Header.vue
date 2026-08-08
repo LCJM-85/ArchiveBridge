@@ -6,7 +6,7 @@
       </el-button>
       <div class="logo">
         <el-icon size="20" class="logo-icon"><HomeFilled /></el-icon>
-        <span class="title">招生学籍档案管理系统</span>
+        <span class="title">数智档桥</span>
       </div>
 
       <el-breadcrumb class="breadcrumb" separator="/">

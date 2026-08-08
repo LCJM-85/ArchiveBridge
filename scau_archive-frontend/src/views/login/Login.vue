@@ -12,8 +12,8 @@
             <line x1="8" y1="11" x2="14" y2="11"/>
           </svg>
         </div>
-        <h1 class="brand-title">SCAU 档案管理系统</h1>
-        <p class="brand-subtitle">华南农业大学 · 学生档案智能分析平台</p>
+        <h1 class="brand-title">数智档桥 ArchiveBridge</h1>
+        <p class="brand-subtitle">华南农业大学 · 档案数字化与可视化分析平台</p>
       </div>
       <div class="feature-list">
         <div class="feature-item">
