@@ -2,6 +2,7 @@
   <img src="docs/images/logo.svg" alt="ArchiveBridge Logo" width="100%" />
 </p>
 
+<div align="center">
 
 ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot)
@@ -42,7 +43,7 @@ ArchiveBridge 不只是一个传统档案管理系统，而是一套面向未来
 让长期沉淀的档案数据真正产生价值。
 
 ---
-
+</div>
 ## 目录
 - [系统架构](#系统架构)
 - [快速开始](#快速开始)
@@ -171,9 +172,10 @@ npm run dev
 
 ## 项目结构
 
-<p align="center">
+<p align="left">
   <img src="docs/images/项目目录结构图.svg" alt="项目目录结构图" width="55%" />
 </p>
+
 ---
 
 ## 核心流程
