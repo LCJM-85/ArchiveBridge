@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class PythonProcessManager implements InitializingBean {
@@ -44,6 +45,8 @@ public class PythonProcessManager implements InitializingBean {
 
     private volatile boolean running = true;
 
+    private static final int PYTHON_PORT = 8765;
+
     @Override
     public void afterPropertiesSet() {
         startPythonProcess();
@@ -60,6 +63,9 @@ public class PythonProcessManager implements InitializingBean {
             log.warn("AI 助手 Python 脚本未找到，跳过启动: {}", scriptFile.getAbsolutePath());
             return;
         }
+
+        // 启动前清理上次残留、仍占用端口的孤儿 Python 进程（Windows 强杀 Java 后子进程会残留）
+        cleanupStalePort();
 
         String venvPython = customVenvPath != null && !customVenvPath.isEmpty()
                 ? customVenvPath
@@ -107,6 +113,37 @@ public class PythonProcessManager implements InitializingBean {
         }
     }
 
+    /**
+     * 清理仍监听 {PYTHON_PORT} 的残留 python 进程。
+     * Windows 上强杀 Java（任务管理器/崩溃）不会终止其 Python 子进程，
+     * 下次启动时新实例绑定端口会报 10048；这里在启动前先拔掉旧进程。
+     */
+    private void cleanupStalePort() {
+        boolean isWindows = System.getProperty("os.name", "").toLowerCase().contains("win");
+        String cmd;
+        if (isWindows) {
+            cmd = "$c = Get-NetTCPConnection -LocalPort " + PYTHON_PORT + " -State Listen -ErrorAction SilentlyContinue; "
+                    + "if ($c) { $procId = ($c | Select-Object -First 1).OwningProcess; "
+                    + "$proc = Get-Process -Id $procId -ErrorAction SilentlyContinue; "
+                    + "if ($proc -and $proc.ProcessName -like '*python*') { Stop-Process -Id $procId -Force } }";
+        } else {
+            cmd = "pid=$(ss -tlnp 2>/dev/null | grep ':" + PYTHON_PORT + " ' | grep -oP 'pid=\\K[0-9]+' | head -1); "
+                    + "if [ -n \"$pid\" ] && ps -p $pid -o comm= | grep -qi python; then kill -9 $pid; fi";
+        }
+        try {
+            Process p = new ProcessBuilder(isWindows
+                    ? new String[]{"powershell", "-NoProfile", "-Command", cmd}
+                    : new String[]{"/bin/sh", "-c", cmd})
+                    .redirectErrorStream(true)
+                    .start();
+            if (!p.waitFor(5, TimeUnit.SECONDS)) {
+                p.destroyForcibly();
+            }
+        } catch (Exception e) {
+            log.debug("清理残留 Python 进程失败（可忽略）: {}", e.getMessage());
+        }
+    }
+
     private void startWatchdog() {
         Thread watchdog = new Thread(() -> {
             while (running) {
@@ -131,7 +168,19 @@ public class PythonProcessManager implements InitializingBean {
     @PreDestroy
     public void destroy() {
         if (pythonProcess != null && pythonProcess.isAlive()) {
-            pythonProcess.destroy();
+            try {
+                // Windows 上 venv 的 python.exe 是 stub，会再派生一个 base python 子进程；
+                // 只 destroy 父进程会导致孙进程残留占用端口，需按进程树杀。
+                if (System.getProperty("os.name", "").toLowerCase().contains("win")) {
+                    Process p = new ProcessBuilder("taskkill", "/PID", String.valueOf(pythonProcess.pid()), "/T", "/F")
+                            .redirectErrorStream(true).start();
+                    p.waitFor(5, TimeUnit.SECONDS);
+                } else {
+                    pythonProcess.destroy();
+                }
+            } catch (Exception e) {
+                pythonProcess.destroy();
+            }
             log.info("AI 助手 Python 服务已停止");
         }
     }

@@ -27,12 +27,16 @@ def train_arima(series):
     best_order = None
     best_model = None
 
-    for p in range(0, 4):
+    # 样本只有几年，全网格 4x2x4=32 次 ARIMA 拟合会把请求拖到分钟级（statsmodels 拟合慢）。
+    # 限制 p,q ∈ 0..2 且 p+q<=3、d ∈ 0..1（16 次），低阶对小样本更稳更快。
+    for p in range(0, 3):
         for d in range(0, 2):
-            for q in range(0, 4):
+            for q in range(0, 3):
+                if p + q > 3:
+                    continue
                 try:
                     model = ARIMA(series, order=(p, d, q))
-                    result = model.fit()
+                    result = model.fit(disp=False)
                     if result.aic < best_aic:
                         best_aic = result.aic
                         best_order = (p, d, q)

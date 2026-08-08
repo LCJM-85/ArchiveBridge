@@ -59,7 +59,8 @@ export function fetchSankeyData() {
 export function fetchPrediction(years = 3, degreeName = null) {
   const params = { years }
   if (degreeName) params.degreeName = degreeName
-  return request.get('/api/admission/predict/next-years', { params })
+  // 预测会拉起 Python 进程训练模型（ARIMA + XGBoost），冷启动+训练常超 10s，单独放宽超时
+  return request.get('/api/admission/predict/next-years', { params, timeout: 60000 })
 }
 
 export function fetchReportData(year) {

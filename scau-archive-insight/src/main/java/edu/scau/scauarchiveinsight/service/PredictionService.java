@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,6 +59,14 @@ public class PredictionService {
 
         Process process = pb.start();
 
+        // 先等待（带超时）再读输出：进程结束前读 stdout 会隐式阻塞且无超时，
+        // Python 预测脚本卡住时会永久占住 Tomcat 线程，导致其它接口 502。
+        boolean finished = process.waitFor(45, TimeUnit.SECONDS);
+        if (!finished) {
+            killProcessTree(process);
+            throw new RuntimeException("Python prediction timed out after 45 seconds");
+        }
+
         StringBuilder output = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(
                 new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
@@ -76,7 +85,7 @@ public class PredictionService {
             }
         }
 
-        int exitCode = process.waitFor();
+        int exitCode = process.exitValue();
         if (exitCode != 0) {
             throw new RuntimeException("Python prediction failed: " + errorOutput);
         }
@@ -84,5 +93,23 @@ public class PredictionService {
         // 3. 解析返回 JSON
         return objectMapper.readValue(output.toString(),
                 new TypeReference<Map<String, Object>>() {});
+    }
+
+    /**
+     * 强杀 Python 进程树。Windows 上 venv 的 python.exe 是 stub，会派生 base python 子进程，
+     * 只 destroyForcibly 父进程会导致子进程残留，故用 taskkill /T 连根拔起。
+     */
+    private void killProcessTree(Process p) {
+        try {
+            if (System.getProperty("os.name", "").toLowerCase().contains("win")) {
+                Process k = new ProcessBuilder("taskkill", "/PID", String.valueOf(p.pid()), "/T", "/F")
+                        .redirectErrorStream(true).start();
+                k.waitFor(5, TimeUnit.SECONDS);
+            } else {
+                p.destroyForcibly();
+            }
+        } catch (Exception ignored) {
+            p.destroyForcibly();
+        }
     }
 }
