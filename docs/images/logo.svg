@@ -131,12 +131,12 @@
 
     <!-- Main title -->
     <text x="0" y="98" font-family="Segoe UI, system-ui, -apple-system, sans-serif" font-size="52" font-weight="700" letter-spacing="-1" fill="url(#titleGradient)">
-      数智档桥
+      ArchiveBridge
     </text>
 
     <!-- Chinese subtitle -->
     <text x="2" y="138" font-family="Segoe UI, PingFang SC, Microsoft YaHei, sans-serif" font-size="28" font-weight="500" fill="#94A3B8" letter-spacing="6">
-      ArchiveBridge
+      数智档桥
       <animate attributeName="opacity" values="0.65;1;0.65" dur="3s" repeatCount="indefinite"/>
     </text>
 
