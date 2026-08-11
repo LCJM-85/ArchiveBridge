@@ -139,8 +139,8 @@ function renderMap(data) {
       type: 'map',
       map: 'china',
       roam: false,
-      layoutCenter: ['50%', '50%'],
-      layoutSize: '100%',
+      layoutCenter: ['50%', '45%'],
+      layoutSize: '118%',
       label: { show: false },
       selectedMode: false,
       itemStyle: {
