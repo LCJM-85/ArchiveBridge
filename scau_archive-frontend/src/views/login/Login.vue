@@ -341,7 +341,6 @@ const handleLogin = () => login(route, router)
   box-shadow: 0 0 10px rgba(201, 164, 92, 0.9);
 }
 .feature-tag {
-  margin-left: auto;
   font-size: 10px;
   letter-spacing: 2px;
   color: rgba(230, 205, 149, 0.7);
