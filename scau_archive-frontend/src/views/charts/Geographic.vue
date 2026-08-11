@@ -143,11 +143,7 @@ function renderMap(data) {
       roam: false,
       layoutCenter: ['50%', '49%'],
       layoutSize: '118%',
-      label: {
-        show: true,
-        fontSize: 10,
-        color: isDark ? '#c8d4cc' : '#3c5a4a',
-      },
+      label: { show: false },
       selectedMode: false,
       itemStyle: {
         borderColor: isDark ? 'rgba(47, 185, 132, 0.8)' : 'rgba(11, 92, 64, 0.7)',
