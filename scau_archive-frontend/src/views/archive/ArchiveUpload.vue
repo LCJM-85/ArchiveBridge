@@ -1,5 +1,39 @@
 <template>
   <div class="page-wrapper">
+    <!-- 页面头部条 -->
+    <div class="page-hero">
+      <div class="ph-left">
+        <div class="ph-kicker">SCAU ARCHIVE BRIDGE · 档案管道</div>
+        <h2 class="font-display">档案智能采集</h2>
+        <div class="ph-rule"></div>
+        <p class="ph-sub">上传档案文件，自动完成 OCR 识别 / LLM 提取 / 字段映射入库</p>
+      </div>
+      <div class="ph-right">
+        <svg class="ph-art" viewBox="0 0 220 90" preserveAspectRatio="xMidYMax meet">
+          <!-- 云上传 -->
+          <g transform="translate(24 26)">
+            <path d="M30 34 C 22 34, 14 27, 14 20 C 14 12, 22 6, 30 6 C 36 0, 48 0, 54 6 C 62 4, 72 10, 72 18 C 72 26, 64 32, 56 34 Z" fill="#123d2c" stroke="rgba(230,205,149,.4)" stroke-width="1.4"/>
+            <path d="M43 26 L43 8 M36 14 L43 7 L50 14" stroke="#d9b877" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <!-- 文件卡片 -->
+          <g transform="translate(96 30)">
+            <rect x="0" y="0" width="34" height="42" rx="6" fill="#0a2e21" stroke="rgba(230,205,149,.35)" stroke-width="1.3"/>
+            <path d="M10 0 L10 10 L20 10" fill="none" stroke="#c9a45c" stroke-width="1.6"/>
+            <line x1="8" y1="20" x2="26" y2="20" stroke="rgba(230,205,149,.4)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="8" y1="27" x2="22" y2="27" stroke="rgba(230,205,149,.4)" stroke-width="2" stroke-linecap="round"/>
+            <line x1="8" y1="34" x2="24" y2="34" stroke="rgba(230,205,149,.4)" stroke-width="2" stroke-linecap="round"/>
+          </g>
+          <!-- 入库箭头 -->
+          <path d="M150 52 C 170 48, 186 40, 206 30" fill="none" stroke="#2fb984" stroke-width="2" stroke-linecap="round"/>
+          <path d="M198 26 L206 30 L198 34" fill="none" stroke="#2fb984" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="182" y="52" width="30" height="14" rx="4" fill="#0a2e21" stroke="rgba(230,205,149,.3)" stroke-width="1.2"/>
+          <rect x="187" y="57" width="20" height="3" rx="1.5" fill="#c9a45c" opacity=".8"/>
+          <circle cx="58" cy="50" r="2" fill="rgba(230,205,149,.5)"/>
+          <circle cx="140" cy="18" r="2" fill="rgba(47,185,132,.55)"/>
+        </svg>
+      </div>
+    </div>
+
     <el-card shadow="never" class="page-card">
       <template #header>
         <div class="card-header">
@@ -99,8 +133,8 @@
           @keydown.enter.prevent="switchType(t.key)"
           @keydown.space.prevent="switchType(t.key)"
         >
-          <div class="type-card-icon" :style="{ background: t.bg }">
-            <el-icon :size="20" :color="t.color">
+          <div class="type-card-icon" :style="{ background: t.bg, color: t.color }">
+            <el-icon :size="20">
               <component :is="t.icon" />
             </el-icon>
           </div>
@@ -127,9 +161,11 @@
           class="file-input-hidden"
           @change="onFileSelect"
         />
-        <el-icon :size="36" class="drop-zone-icon" :color="files.length > 0 ? 'var(--color-primary)' : '#bbb'">
-          <UploadFilled />
-        </el-icon>
+        <div class="drop-zone-icon" :class="{ 'drop-zone-icon--has': files.length > 0 }">
+          <el-icon :size="38" :color="files.length > 0 ? 'var(--color-primary)' : 'var(--color-gold)'">
+            <UploadFilled />
+          </el-icon>
+        </div>
         <p class="drop-zone-text" v-if="files.length === 0">
           拖拽文件到此处，或 <em>点击选择</em>
         </p>
@@ -152,8 +188,8 @@
             class="file-item"
             :class="{ 'file-item--uploading': f.status === 'uploading', 'file-item--done': f.status === 'done', 'file-item--error': f.status === 'error' }"
           >
-            <div class="file-item-icon">
-              <el-icon :size="18" :color="fileIconColor(f)">
+            <div class="file-item-icon" :style="{ color: fileIconColor(f) }">
+              <el-icon :size="18">
                 <component :is="fileIcon(f)" />
               </el-icon>
             </div>
@@ -168,6 +204,7 @@
                 :width="36"
                 type="circle"
                 :stroke-width="3"
+                color="#14a06f"
               />
               <el-icon v-else-if="f.status === 'done'" size="18" color="#67c23a"><CircleCheck /></el-icon>
               <el-icon v-else-if="f.status === 'error'" size="18" color="#f56c6c"><CircleClose /></el-icon>
@@ -189,6 +226,7 @@
         <el-button @click="clearAll" :disabled="isUploading">取消</el-button>
         <el-button
           type="primary"
+          class="btn-gold"
           :loading="isUploading"
           :disabled="isUploading"
           @click="handleUpload"
@@ -223,10 +261,10 @@ import {
 } from '@element-plus/icons-vue'
 
 const fileTypes = [
-  { key: 'image', label: '图片文件', hint: '.jpg / .png / .tiff', icon: Picture, accept: '.jpg,.jpeg,.png,.tif,.tiff,.bmp', acceptLabel: '.jpg / .png / .tiff 等图片文件', bg: 'rgba(64, 158, 255, 0.1)', color: '#409eff' },
-  { key: 'pdf', label: 'PDF文件', hint: '.pdf', icon: DocumentCopy, accept: '.pdf', acceptLabel: '.pdf 文件', bg: 'rgba(230, 162, 60, 0.1)', color: '#e6a23c' },
-  { key: 'excel', label: 'Excel', hint: '.xls / .xlsx', icon: Grid, accept: '.xls,.xlsx', acceptLabel: '.xls / .xlsx 文件', bg: 'rgba(26, 122, 78, 0.1)', color: '#1a7a4e' },
-  { key: 'csv', label: 'CSV', hint: '.csv', icon: List, accept: '.csv', acceptLabel: '.csv 文件', bg: 'rgba(64, 158, 255, 0.1)', color: '#7232dd' },
+  { key: 'image', label: '图片文件', hint: '.jpg / .png / .tiff', icon: Picture, accept: '.jpg,.jpeg,.png,.tif,.tiff,.bmp', acceptLabel: '.jpg / .png / .tiff 等图片文件', bg: 'rgba(91, 141, 239, 0.12)', color: '#5b8def' },
+  { key: 'pdf', label: 'PDF文件', hint: '.pdf', icon: DocumentCopy, accept: '.pdf', acceptLabel: '.pdf 文件', bg: 'rgba(201, 164, 92, 0.14)', color: '#c9a45c' },
+  { key: 'excel', label: 'Excel', hint: '.xls / .xlsx', icon: Grid, accept: '.xls,.xlsx', acceptLabel: '.xls / .xlsx 文件', bg: 'rgba(14, 138, 95, 0.12)', color: '#0e8a5f' },
+  { key: 'csv', label: 'CSV', hint: '.csv', icon: List, accept: '.csv', acceptLabel: '.csv 文件', bg: 'rgba(138, 99, 210, 0.12)', color: '#8a63d2' },
 ]
 
 const activeType = ref('image')
@@ -353,10 +391,10 @@ function fileIcon(f) {
 function fileIconColor(f) {
   const ext = f.name.split('.').pop().toLowerCase()
   const imgExts = ['jpg', 'jpeg', 'png', 'tif', 'tiff', 'bmp']
-  if (ext === 'pdf') return '#e6a23c'
-  if (imgExts.includes(ext)) return '#409eff'
-  if (['xls', 'xlsx'].includes(ext)) return '#1a7a4e'
-  if (ext === 'csv') return '#7232dd'
+  if (ext === 'pdf') return '#c9a45c'
+  if (imgExts.includes(ext)) return '#5b8def'
+  if (['xls', 'xlsx'].includes(ext)) return '#0e8a5f'
+  if (ext === 'csv') return '#8a63d2'
   return '#67c23a'
 }
 
@@ -445,6 +483,60 @@ async function handleUpload() {
   gap: 16px;
 }
 
+/* ===== 页面头部条 ===== */
+.page-hero {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(520px 240px at 88% -30px, rgba(47, 185, 132, 0.32), transparent 62%),
+    radial-gradient(420px 200px at 100% 130%, rgba(201, 164, 92, 0.2), transparent 60%),
+    linear-gradient(120deg, #07271c 0%, #0b5c40 55%, #0e8a5f 100%);
+  box-shadow: 0 20px 48px rgba(7, 39, 28, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 34px;
+  min-height: 116px;
+  animation: rise-up 0.7s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+.page-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+}
+.ph-left { position: relative; z-index: 2; }
+.ph-kicker {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--color-gold-light);
+  margin-bottom: 8px;
+}
+.ph-left h2 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin: 0;
+}
+.ph-rule {
+  width: 48px;
+  height: 2px;
+  margin: 12px 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #d9b877, rgba(201, 164, 92, 0));
+}
+.ph-sub { font-size: 12.5px; color: rgba(255, 255, 255, 0.6); margin: 0; }
+.ph-right { position: relative; z-index: 2; }
+.ph-art { width: 220px; height: 84px; flex-shrink: 0; }
+@media (max-width: 900px) {
+  .ph-art { display: none; }
+  .page-hero { padding: 22px 24px; }
+}
+
 .card-header {
   display: flex;
   align-items: center;
@@ -463,13 +555,20 @@ async function handleUpload() {
 /* Archive Type Selector */
 .archive-type-selector {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  padding: 10px 14px;
-  background: var(--bg-tertiary);
-  border-radius: 8px;
-  border: 1px solid var(--border-light);
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--card-bg), var(--bg-primary));
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 4px 16px rgba(7, 39, 28, 0.05);
+  transition: border-color 0.25s ease;
+}
+.archive-type-selector--required {
+  border-color: var(--color-gold);
+  background: linear-gradient(135deg, var(--card-bg), rgba(201, 164, 92, 0.06));
 }
 
 .archive-type-label {
@@ -479,14 +578,16 @@ async function handleUpload() {
   white-space: nowrap;
 }
 
-.archive-type-selector--required {
-  border-color: #e6a23c;
-  background: rgba(230, 162, 60, 0.04);
+.archive-type-selector :deep(.el-radio) {
+  margin-right: 8px;
+}
+.archive-type-selector :deep(.el-radio__label) {
+  font-weight: 500;
 }
 
 .archive-type-hint {
   font-size: 12px;
-  color: #e6a23c;
+  color: var(--color-gold);
   margin-left: 4px;
 }
 
@@ -494,7 +595,7 @@ async function handleUpload() {
   width: 1px;
   height: 20px;
   background: var(--border-light);
-  margin: 0 12px;
+  margin: 0 8px;
 }
 .llm-enabled {
   color: var(--color-primary) !important;
@@ -505,32 +606,41 @@ async function handleUpload() {
 .type-selector {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-  margin-bottom: 4px;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .type-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 16px 8px;
-  border-radius: 10px;
+  gap: 8px;
+  padding: 18px 8px 14px;
+  border-radius: 14px;
   cursor: pointer;
   border: 1px solid var(--border-light);
   background: var(--bg-tertiary);
-  transition: all 0.2s;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
 }
-
 .type-card:hover {
+  transform: translateY(-4px);
   border-color: var(--color-primary);
   background: var(--color-primary-light);
+  box-shadow: 0 12px 26px rgba(7, 39, 28, 0.12);
 }
-
 .type-card.active {
   border-color: var(--color-primary);
   background: var(--color-primary-light);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 138, 95, 0.12), 0 12px 26px rgba(7, 39, 28, 0.1);
+}
+.type-card.active::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
 .type-card--disabled {
@@ -540,12 +650,16 @@ async function handleUpload() {
 }
 
 .type-card-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.type-card:hover .type-card-icon {
+  transform: scale(1.1);
 }
 
 .type-card-label {
@@ -561,34 +675,41 @@ async function handleUpload() {
 
 /* Drop Zone */
 .drop-zone {
-  border: 2px dashed var(--border-light);
-  border-radius: 12px;
-  padding: 40px 20px;
+  position: relative;
+  border: 2px dashed var(--border-color);
+  border-radius: 16px;
+  padding: 46px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  background: linear-gradient(160deg, var(--card-bg), var(--bg-primary));
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
 }
-
 .drop-zone:hover,
 .drop-zone--dragover {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
+  border-color: var(--color-gold);
+  background: linear-gradient(160deg, var(--card-bg), rgba(201, 164, 92, 0.05));
+  box-shadow: inset 0 0 0 3px rgba(201, 164, 92, 0.1);
 }
-
 .drop-zone--has-files {
-  padding: 24px 20px;
+  padding: 26px 20px;
 }
-
 .drop-zone--disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .drop-zone-icon {
   pointer-events: none;
+  animation: floaty 3.2s ease-in-out infinite;
+}
+.drop-zone-icon--has {
+  animation: none;
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
 }
 
 .drop-zone-text {
@@ -601,7 +722,7 @@ async function handleUpload() {
 .drop-zone-text em {
   font-style: normal;
   color: var(--color-primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .drop-zone-hint {
@@ -618,19 +739,21 @@ async function handleUpload() {
 /* File List */
 .file-list {
   border: 1px solid var(--border-light);
-  border-radius: 10px;
+  border-radius: 14px;
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .file-list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
+  padding: 12px 16px;
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   border-bottom: 1px solid var(--border-light);
+  background: var(--bg-tertiary);
 }
 
 .file-list-body {
@@ -641,12 +764,14 @@ async function handleUpload() {
 .file-item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 12px;
+  padding: 10px 16px;
   border-bottom: 1px solid var(--border-light);
   transition: background 0.15s;
 }
-
+.file-item:hover {
+  background: var(--bg-tertiary);
+}
 .file-item:last-child {
   border-bottom: none;
 }
@@ -654,20 +779,23 @@ async function handleUpload() {
 .file-item--error {
   background: rgba(245, 108, 108, 0.04);
 }
-
+.file-item--error:hover { background: rgba(245, 108, 108, 0.08); }
 .file-item--done {
   background: rgba(103, 194, 58, 0.04);
 }
+.file-item--done:hover { background: rgba(103, 194, 58, 0.08); }
 
 .file-item-icon {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-tertiary);
-  border-radius: 6px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-light);
+  border-radius: 9px;
+  box-shadow: 0 3px 10px rgba(7, 39, 28, 0.06);
 }
 
 .file-item-info {
@@ -711,5 +839,25 @@ async function handleUpload() {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  margin-top: 4px;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark)) !important;
+  border: none !important;
+  color: #1d1608 !important;
+  font-weight: 600;
+}
+.btn-gold:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 16px rgba(201, 164, 92, 0.4);
+}
+
+/* ===== 动效 ===== */
+@keyframes rise-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-hero, .drop-zone-icon { animation: none !important; }
 }
 </style>

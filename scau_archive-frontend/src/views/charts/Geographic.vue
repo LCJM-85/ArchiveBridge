@@ -1,11 +1,48 @@
 <template>
   <div class="page-wrapper">
+    <!-- 页面头部条 -->
+    <div class="page-hero">
+      <div class="ph-left">
+        <div class="ph-kicker">SCAU ARCHIVE BRIDGE · 可视化分析</div>
+        <h2 class="font-display">录取地理分布</h2>
+        <div class="ph-rule"></div>
+        <p class="ph-sub">全国生源地录取人数热力地图 · 省份录取排名</p>
+      </div>
+      <div class="ph-right">
+        <svg class="ph-art" viewBox="0 0 220 90" preserveAspectRatio="xMidYMax meet">
+          <!-- 简化地图轮廓 -->
+          <path d="M96 18 C 112 12, 132 16, 146 26 C 162 38, 172 54, 170 68 C 168 80, 152 82, 140 76 C 124 68, 108 64, 94 68 C 78 72, 62 70, 54 60 C 46 50, 48 36, 60 28 C 70 22, 82 22, 96 18 Z" fill="#0a2e21" stroke="rgba(230,205,149,.4)" stroke-width="1.4"/>
+          <!-- 热力点 -->
+          <g fill="#2fb984"><circle cx="86" cy="44" r="3.4"/><circle cx="112" cy="38" r="2.8"/><circle cx="138" cy="56" r="3"/></g>
+          <g fill="#d9b877"><circle cx="100" cy="56" r="2.4"/><circle cx="64" cy="52" r="2.2"/></g>
+          <!-- 定位针 -->
+          <g transform="translate(150 22)">
+            <path d="M0 0 C 6 -8, 14 -8, 14 -2 C 14 4, 7 12, 7 12 C 7 12, 0 4, 0 -2 Z" fill="#d9b877"/>
+            <circle cx="7" cy="-3" r="2.6" fill="#0b2a1e"/>
+          </g>
+          <!-- 图例条 -->
+          <g transform="translate(16 70)">
+            <rect x="0" y="0" width="52" height="9" rx="4.5" fill="url(#geoGrad)"/>
+            <text x="0" y="22" font-size="9" fill="rgba(230,205,149,.7)" font-family="inherit">低</text>
+            <text x="44" y="22" font-size="9" fill="rgba(230,205,149,.7)" font-family="inherit">高</text>
+          </g>
+          <defs>
+            <linearGradient id="geoGrad" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#e6f3ec"/>
+              <stop offset="1" stop-color="#0b5c40"/>
+            </linearGradient>
+          </defs>
+          <circle cx="186" cy="72" r="2" fill="rgba(47,185,132,.55)"/>
+        </svg>
+      </div>
+    </div>
+
     <el-card shadow="never" class="page-card">
       <template #header>
         <div class="card-header">
           <div class="card-header-left">
             <el-icon size="18" color="var(--color-primary)"><MapLocation /></el-icon>
-            <span>录取地理分布</span>
+            <span>录取地理分布 <span class="scope-note">含硕博</span></span>
           </div>
         </div>
       </template>
@@ -16,7 +53,10 @@
         </div>
 
         <div class="rank-section">
-          <div class="rank-title">省份录取排名</div>
+          <div class="rank-title">
+            <span class="rank-dot"></span>
+            省份录取排名
+          </div>
           <div ref="rankChartRef" class="rank-chart"></div>
         </div>
       </div>
@@ -57,6 +97,9 @@ function renderMap(data) {
   mapChart.setOption({
     tooltip: {
       trigger: 'item',
+      backgroundColor: 'var(--bg-elevated)',
+      borderColor: 'var(--border-color)',
+      textStyle: { color: 'var(--text-primary)' },
       formatter: p => `${p.name}<br/>录取人数: ${p.value || 0}`,
     },
     visualMap: {
@@ -65,15 +108,21 @@ function renderMap(data) {
       left: 'left',
       bottom: 20,
       text: ['高', '低'],
-      inRange: { color: ['#e8f5e9', '#a5d6a7', '#43a047', '#1b5e20'] },
+      textStyle: { color: t.textSecondary },
+      inRange: { color: ['#e6f3ec', '#8fd3b0', '#2fb984', '#0b5c40'] },
       calculable: true,
     },
     series: [{
       type: 'map',
       map: 'china',
       roam: true,
-      label: { show: true, fontSize: 10 },
-      emphasis: { label: { fontSize: 14, fontWeight: 'bold' } },
+      label: { show: true, fontSize: 10, color: t.textSecondary },
+      itemStyle: {
+        borderColor: 'var(--card-bg)',
+        borderWidth: 1,
+        areaColor: 'var(--bg-tertiary)',
+      },
+      emphasis: { label: { fontSize: 14, fontWeight: 'bold' }, itemStyle: { shadowBlur: 12, shadowColor: 'rgba(14,138,95,.4)' } },
       data: data.map(d => ({ name: d.provincename, value: d.count })),
     }],
   })
@@ -97,21 +146,36 @@ function renderRank(data) {
   const values = sorted.map(d => d.count)
 
   rankChart.setOption({
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-    grid: { left: 90, right: 30, top: 10, bottom: 20 },
-    xAxis: { type: 'value' },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      backgroundColor: 'var(--bg-elevated)',
+      borderColor: 'var(--border-color)',
+      textStyle: { color: 'var(--text-primary)' },
+    },
+    grid: { left: 90, right: 34, top: 10, bottom: 20 },
+    xAxis: { type: 'value', splitLine: { lineStyle: { color: t.borderColor, type: 'dashed' } }, axisLabel: { color: t.textTertiary } },
     yAxis: {
       type: 'category',
       data: names,
-      axisLabel: { fontSize: 11 },
+      axisLabel: { fontSize: 11, color: t.textSecondary },
+      axisLine: { lineStyle: { color: t.axisLine } },
     },
     series: [{
       type: 'bar',
+      barMaxWidth: 14,
       data: values.map((v, i) => ({
         value: v,
-        itemStyle: { color: t.palette[i % t.palette.length] },
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            { offset: 0, color: i === 0 ? t.gold : t.primary },
+            { offset: 1, color: 'rgba(47,185,132,0.3)' },
+          ]),
+          borderRadius: [0, 7, 7, 0],
+        },
       })),
-      label: { show: true, position: 'right', fontSize: 11 },
+      label: { show: true, position: 'right', fontSize: 11, color: t.textSecondary },
+      animationDuration: 1000,
     }],
   })
 }
@@ -156,6 +220,60 @@ onBeforeUnmount(() => {
   gap: 16px;
 }
 
+/* ===== 页面头部条 ===== */
+.page-hero {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(520px 240px at 88% -30px, rgba(47, 185, 132, 0.32), transparent 62%),
+    radial-gradient(420px 200px at 100% 130%, rgba(201, 164, 92, 0.2), transparent 60%),
+    linear-gradient(120deg, #07271c 0%, #0b5c40 55%, #0e8a5f 100%);
+  box-shadow: 0 20px 48px rgba(7, 39, 28, 0.24);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26px 34px;
+  min-height: 116px;
+  animation: rise-up 0.7s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+.page-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+}
+.ph-left { position: relative; z-index: 2; }
+.ph-kicker {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--color-gold-light);
+  margin-bottom: 8px;
+}
+.ph-left h2 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin: 0;
+}
+.ph-rule {
+  width: 48px;
+  height: 2px;
+  margin: 12px 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #d9b877, rgba(201, 164, 92, 0));
+}
+.ph-sub { font-size: 12.5px; color: rgba(255, 255, 255, 0.6); margin: 0; }
+.ph-right { position: relative; z-index: 2; }
+.ph-art { width: 220px; height: 84px; flex-shrink: 0; }
+@media (max-width: 900px) {
+  .ph-art { display: none; }
+  .page-hero { padding: 22px 24px; }
+}
+
 .card-header {
   display: flex;
   align-items: center;
@@ -171,6 +289,18 @@ onBeforeUnmount(() => {
   color: var(--text-primary);
 }
 
+.scope-note {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  margin-left: 6px;
+  background: var(--bg-tertiary);
+  padding: 1px 8px;
+  border-radius: 999px;
+  vertical-align: 2px;
+}
+
+/* ===== 地理容器 ===== */
 .geo-container {
   display: grid;
   grid-template-columns: 1fr 360px;
@@ -180,6 +310,11 @@ onBeforeUnmount(() => {
 
 .map-section {
   min-height: 500px;
+  border-radius: 14px;
+  border: 1px solid var(--border-light);
+  background: var(--card-bg);
+  overflow: hidden;
+  animation: rise-up 0.7s 0.14s cubic-bezier(0.2, 0.75, 0.3, 1) both;
 }
 
 .map-chart {
@@ -190,18 +325,45 @@ onBeforeUnmount(() => {
 .rank-section {
   display: flex;
   flex-direction: column;
+  border-radius: 14px;
+  border: 1px solid var(--border-light);
+  background: var(--card-bg);
+  padding: 14px 12px 6px;
+  overflow: hidden;
+  animation: rise-up 0.7s 0.2s cubic-bezier(0.2, 0.75, 0.3, 1) both;
 }
 
 .rank-title {
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 14.5px;
   font-weight: 600;
+  letter-spacing: 1px;
   color: var(--text-primary);
-  margin-bottom: 8px;
+  margin: 0 6px 10px;
+}
+
+.rank-dot {
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-dark));
 }
 
 .rank-chart {
   flex: 1;
   min-height: 400px;
+}
+
+/* ===== 动效 ===== */
+@keyframes rise-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-hero, .map-section, .rank-section { animation: none !important; }
 }
 
 @media (max-width: 1000px) {
