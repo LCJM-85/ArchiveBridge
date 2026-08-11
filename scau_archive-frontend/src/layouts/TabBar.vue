@@ -50,12 +50,25 @@ function handleClick(tab) {
   padding: 0 14px;
   border: none !important;
   background: transparent;
-  transition: background 0.2s;
+  transition: background 0.2s, color 0.2s;
+  position: relative;
 }
 
 .tab-bar :deep(.el-tabs__item.is-active) {
   background: var(--el-color-primary-light-9);
-  color: var(--el-color-primary);
+  color: var(--color-primary);
+}
+
+/* 激活标签：顶部金色指示条 */
+.tab-bar :deep(.el-tabs__item.is-active::before) {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 2.5px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--color-gold-light), var(--color-gold));
 }
 
 /* 深色模式下亮绿底+绿字对比度不足（≈2.5:1），改用深绿底 + 亮绿字 */

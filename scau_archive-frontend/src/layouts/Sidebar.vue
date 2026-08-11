@@ -143,7 +143,7 @@ const handleSelect = (menuKey) => {
 
 <style scoped>
 .sidebar {
-  background: var(--sidebar-bg);
+  background: linear-gradient(180deg, #0b2a1e 0%, #09251a 55%, #07271c 100%) !important;
   color: var(--sidebar-active-text);
   border-right: 1px solid var(--sidebar-border);
   display: flex;
@@ -153,35 +153,35 @@ const handleSelect = (menuKey) => {
 }
 
 .logo {
-  height: 60px;
+  height: 64px;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 0 16px;
   border-bottom: 1px solid var(--sidebar-logo-border);
   flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(14, 138, 95, 0.14), transparent);
 }
 
 .logo-icon {
-  color: var(--color-primary);
+  color: #e6cd95;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: rgba(26, 122, 78, 0.15);
-  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(140deg, #14a06f, #0b5c40);
+  border: 1px solid rgba(201, 164, 92, 0.5);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(6, 40, 28, 0.5);
   flex-shrink: 0;
 }
 
-.dark .logo-icon {
-  background: rgba(45, 157, 110, 0.2);
-}
-
 .logo-text {
-  font-size: 15px;
+  font-family: var(--font-display);
+  font-size: 16px;
   font-weight: 600;
-  letter-spacing: 1px;
+  letter-spacing: 3px;
   white-space: nowrap;
 }
 
@@ -207,6 +207,18 @@ const handleSelect = (menuKey) => {
   font-size: 11px;
   color: var(--sidebar-text);
   opacity: 0.5;
+}
+
+.sidebar-footer::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  margin-right: 7px;
+  vertical-align: 1px;
+  box-shadow: 0 0 8px rgba(201, 164, 92, 0.8);
 }
 
 /* ===== Mobile responsive ===== */

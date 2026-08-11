@@ -148,9 +148,11 @@ function logout() {
 
 <style scoped>
 .header {
-  height: 60px;
+  height: 64px;
   padding: 0 24px;
-  background: var(--header-bg);
+  background: color-mix(in srgb, var(--header-bg) 82%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--header-border);
   display: flex;
   justify-content: space-between;
@@ -171,12 +173,14 @@ function logout() {
 }
 
 .logo-icon {
-  color: var(--color-primary);
+  color: var(--color-gold);
 }
 
 .title {
-  font-size: 16px;
+  font-family: var(--font-display);
+  font-size: 17px;
   font-weight: 600;
+  letter-spacing: 2px;
   color: var(--header-text);
 }
 
@@ -205,7 +209,16 @@ function logout() {
 }
 
 .user-icon {
-  color: var(--color-primary);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, #14a06f, #0b5c40);
+  border: 1px solid rgba(201, 164, 92, 0.5);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ===== Mobile responsive ===== */

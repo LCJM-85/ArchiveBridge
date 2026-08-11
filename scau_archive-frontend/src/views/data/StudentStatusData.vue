@@ -1,88 +1,118 @@
 <template>
   <div class="page-wrapper">
-    <el-card shadow="never" class="page-card">
-      <template #header>
-        <div class="card-header">
-          <div class="card-header-left">
-            <el-icon size="18" color="var(--color-primary)"><UserFilled /></el-icon>
-            <span>学籍数据管理</span>
-          </div>
-          <div class="card-header-right">
-            <el-select v-model="degreeFilter" placeholder="培养层次" clearable style="width:130px" @change="handleSearch">
-              <el-option v-for="d in degrees" :key="d.degreeId" :label="levelMap[d.degreeName] || d.degreeName" :value="d.degreeId" />
-            </el-select>
-            <el-input v-model="searchText" placeholder="搜索所有字段" clearable style="width:160px" @keyup.enter="handleSearch" @clear="handleClear" />
-            <el-date-picker
-              v-model="createTimeRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="录入开始"
-              end-placeholder="录入结束"
-              value-format="YYYY-MM-DD"
-              style="width:200px"
-            />
-            <el-date-picker
-              v-model="updateTimeRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="更新开始"
-              end-placeholder="更新结束"
-              value-format="YYYY-MM-DD"
-              style="width:200px"
-            />
-            <el-button :icon="Search" @click="handleSearch">查询</el-button>
-            <el-button :icon="Refresh" @click="handleSearch">刷新</el-button>
-            <el-button @click="resetFilters">重置</el-button>
-            <el-button type="primary" :icon="Plus" @click="openAddDialog">新增</el-button>
-          </div>
+    <!-- 页面头部条 -->
+    <div class="page-hero">
+      <div class="ph-left">
+        <div class="ph-kicker">SCAU ARCHIVE BRIDGE · 数据管理</div>
+        <h2 class="font-display">学籍数据管理</h2>
+        <div class="ph-rule"></div>
+      </div>
+      <div class="ph-right">
+        <div class="ph-count">
+          <span class="ph-count-num">{{ total }}</span>
+          <span class="ph-count-label">条记录</span>
         </div>
-      </template>
+        <svg class="ph-art" viewBox="0 0 220 90" preserveAspectRatio="xMidYMax meet">
+          <g transform="translate(120 34)">
+            <circle cx="0" cy="0" r="17" fill="none" stroke="#2fb984" stroke-width="2"/>
+            <circle cx="0" cy="0" r="6" fill="#d9b877"/>
+            <path d="M0 -17 L0 -30" stroke="#2fb984" stroke-width="2" stroke-linecap="round"/>
+            <path d="M0 -30 C 0 -40, 10 -40, 13 -34 C 10 -33, 7 -32, 4 -30" fill="#3cc78f"/>
+          </g>
+          <rect x="14" y="48" width="40" height="18" rx="5" fill="#0a2e21" stroke="rgba(230,205,149,.3)" stroke-width="1.2"/>
+          <rect x="19" y="55" width="30" height="4" rx="2" fill="#c9a45c" opacity=".8"/>
+          <path d="M10 36 C 40 30, 64 18, 100 14 S 168 4, 210 8" fill="none" stroke="#d9b877" stroke-width="2.2" stroke-linecap="round"/>
+          <circle cx="100" cy="14" r="3" fill="#2fb984"/>
+          <circle cx="168" cy="4" r="3" fill="#2fb984"/>
+          <circle cx="34" cy="22" r="2" fill="rgba(230,205,149,.5)"/>
+          <circle cx="190" cy="44" r="2" fill="rgba(47,185,132,.55)"/>
+        </svg>
+      </div>
+    </div>
 
+    <!-- 筛选工具栏 -->
+    <div class="filter-bar">
+      <el-select v-model="degreeFilter" placeholder="培养层次" clearable style="width:132px" @change="handleSearch">
+        <el-option v-for="d in degrees" :key="d.degreeId" :label="levelMap[d.degreeName] || d.degreeName" :value="d.degreeId" />
+      </el-select>
+      <el-input v-model="searchText" placeholder="搜索所有字段" clearable style="width:170px" @keyup.enter="handleSearch" @clear="handleClear">
+        <template #prefix><el-icon><Search /></el-icon></template>
+      </el-input>
+      <el-date-picker
+        v-model="createTimeRange"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="录入开始"
+        end-placeholder="录入结束"
+        value-format="YYYY-MM-DD"
+        style="width:210px"
+      />
+      <el-date-picker
+        v-model="updateTimeRange"
+        type="daterange"
+        range-separator="至"
+        start-placeholder="更新开始"
+        end-placeholder="更新结束"
+        value-format="YYYY-MM-DD"
+        style="width:210px"
+      />
+      <div class="filter-divider"></div>
+      <el-button :icon="Search" @click="handleSearch">查询</el-button>
+      <el-button :icon="Refresh" @click="handleSearch">刷新</el-button>
+      <el-button @click="resetFilters">重置</el-button>
+      <el-button type="primary" class="btn-gold" :icon="Plus" @click="openAddDialog">新增</el-button>
+    </div>
+
+    <!-- 数据表格 -->
+    <el-card shadow="never" class="table-card">
       <el-table :data="tableData" v-loading="loading" stripe border style="width:100%">
         <el-table-column prop="studentNo" label="学号" width="130" />
         <el-table-column prop="name" label="姓名" width="90" />
-        <el-table-column prop="gender" label="性别" width="60" align="center">
+        <el-table-column prop="gender" label="性别" width="70" align="center">
           <template #default="{ row }">
-            <span :style="{ color: row.gender === '男' ? 'var(--color-primary)' : '#e84393' }">{{ row.gender }}</span>
+            <span class="gender-tag" :class="row.gender === '男' ? 'gender-male' : 'gender-female'">{{ row.gender }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="培养层次" width="100" align="center">
+        <el-table-column label="培养层次" width="105" align="center">
           <template #default="{ row }">
-            {{ levelMap[row.degreeName] || row.degreeName }}
+            <span class="degree-pill">{{ levelMap[row.degreeName] || row.degreeName }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="idCard" label="身份证号" width="200" />
         <el-table-column prop="provinceName" label="生源省份" width="140" />
         <el-table-column prop="majorName" label="专业" width="180" />
-        <el-table-column prop="className" label="班级" width="220" />
-
-        <el-table-column prop="admissionDate" label="入学日期" width="110" align="center" />
-        <el-table-column label="毕业状态" width="80" align="center">
+        <el-table-column prop="className" label="班级" width="200">
           <template #default="{ row }">
-            <el-tag :type="row.graduated ? 'success' : 'primary'" size="small" effect="plain">
+            <span class="class-pill">{{ row.className || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="admissionDate" label="入学日期" width="110" align="center" />
+        <el-table-column label="毕业状态" width="90" align="center">
+          <template #default="{ row }">
+            <span class="status-pill" :class="row.graduated ? 'status-done' : 'status-active'">
               {{ row.graduated ? '已毕业' : '在读' }}
-            </el-tag>
+            </span>
           </template>
         </el-table-column>
         <el-table-column label="来源文件" width="160">
           <template #default="{ row }">
-            <span style="font-size:12px;color:var(--text-secondary)">{{ row.fileName || '-' }}</span>
+            <span class="cell-muted">{{ row.fileName || '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="录入时间" width="175" align="center">
           <template #default="{ row }">
-            <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ row.createTime ? row.createTime.replace('T', ' ').split('.')[0] : '-' }}</span>
+            <span class="cell-muted">{{ row.createTime ? row.createTime.replace('T', ' ').split('.')[0] : '-' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="updateTime" label="更新时间" width="175" align="center">
           <template #default="{ row }">
-            <span style="font-size:12px;color:var(--text-secondary);white-space:nowrap">{{ row.updateTime ? row.updateTime.replace('T', ' ').split('.')[0] : '-' }}</span>
+            <span class="cell-muted">{{ row.updateTime ? row.updateTime.replace('T', ' ').split('.')[0] : '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="180" align="center" fixed="right">
+        <el-table-column label="操作" width="170" align="center" fixed="right">
           <template #default="{ row }">
-            <el-button size="small" :icon="Edit" @click="openEditDialog(row)">编辑</el-button>
-            <el-button size="small" type="danger" :icon="Delete" @click="handleDelete(row.id)">删除</el-button>
+            <el-button size="small" class="op-btn" :icon="Edit" @click="openEditDialog(row)">编辑</el-button>
+            <el-button size="small" class="op-btn op-danger" :icon="Delete" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -178,7 +208,7 @@
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmit">确定</el-button>
+        <el-button type="primary" class="btn-gold" :loading="submitting" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
   </div>
@@ -186,7 +216,7 @@
 
 <script setup>
 import { ref, onMounted, onActivated } from 'vue'
-import { Plus, Edit, Delete, Search, UserFilled, Refresh } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Search, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { fetchStudentPage, addStudent, updateStudent, deleteStudent, fetchProvinces, fetchMajors, fetchClasses, fetchDegrees } from '@/api/modules/student'
 
@@ -460,30 +490,200 @@ onActivated(() => {
   gap: 16px;
 }
 
-.card-header {
+/* ===== 页面头部条 ===== */
+.page-hero {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(520px 240px at 88% -30px, rgba(47, 185, 132, 0.32), transparent 62%),
+    radial-gradient(420px 200px at 100% 130%, rgba(201, 164, 92, 0.2), transparent 60%),
+    linear-gradient(120deg, #07271c 0%, #0b5c40 55%, #0e8a5f 100%);
+  box-shadow: 0 20px 48px rgba(7, 39, 28, 0.24);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 18px 28px;
+  min-height: 84px;
+  animation: rise-up 0.7s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+.page-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+}
+.ph-left { position: relative; z-index: 2; }
+.ph-kicker {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--color-gold-light);
+  margin-bottom: 8px;
+}
+.ph-left h2 {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  margin: 0;
+}
+.ph-rule {
+  width: 48px;
+  height: 2px;
+  margin: 8px 0;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #d9b877, rgba(201, 164, 92, 0));
 }
 
-.card-header-left {
+.ph-right {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 15px;
+  gap: 26px;
+}
+.ph-count { text-align: right; }
+.ph-count-num {
+  display: block;
+  font-size: 34px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-gold-light);
+  line-height: 1.1;
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+}
+.ph-count-label { font-size: 12px; color: rgba(255, 255, 255, 0.6); letter-spacing: 1px; }
+.ph-art { width: 210px; height: 84px; flex-shrink: 0; }
+@media (max-width: 900px) {
+  .ph-art { display: none; }
+  .page-hero { padding: 14px 20px; }
+}
+
+/* ===== 筛选工具栏 ===== */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  background: linear-gradient(135deg, var(--card-bg), var(--bg-primary));
+  box-shadow: 0 4px 16px rgba(7, 39, 28, 0.05);
+  animation: rise-up 0.7s 0.08s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+.filter-divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 4px;
+  background: var(--border-color);
+}
+.filter-bar :deep(.el-input__wrapper),
+.filter-bar :deep(.el-select__wrapper),
+.filter-bar :deep(.el-date-editor .el-input__wrapper) {
+  border-radius: 9px !important;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark)) !important;
+  border: none !important;
+  color: #1d1608 !important;
   font-weight: 600;
-  color: var(--text-primary);
+}
+.btn-gold:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 16px rgba(201, 164, 92, 0.4);
 }
 
-.card-header-right {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* ===== 数据表格 ===== */
+.table-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  animation: rise-up 0.7s 0.16s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+.table-card :deep(.el-table) {
+  --el-table-header-text-color: var(--text-secondary);
+}
+.table-card :deep(.el-table th.el-table__cell) {
+  background: linear-gradient(180deg, var(--bg-tertiary), var(--bg-primary)) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px;
+}
+.table-card :deep(.el-table__row:hover > td.el-table__cell) {
+  background: var(--color-primary-light) !important;
+}
+.table-card :deep(.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell) {
+  background: var(--bg-tertiary);
 }
 
-.pagination-wrap {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 16px;
+.gender-tag {
+  display: inline-block;
+  min-width: 40px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+.gender-male { color: #0e8a5f; background: var(--color-primary-light); }
+.gender-female { color: #d6458d; background: rgba(214, 69, 141, 0.1); }
+
+.degree-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: rgba(201, 164, 92, 0.12);
+  color: var(--color-gold-dark);
+  border: 1px solid rgba(201, 164, 92, 0.3);
+}
+.class-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+.status-pill {
+  display: inline-block;
+  min-width: 52px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+.status-done { color: var(--color-gold-dark); background: rgba(201, 164, 92, 0.12); border: 1px solid rgba(201, 164, 92, 0.3); }
+.status-active { color: #0e8a5f; background: var(--color-primary-light); border: 1px solid rgba(14, 138, 95, 0.25); }
+
+.cell-muted { font-size: 12px; color: var(--text-secondary); }
+
+.op-btn {
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color) !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.2s ease !important;
+}
+.op-btn:hover {
+  color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  background: var(--color-primary-light) !important;
+}
+.op-danger:hover {
+  color: var(--color-danger) !important;
+  border-color: var(--color-danger) !important;
+  background: rgba(245, 108, 108, 0.1) !important;
+}
+
+/* ===== 动效 ===== */
+@keyframes rise-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page-hero, .filter-bar, .table-card { animation: none !important; }
 }
 </style>

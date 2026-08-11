@@ -20,17 +20,21 @@ function cssVar(name, fallback = '') {
 export function getChartTheme() {
   const primary = cssVar('--color-primary', '#1a7a4e')
   const accent = cssVar('--color-accent', '#238a5f')
+  const gold = cssVar('--color-gold', '#c9a45c')
+  const goldLight = cssVar('--color-gold-light', '#d9b877')
   const textSecondary = cssVar('--text-secondary', '#5a5d6e')
   const textTertiary = cssVar('--text-tertiary', '#9ea0ad')
   const borderColor = cssVar('--border-color', '#e4e6ed')
 
-  // 品牌绿系渐进色板（替代通用彩虹板）。
+  // 品牌绿系渐进色板 + 琥珀金点缀（替代通用彩虹板）。
   // 末位紫罗兰用于"女"等需要与绿强区分的对比项，对红绿色盲友好。
-  const palette = [primary, '#2d9d6e', '#3fb57f', '#57c493', '#8fd3b0', '#b37feb']
+  const palette = [primary, '#2fb984', '#57c493', '#8fd3b0', gold, '#b37feb']
 
   return {
     primary,
     accent,
+    gold,
+    goldLight,
     textSecondary,
     textTertiary,
     borderColor,

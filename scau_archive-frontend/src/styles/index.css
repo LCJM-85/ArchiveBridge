@@ -20,7 +20,7 @@
 /* ===================== LIGHT THEME (Default) ===================== */
 :root {
   /* ---- Background Colors ---- */
-  --bg-primary: #f5f6fa;
+  --bg-primary: #f4f7f5;
   --bg-secondary: #ffffff;
   --bg-tertiary: #f0f2f5;
   --bg-elevated: #ffffff;
@@ -36,14 +36,22 @@
   --border-light: #eef0f4;
 
   /* ---- Brand / Accent Colors ---- */
-  --color-primary: #1a7a4e;
-  --color-primary-light: #e8f5ed;
-  --color-primary-dark: #14603d;
-  --color-accent: #238a5f;
+  --color-primary: #0e8a5f;
+  --color-primary-light: #e6f3ec;
+  --color-primary-dark: #0b5c40;
+  --color-accent: #0b6b49;
   --color-warning: #e6a23c;
   --color-danger: #f56c6c;
   --color-success: #67c23a;
   --color-info: #909399;
+
+  /* ---- 琥珀金（品牌点缀色） ---- */
+  --color-gold: #c9a45c;
+  --color-gold-light: #d9b877;
+  --color-gold-dark: #9a7a3c;
+
+  /* ---- 展示字体（标题/品牌，衬线） ---- */
+  --font-display: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
 
   /* ---- Shadows ---- */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -57,7 +65,7 @@
   --radius-lg: 16px;
 
   /* ---- Layout Specific ---- */
-  --sidebar-bg: #1a2e22;
+  --sidebar-bg: #0b2a1e;
   --sidebar-text: #b8c5bc;
   --sidebar-active-text: #ffffff;
   --sidebar-active-bg: rgba(255, 255, 255, 0.1);
@@ -114,12 +122,12 @@
   --el-border-color-lighter: var(--border-light);
   --el-border-color-extra-light: #f2f4f8;
   --el-color-primary: var(--color-primary);
-  --el-color-primary-light-3: #5fa283;
-  --el-color-primary-light-5: #8cbca6;
-  --el-color-primary-light-7: #bad7c9;
-  --el-color-primary-light-8: #d1e4db;
-  --el-color-primary-light-9: #e8f2ed;
-  --el-color-primary-dark-2: #15623e;
+  --el-color-primary-light-3: #2fb984;
+  --el-color-primary-light-5: #57c493;
+  --el-color-primary-light-7: #8fd3b0;
+  --el-color-primary-light-8: #b5e2cc;
+  --el-color-primary-light-9: #e6f3ec;
+  --el-color-primary-dark-2: #0b6b49;
   --el-color-success: var(--color-success);
   --el-color-warning: var(--color-warning);
   --el-color-danger: var(--color-danger);
@@ -153,10 +161,10 @@
 /* ===================== DARK THEME ===================== */
 .dark {
   /* ---- Background Colors ---- */
-  --bg-primary: #111316;
-  --bg-secondary: #1a1d21;
-  --bg-tertiary: #23262b;
-  --bg-elevated: #23262b;
+  --bg-primary: #101713;
+  --bg-secondary: #17211c;
+  --bg-tertiary: #1f2a24;
+  --bg-elevated: #1f2a24;
 
   /* ---- Text Colors ---- */
   --text-primary: #e4e7ed;
@@ -169,14 +177,19 @@
   --border-light: #25292f;
 
   /* ---- Brand / Accent Colors ---- */
-  --color-primary: #2d9d6e;
-  --color-primary-light: #1a2e24;
-  --color-primary-dark: #238a5f;
+  --color-primary: #2fae7c;
+  --color-primary-light: #132b20;
+  --color-primary-dark: #14a06f;
   --color-accent: #3fb57f;
   --color-warning: #e6a23c;
   --color-danger: #f56c6c;
   --color-success: #67c23a;
   --color-info: #63666e;
+
+  /* ---- 琥珀金（暗色模式提亮） ---- */
+  --color-gold: #d9b877;
+  --color-gold-light: #e6cd95;
+  --color-gold-dark: #c9a45c;
 
   /* ---- Shadows ---- */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -185,7 +198,7 @@
   --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.4);
 
   /* ---- Layout Specific ---- */
-  --sidebar-bg: #0d1115;
+  --sidebar-bg: #0a1f17;
   --sidebar-text: #8b8f99;
   --sidebar-active-text: #ffffff;
   --sidebar-active-bg: rgba(45, 157, 110, 0.25);
@@ -242,12 +255,12 @@
   --el-border-color-lighter: var(--border-light);
   --el-border-color-extra-light: #202328;
   --el-color-primary: var(--color-primary);
-  --el-color-primary-light-3: #6cba99;
-  --el-color-primary-light-5: #96ceb6;
-  --el-color-primary-light-7: #c0e2d3;
-  --el-color-primary-light-8: #d5ebe2;
-  --el-color-primary-light-9: #eaf5f0;
-  --el-color-primary-dark-2: #247e58;
+  --el-color-primary-light-3: #4cbf90;
+  --el-color-primary-light-5: #74cda4;
+  --el-color-primary-light-7: #a2dcc4;
+  --el-color-primary-light-8: #bfe5d3;
+  --el-color-primary-light-9: #dcefe6;
+  --el-color-primary-dark-2: #248a62;
   --el-color-success: var(--color-success);
   --el-color-warning: var(--color-warning);
   --el-color-danger: var(--color-danger);
@@ -283,6 +296,22 @@
 
 /* ===================== GLOBAL STYLES ===================== */
 
+/* ---- 动效关键帧（全站可复用，尊重 prefers-reduced-motion） ---- */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 164, 92, 0.35); }
+  50% { box-shadow: 0 0 0 10px rgba(201, 164, 92, 0); }
+}
+.animate-fade-up { animation: fade-up 0.65s cubic-bezier(0.2, 0.75, 0.3, 1) both; }
+.font-display { font-family: var(--font-display); }
+
 html {
   color-scheme: light;
 }
@@ -297,7 +326,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-primary);
-  background: var(--bg-primary);
+  background:
+    radial-gradient(900px 420px at 85% -100px, rgba(14, 138, 95, 0.07), transparent 60%),
+    radial-gradient(700px 380px at -10% 30%, rgba(201, 164, 92, 0.05), transparent 60%),
+    var(--bg-primary);
+  background-attachment: fixed;
   margin: 0;
   padding: 0;
 }
@@ -379,17 +412,32 @@ body {
   margin: 2px 8px;
   border-radius: var(--radius-sm);
   width: auto;
+  position: relative;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .sidebar .el-menu-item:hover {
   background: var(--sidebar-hover-bg) !important;
   color: var(--sidebar-active-text) !important;
+  transform: translateX(2px);
 }
 
 .sidebar .el-menu-item.is-active {
-  background: var(--sidebar-active-bg) !important;
+  background: linear-gradient(90deg, rgba(14, 138, 95, 0.42), rgba(14, 138, 95, 0.14)) !important;
   color: var(--sidebar-active-text) !important;
   font-weight: 500;
+}
+
+/* 激活项左侧金色指示条 */
+.sidebar .el-menu-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--color-gold-light), var(--color-gold));
 }
 
 .sidebar .el-sub-menu__title {
@@ -397,11 +445,14 @@ body {
   margin: 2px 8px;
   border-radius: var(--radius-sm);
   width: auto;
+  position: relative;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .sidebar .el-sub-menu__title:hover {
   background: var(--sidebar-hover-bg) !important;
   color: var(--sidebar-active-text) !important;
+  transform: translateX(2px);
 }
 
 .sidebar .el-sub-menu .el-menu {
@@ -412,6 +463,19 @@ body {
   padding-left: 50px !important;
   margin: 1px 8px;
   border-radius: 6px;
+  position: relative;
+}
+
+/* 子菜单激活项金色指示条 */
+.sidebar .el-sub-menu .el-menu-item.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 22%;
+  bottom: 22%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--color-gold-light), var(--color-gold));
 }
 
 .sidebar .el-sub-menu .el-sub-menu__title .el-sub-menu__icon-arrow {
@@ -419,7 +483,10 @@ body {
 }
 
 .content {
-  background: var(--content-bg) !important;
+  background:
+    radial-gradient(900px 480px at 88% -80px, rgba(14, 138, 95, 0.08), transparent 62%),
+    radial-gradient(700px 400px at -6% 28%, rgba(201, 164, 92, 0.05), transparent 60%),
+    var(--content-bg) !important;
 }
 
 /* ===================== COMPONENT STYLES ===================== */
@@ -611,6 +678,204 @@ body {
   background: var(--color-primary-light) !important;
   color: var(--color-primary) !important;
   font-weight: 500;
+}
+
+/* ===================== PAGE-LEVEL COMPONENT STYLES ===================== */
+/* 「森屿」统一页面级组件：卡片头、筛选栏、统计卡、上传/聊天/预测等
+   注：页面组件多为 scoped 样式，此处关键属性使用 !important 覆盖 */
+
+/* ---- 页面卡片头：图标徽章 + 标题 ---- */
+.page-card .el-card__header {
+  padding: 16px 22px !important;
+}
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-header-left > span {
+  font-family: var(--font-display);
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--text-primary);
+}
+.card-header-left .el-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(140deg, #14a06f, #0b5c40) !important;
+  color: #e6cd95 !important;
+  border: 1px solid rgba(201, 164, 92, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(6, 40, 28, 0.25) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.el-card:hover .card-header-left .el-icon {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 6px 16px rgba(6, 40, 28, 0.35) !important;
+}
+
+/* ---- 分页 ---- */
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-light);
+}
+.pagination-wrap .el-pagination {
+  --el-pagination-button-bg-color: var(--bg-tertiary);
+}
+.pagination-wrap .el-pagination.is-background .el-pager li.is-active {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)) !important;
+}
+
+/* ---- 筛选卡片（图表页） ---- */
+.filter-card,
+.control-card,
+.toolbar-card {
+  background: linear-gradient(135deg, var(--card-bg), var(--bg-primary)) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 16px rgba(7, 39, 28, 0.05) !important;
+}
+
+/* ---- 图表容器 ---- */
+.chart-container {
+  background: var(--card-bg);
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 6px 20px rgba(7, 39, 28, 0.05);
+  padding: 10px;
+}
+
+/* ---- 统计卡（OCR / 报告页结构） ---- */
+.stat-cards .stat-card,
+.chart-grid .stat-card,
+.analysis-card .stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px !important;
+  border: 1px solid var(--card-border) !important;
+  background: var(--card-bg) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+.stat-cards .stat-card:hover,
+.chart-grid .stat-card:hover,
+.analysis-card .stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(7, 39, 28, 0.12) !important;
+}
+.stat-cards .stat-card::after,
+.chart-grid .stat-card::after,
+.analysis-card .stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+}
+.stat-cards .stat-value,
+.analysis-card .stat-value {
+  color: var(--color-primary) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 预测页指标 ---- */
+.metrics-grid .metric-item {
+  border-radius: 14px !important;
+  border: 1px solid var(--card-border) !important;
+  background: linear-gradient(160deg, var(--card-bg), var(--bg-primary)) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+.metrics-grid .metric-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(7, 39, 28, 0.1) !important;
+}
+.metrics-grid .metric-value,
+.overview-card .overview-value {
+  color: var(--color-primary) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 上传页：类型卡片 + 拖拽区 ---- */
+.type-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+.type-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px rgba(7, 39, 28, 0.12) !important;
+}
+.type-card.active {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(14, 138, 95, 0.12), 0 12px 26px rgba(7, 39, 28, 0.1) !important;
+}
+.drop-zone {
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease !important;
+}
+.drop-zone--dragover {
+  border-color: var(--color-gold) !important;
+  box-shadow: inset 0 0 0 3px rgba(201, 164, 92, 0.12) !important;
+}
+
+/* ---- AI 助手聊天卡 ---- */
+.chat-card {
+  border-radius: 18px !important;
+  border: 1px solid var(--card-border) !important;
+  background: var(--card-bg) !important;
+  box-shadow: 0 10px 30px rgba(7, 39, 28, 0.08) !important;
+}
+.chat-card .el-card__header {
+  background: linear-gradient(120deg, var(--color-primary-dark), var(--color-primary)) !important;
+  border-radius: 18px 18px 0 0 !important;
+  border-bottom: 1px solid rgba(201, 164, 92, 0.3);
+}
+.bubble {
+  border-radius: 14px !important;
+}
+
+/* ---- 报告页分析卡 ---- */
+.analysis-card {
+  border-radius: 16px !important;
+  border: 1px solid var(--card-border) !important;
+  box-shadow: 0 8px 24px rgba(7, 39, 28, 0.07) !important;
+}
+.section-title {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+}
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-dark));
+  margin-right: 8px;
+  vertical-align: -2px;
+}
+
+/* ---- 知识库上传区（与档案上传统一） ---- */
+.knowledge-page .drop-zone {
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease !important;
+}
+.knowledge-page .drop-zone:hover {
+  border-color: var(--color-gold) !important;
+}
+
+/* ---- 深色模式：渐变亮度微调 ---- */
+.dark .card-header-left .el-icon {
+  background: linear-gradient(140deg, #14a06f, #0b5c40) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
 }
 
 /* ===================== UTILITY ===================== */
