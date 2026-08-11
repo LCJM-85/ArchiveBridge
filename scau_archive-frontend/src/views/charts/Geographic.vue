@@ -115,13 +115,19 @@ function renderMap(data) {
       type: 'map',
       map: 'china',
       roam: true,
-      label: { show: true, fontSize: 10, color: t.textSecondary },
+      label: { show: false, color: t.textSecondary, fontSize: 10 },
       itemStyle: {
-        borderColor: 'var(--card-bg)',
-        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.55)',
+        borderWidth: 0.7,
         areaColor: 'var(--bg-tertiary)',
+        shadowBlur: 4,
+        shadowColor: 'rgba(7,39,28,0.06)',
       },
-      emphasis: { label: { fontSize: 14, fontWeight: 'bold' }, itemStyle: { shadowBlur: 12, shadowColor: 'rgba(14,138,95,.4)' } },
+      emphasis: {
+        label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#fff' },
+        itemStyle: { shadowBlur: 14, shadowColor: 'rgba(14,138,95,0.45)', borderColor: 'var(--card-bg)', borderWidth: 1.5 },
+      },
+      select: { label: { show: true } },
       data: data.map(d => ({ name: d.provincename, value: d.count })),
     }],
   })
