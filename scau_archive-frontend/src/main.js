@@ -17,6 +17,14 @@ if (savedTheme === 'dark') {
   localStorage.setItem('theme', 'dark')
 }
 
+// 键盘导航焦点环：仅键盘 Tab 导航时显示（鼠标操作不显示）
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Tab') document.body.classList.add('keyboard-nav')
+})
+document.addEventListener('mousedown', () => {
+  document.body.classList.remove('keyboard-nav')
+})
+
 // 创建并挂载 Vue 实例
 const app = createApp(App)
 const pinia = createPinia()

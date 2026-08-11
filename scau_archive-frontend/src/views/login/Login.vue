@@ -379,7 +379,7 @@ const handleLogin = () => login(route, router)
   max-width: 400px;
   padding: 42px 38px 34px;
   border-radius: 26px;
-  background: rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.08);
   /* 无 backdrop-filter：保持与生产构建一致的透明玻璃效果（构建产物不支持 blur） */
   border: 1px solid rgba(255, 255, 255, 0.13);
   box-shadow: 0 40px 90px rgba(2, 18, 12, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.14);

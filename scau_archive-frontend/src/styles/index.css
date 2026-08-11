@@ -4,7 +4,8 @@
    ============================================ */
 
 /* --- 键盘导航焦点环（WCAG 2.4.7 Focus Visible）--- */
-:focus-visible {
+/* 仅当用户使用键盘 Tab 导航时显示（body 有 .keyboard-nav 类），鼠标操作不显示 */
+.keyboard-nav :focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
   border-radius: 4px;
@@ -322,7 +323,7 @@ html {
 }
 
 body {
-  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--text-primary);

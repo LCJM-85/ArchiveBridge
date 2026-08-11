@@ -73,7 +73,7 @@
             <span class="gender-tag" :class="row.gender === '男' ? 'gender-male' : 'gender-female'">{{ row.gender }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="培养层次" width="105" align="center">
+        <el-table-column label="培养层次" width="130" align="center">
           <template #default="{ row }">
             <span class="degree-pill">{{ levelMap[row.degreeName] || row.degreeName }}</span>
           </template>

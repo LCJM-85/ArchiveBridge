@@ -45,3 +45,20 @@ export function getChartTheme() {
     femaleColor: '#b37feb',
   }
 }
+
+/**
+ * 动态生成色板：品牌绿色系渐变（绿→青绿），亮度由深到浅，协调明亮。
+ * 用于专业/层次等数量不固定的分类图，避免超出静态色板后颜色循环重复。
+ * @param {number} n 需要的颜色数量
+ */
+export function generatePalette(n) {
+  const colors = []
+  if (n <= 0) return colors
+  for (let i = 0; i < n; i++) {
+    const ratio = n === 1 ? 0 : i / (n - 1)
+    const hue = 150 + ratio * 45        // 150°-195°：绿 → 青绿
+    const lightness = 46 + ratio * 16   // 46%-62%：深 → 浅（整体明亮）
+    colors.push(`hsl(${Math.round(hue)}, 60%, ${Math.round(lightness)}%)`)
+  }
+  return colors
+}

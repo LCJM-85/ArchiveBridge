@@ -193,7 +193,7 @@
 <script setup>
 import { ref, watch, onMounted, onActivated, onBeforeUnmount, nextTick } from 'vue'
 import { Files, DataBoard, DataAnalysis, MapLocation, User } from '@element-plus/icons-vue'
-import { getChartTheme } from '@/utils/chartTheme'
+import { getChartTheme, generatePalette } from '@/utils/chartTheme'
 import * as echarts from 'echarts'
 import { fetchReportData } from '@/api/modules/admission'
 import { analyzeReport } from '@/api/modules/ai'
@@ -232,7 +232,7 @@ function renderCharts(data) {
           type: 'pie', radius: ['32%', '56%'], center: ['50%', '44%'],
           itemStyle: { borderRadius: 6, borderColor: 'var(--card-bg)', borderWidth: 2 },
           label: { fontSize: 11, color: t.textSecondary },
-          color: t.palette,
+          color: generatePalette(data.majorDistribution.length),
           data: data.majorDistribution.map(m => ({ name: m.name, value: m.count })),
         }],
       })

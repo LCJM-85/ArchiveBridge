@@ -9,7 +9,7 @@
             </span>
             <div>
               <div class="chat-name">AI 分析助手</div>
-              <div class="chat-status"><span class="status-dot"></span>在线 · RAG 知识库已接入</div>
+              <div class="chat-status"><span class="status-dot" :class="{ offline: !aiOnline }"></span>{{ aiOnline ? '在线 · RAG 知识库已接入' : 'AI 服务离线' }}</div>
             </div>
           </div>
           <el-button text size="small" class="clear-btn" @click="clearChat">清空对话</el-button>
@@ -28,7 +28,7 @@
             </button>
           </div>
           <div class="welcome-cap">
-            <span>📊 实时数据查询</span><span>🤖 智能分析</span><span>📚 知识库检索</span>
+            <span><el-icon :size="14"><DataAnalysis /></el-icon>实时数据查询</span><span><el-icon :size="14"><MagicStick /></el-icon>智能分析</span><span><el-icon :size="14"><Collection /></el-icon>知识库检索</span>
           </div>
         </div>
         <div v-for="(msg, i) in messages" :key="i" class="message-row" :class="msg.role">
@@ -69,13 +69,14 @@ export default { name: 'AIAssistant' }
 </script>
 <script setup>
 import { ref, nextTick, onActivated } from 'vue'
-import { UserFilled, Cpu } from '@element-plus/icons-vue'
-import { sendChatMessageStream } from '@/api/modules/ai'
+import { UserFilled, Cpu, DataAnalysis, MagicStick, Collection } from '@element-plus/icons-vue'
+import { sendChatMessageStream, checkAiStatus } from '@/api/modules/ai'
 
 const messages = ref([])
 const question = ref('')
 const loading = ref(false)
 const statusText = ref('')
+const aiOnline = ref(true)
 const messageListRef = ref(null)
 let streamController = null
 
@@ -181,7 +182,17 @@ function scrollToBottom() {
 
 onActivated(() => {
   scrollToBottom()
+  checkStatus()
 })
+
+async function checkStatus() {
+  try {
+    const res = await checkAiStatus()
+    aiOnline.value = res?.data?.data?.available ?? true
+  } catch {
+    aiOnline.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -231,6 +242,11 @@ onActivated(() => {
   background: #2fb984;
   box-shadow: 0 0 8px rgba(47, 185, 132, 0.8);
   animation: pulse 2s ease infinite;
+}
+.status-dot.offline {
+  background: #f56c6c;
+  box-shadow: 0 0 8px rgba(245, 108, 108, 0.8);
+  animation: none;
 }
 @keyframes pulse {
   0%, 100% { opacity: 1; }
@@ -320,6 +336,11 @@ onActivated(() => {
   margin-top: 22px;
   font-size: 12px;
   color: var(--text-tertiary);
+}
+.welcome-cap span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* ===== 消息区 ===== */

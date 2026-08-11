@@ -78,7 +78,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="idCard" label="身份证号" width="200" />
-        <el-table-column prop="degreeName" label="学历" width="105" align="center">
+        <el-table-column prop="degreeName" label="学历" width="130" align="center">
           <template #default="{ row }">
             <span class="degree-pill">{{ row.degreeName || '-' }}</span>
           </template>

@@ -143,7 +143,7 @@ import {
 import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import { fetchDashboardStats } from '@/api/modules/admission'
-import { getChartTheme } from '@/utils/chartTheme'
+import { getChartTheme, generatePalette } from '@/utils/chartTheme'
 import { useMenuStore } from '@/store/menu'
 import { useTabStore } from '@/store/tab'
 
@@ -321,7 +321,7 @@ function renderCharts(data) {
         label: { fontSize: 11, color: t.textSecondary },
         itemStyle: { borderRadius: 6, borderColor: 'var(--card-bg)', borderWidth: 2 },
         data: majors.map((m) => ({ name: m.name, value: m.count })),
-        color: [t.primary, '#2fb984', '#57c493', '#8fd3b0', t.gold || '#c9a45c', '#b37feb'],
+        color: generatePalette(majors.length),
       }],
     })
   }
@@ -347,7 +347,7 @@ function renderCharts(data) {
         label: { fontSize: 11, color: t.textSecondary },
         itemStyle: { borderRadius: 6, borderColor: 'var(--card-bg)', borderWidth: 2 },
         data: degreeDist.map((m) => ({ name: m.name, value: m.count })),
-        color: [t.primary, t.gold || '#d9b877', '#2fb984', '#57c493', '#b37feb'],
+        color: generatePalette(degreeDist.length),
       }],
     })
   }

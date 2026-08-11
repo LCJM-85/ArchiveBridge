@@ -258,9 +258,9 @@ function updateProvinceChart(data) {
       textStyle: { color: 'var(--text-primary)' },
       formatter: p => `年份: ${years[p.data[0]]}<br/>省份: ${provinces[p.data[1]]}<br/>人数: ${p.data[2]}`,
     },
-    grid: { left: 80, right: 60, top: 20, bottom: 40 },
-    xAxis: { type: 'category', data: years.map(String), splitArea: { show: true }, axisLabel: { color: t.textTertiary } },
-    yAxis: { type: 'category', data: provinces, splitArea: { show: true }, axisLabel: { color: t.textTertiary } },
+    grid: { left: 130, right: 60, top: 20, bottom: 40 },
+    xAxis: { type: 'category', data: years.map(String), splitArea: { show: false }, axisLabel: { color: t.textTertiary } },
+    yAxis: { type: 'category', data: provinces, splitArea: { show: false }, axisLabel: { color: t.textTertiary, fontSize: 9, interval: 0 } },
     visualMap: {
       min: 0,
       max: maxVal,
