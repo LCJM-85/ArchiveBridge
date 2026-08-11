@@ -413,8 +413,8 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 34px 42px;
-  min-height: 190px;
+  padding: 24px 34px;
+  min-height: 150px;
   animation: rise-up 0.7s cubic-bezier(0.2, 0.75, 0.3, 1) both;
 }
 .hero::after {
@@ -426,12 +426,12 @@ onBeforeUnmount(() => {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
 }
 .h-left { position: relative; z-index: 2; }
-.h-hi { font-size: 12px; letter-spacing: 3px; color: var(--color-gold-light); margin-bottom: 10px; }
-.hero h2 { font-size: 26px; font-weight: 700; letter-spacing: 2px; margin: 0; }
-.h-date { font-size: 13px; color: rgba(255, 255, 255, 0.6); margin-top: 12px; display: flex; align-items: center; gap: 12px; }
+.h-hi { font-size: 11.5px; letter-spacing: 3px; color: var(--color-gold-light); margin-bottom: 8px; }
+.hero h2 { font-size: 23px; font-weight: 700; letter-spacing: 2px; margin: 0; }
+.h-date { font-size: 12.5px; color: rgba(255, 255, 255, 0.6); margin-top: 10px; display: flex; align-items: center; gap: 12px; }
 .h-date .clock { color: var(--color-gold-light); font-variant-numeric: tabular-nums; }
 .h-quick {
-  margin-top: 18px;
+  margin-top: 14px;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -446,15 +446,15 @@ onBeforeUnmount(() => {
 }
 .h-quick:hover { background: rgba(201, 164, 92, 0.16); color: #fff; transform: translateY(-1px); }
 
-.h-art { position: relative; z-index: 2; width: 340px; height: 180px; flex-shrink: 0; }
+.h-art { position: relative; z-index: 2; width: 300px; height: 140px; flex-shrink: 0; }
 .h-art .ring {
   position: absolute;
   border-radius: 50%;
   border: 1px dashed rgba(230, 205, 149, 0.3);
   animation: spin 40s linear infinite;
 }
-.h-art .ring.r1 { width: 160px; height: 160px; right: 22px; top: -4px; }
-.h-art .ring.r2 { width: 220px; height: 220px; right: -16px; top: -34px; animation-direction: reverse; animation-duration: 60s; border-color: rgba(255, 255, 255, 0.14); }
+.h-art .ring.r1 { width: 130px; height: 130px; right: 20px; top: -2px; }
+.h-art .ring.r2 { width: 180px; height: 180px; right: -14px; top: -26px; animation-direction: reverse; animation-duration: 60s; border-color: rgba(255, 255, 255, 0.14); }
 @keyframes spin { to { transform: rotate(360deg); } }
 .h-art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 @media (max-width: 1100px) { .h-art { display: none; } }
@@ -611,6 +611,6 @@ onBeforeUnmount(() => {
 @media (max-width: 640px) {
   .stats-grid { grid-template-columns: 1fr; }
   .quick-grid { grid-template-columns: repeat(2, 1fr); }
-  .hero { padding: 26px; }
+  .hero { padding: 20px; }
 }
 </style>
