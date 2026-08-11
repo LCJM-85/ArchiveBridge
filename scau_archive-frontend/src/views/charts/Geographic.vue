@@ -118,9 +118,10 @@ function renderMap(data) {
       padding: [10, 14],
       textStyle: { color: '#fff', fontSize: 13 },
       formatter: p => {
+        const v = p.value || 0
         const rank = [...data].sort((a, b) => b.count - a.count).findIndex(d => d.provincename === p.name) + 1
-        const pct = maxVal ? ((p.value / maxVal) * 100).toFixed(1) : 0
-        return `<b style="color:#e6cd95">${p.name}</b><br/>录取人数：<b style="color:#fff">${p.value}</b> 人<br/>相对占比：${pct}%${rank ? `<br/>省份排名：TOP ${rank}` : ''}`
+        const pct = maxVal ? ((v / maxVal) * 100).toFixed(1) : 0
+        return `<b style="color:#e6cd95">${p.name}</b><br/>录取人数：<b style="color:#fff">${v}</b> 人<br/>相对占比：${pct}%${rank ? `<br/>省份排名：TOP ${rank}` : ''}`
       },
     },
     visualMap: {
