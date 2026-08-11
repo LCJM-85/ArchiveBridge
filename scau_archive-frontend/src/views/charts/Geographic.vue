@@ -145,7 +145,7 @@ function renderMap(data) {
       label: { show: false },
       selectedMode: false,
       itemStyle: {
-        borderColor: 'rgba(255, 255, 255, 0.85)',
+        borderColor: isDark ? 'rgba(47, 185, 132, 0.55)' : 'rgba(14, 138, 95, 0.5)',
         borderWidth: 1,
         areaColor: isDark ? '#1c2c23' : '#e9f0eb',
       },
@@ -155,7 +155,7 @@ function renderMap(data) {
           areaColor: isDark ? '#2fb984' : '#14a06f',
           shadowBlur: 20,
           shadowColor: 'rgba(14, 138, 95, 0.55)',
-          borderColor: '#fff',
+          borderColor: isDark ? 'rgba(7, 39, 28, 0.9)' : '#fff',
           borderWidth: 1.5,
         },
       },
