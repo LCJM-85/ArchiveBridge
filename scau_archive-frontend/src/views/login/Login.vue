@@ -195,9 +195,9 @@ const handleLogin = () => login(route, router)
   inset: 0;
   z-index: 1;
   background:
-    radial-gradient(900px 500px at 16% 10%, rgba(14, 138, 95, 0.5), transparent 62%),
-    radial-gradient(720px 480px at 84% 92%, rgba(201, 164, 92, 0.2), transparent 60%),
-    linear-gradient(103deg, rgba(6, 28, 19, 0.92) 0%, rgba(8, 32, 22, 0.8) 32%, rgba(11, 38, 26, 0.6) 58%, rgba(8, 31, 23, 0.74) 100%);
+    radial-gradient(900px 500px at 16% 10%, rgba(14, 138, 95, 0.34), transparent 62%),
+    radial-gradient(720px 480px at 84% 92%, rgba(201, 164, 92, 0.16), transparent 60%),
+    linear-gradient(103deg, rgba(6, 28, 19, 0.78) 0%, rgba(8, 32, 22, 0.64) 32%, rgba(11, 38, 26, 0.48) 58%, rgba(8, 31, 23, 0.6) 100%);
   pointer-events: none;
   transition: background 0.4s ease;
 }
