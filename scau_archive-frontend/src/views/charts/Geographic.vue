@@ -93,6 +93,7 @@ function renderMap(data) {
   }
 
   const maxVal = Math.max(...data.map(d => d.count), 1)
+  const isDark = document.documentElement.classList.contains('dark')
   mapChart.setOption({
     tooltip: {
       trigger: 'item',
@@ -108,7 +109,7 @@ function renderMap(data) {
       bottom: 20,
       text: ['高', '低'],
       textStyle: { color: t.textSecondary },
-      inRange: { color: ['#e6f3ec', '#8fd3b0', '#2fb984', '#0b5c40'] },
+      inRange: { color: ['#d9ece0', '#7cc9a2', '#2ba373', '#0b5c40'] },
       calculable: true,
     },
     series: [{
@@ -117,11 +118,11 @@ function renderMap(data) {
       roam: true,
       label: { show: false, color: t.textSecondary, fontSize: 10 },
       itemStyle: {
-        borderColor: 'rgba(255,255,255,0.55)',
-        borderWidth: 0.7,
-        areaColor: 'var(--bg-tertiary)',
+        borderColor: isDark ? 'rgba(47, 185, 132, 0.5)' : 'rgba(14, 138, 95, 0.4)',
+        borderWidth: 1,
+        areaColor: isDark ? '#1c2c23' : '#e3ece6',
         shadowBlur: 4,
-        shadowColor: 'rgba(7,39,28,0.06)',
+        shadowColor: 'rgba(7,39,28,0.08)',
       },
       emphasis: {
         label: { show: true, fontSize: 14, fontWeight: 'bold', color: '#fff' },
