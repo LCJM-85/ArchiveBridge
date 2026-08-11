@@ -74,7 +74,8 @@ import { fetchProvinceStats } from '@/api/modules/admission'
 import chinaGeo from '@/assets/geo/china.json'
 
 // 注册中国地图（构建时打包，运行时不额外请求）
-echarts.registerMap('china', chinaGeo)
+// 注：不覆盖内置 'china'（echarts 完整版内置地图含南海诸岛），改用自定义名确保渲染干净的 34 省数据
+echarts.registerMap('scau-china', chinaGeo)
 
 const mapChartRef = ref(null)
 let mapChart = null
@@ -138,16 +139,20 @@ function renderMap(data) {
     },
     series: [{
       type: 'map',
-      map: 'china',
+      map: 'scau-china',
       roam: false,
       layoutCenter: ['50%', '49%'],
       layoutSize: '118%',
-      label: { show: false },
+      label: {
+        show: true,
+        fontSize: 10,
+        color: isDark ? '#c8d4cc' : '#3c5a4a',
+      },
       selectedMode: false,
       itemStyle: {
-        borderColor: isDark ? 'rgba(47, 185, 132, 0.55)' : 'rgba(14, 138, 95, 0.5)',
+        borderColor: isDark ? 'rgba(47, 185, 132, 0.8)' : 'rgba(11, 92, 64, 0.7)',
         borderWidth: 1,
-        areaColor: isDark ? '#1c2c23' : '#e9f0eb',
+        areaColor: isDark ? '#1c2c23' : '#e2ece5',
       },
       emphasis: {
         label: { show: true, fontSize: 15, fontWeight: 'bold', color: '#fff' },
