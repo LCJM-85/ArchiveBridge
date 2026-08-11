@@ -1,6 +1,8 @@
 FROM postgis/postgis:15-3.3
 
-# 安装 pgvector 扩展
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# 安装 pgvector 扩展 —— 使用阿里云国内镜像（debian + PGDG），避免官方源在代理下 502
+RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list && \
+    echo 'deb [ signed-by=/usr/local/share/keyrings/postgres.gpg.asc ] https://mirrors.aliyun.com/postgresql/repos/apt/ bullseye-pgdg main' > /etc/apt/sources.list.d/pgdg.list && \
+    apt-get update && apt-get install -y --no-install-recommends \
     postgresql-15-pgvector \
     && rm -rf /var/lib/apt/lists/*

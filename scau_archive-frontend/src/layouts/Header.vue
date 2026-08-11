@@ -151,8 +151,6 @@ function logout() {
   height: 64px;
   padding: 0 24px;
   background: color-mix(in srgb, var(--header-bg) 82%, transparent);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--header-border);
   display: flex;
   justify-content: space-between;

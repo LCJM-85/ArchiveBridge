@@ -2,7 +2,8 @@
 FROM node:20-alpine AS builder
 WORKDIR /build
 COPY package*.json ./
-RUN npm ci
+# npm 使用 npmmirror 国内镜像源
+RUN npm config set registry https://registry.npmmirror.com && npm ci
 COPY . .
 RUN npm run build
 
