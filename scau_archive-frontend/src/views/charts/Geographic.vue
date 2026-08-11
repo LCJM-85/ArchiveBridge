@@ -151,7 +151,7 @@ function renderMap(data) {
         areaColor: isDark ? '#1c2c23' : '#e2ece5',
       },
       emphasis: {
-        label: { show: true, fontSize: 15, fontWeight: 'bold', color: '#fff' },
+        label: { show: true, fontSize: 15, fontWeight: 'bold', color: '#0b2a1e' },
         itemStyle: {
           areaColor: isDark ? '#2fb984' : '#14a06f',
           shadowBlur: 20,
