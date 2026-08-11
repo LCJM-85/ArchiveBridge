@@ -173,44 +173,31 @@ function tickClock() {
 const stats = computed(() => {
   const d = dashboardData.value || {}
   const trend = d.trend || []
-  const spark = (arr, color) => {
-    if (!arr || arr.length < 2) return null
-    const vals = arr.slice(-6).map((x) => Number(x.count) || 0)
-    const min = Math.min(...vals)
-    const max = Math.max(...vals)
-    const span = max - min || 1
-    const pts = vals.map((v, i) => {
-      const x = 2 + (i * 86) / (vals.length - 1)
-      const y = 27 - ((v - min) / span) * 22
-      return `${x.toFixed(1)},${y.toFixed(1)}`
-    })
-    return { points: `M${pts.join(' L')}`, color }
-  }
-  const s1 = spark(trend, '#14a06f')
+  // 年份范围动态计算（来自接口趋势数据，避免硬编码）
+  const years = trend.map((x) => Number(x.year)).filter((y) => !Number.isNaN(y))
+  const yearRange = years.length
+    ? `${Math.min(...years)}–${Math.max(...years)} · 含硕博`
+    : '含硕博'
   return [
     {
       key: 'admission', cls: 'c1', icon: DataBoard, unit: '人',
-      label: '招生总数', sub: '2019–2025 · 含硕博',
+      label: '招生总数', sub: yearRange,
       value: d.totalAdmissions, display: d.totalAdmissions ?? '—',
-      sparkPoints: s1?.points, sparkColor: s1?.color,
     },
     {
       key: 'graduate', cls: 'c2', icon: School, unit: '人',
       label: '毕业人数', sub: '已归档 · 含硕博',
       value: d.totalGraduates, display: d.totalGraduates ?? '—',
-      sparkPoints: null, sparkColor: '#c9a45c',
     },
     {
       key: 'major', cls: 'c3', icon: Files, unit: '个',
       label: '开设专业', sub: '本科 · 硕士 · 博士',
       value: d.majorCount, display: d.majorCount ?? '—',
-      sparkPoints: null, sparkColor: '#2fb984',
     },
     {
       key: 'score', cls: 'c4', icon: DataAnalysis, unit: '分',
       label: '本科生录取均分', sub: '仅统计学士群体',
       value: d.avgScore, display: d.avgScore ?? '—',
-      sparkPoints: null, sparkColor: '#5b8def',
     },
   ]
 })
