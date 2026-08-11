@@ -78,13 +78,13 @@ echarts.registerMap('china', chinaGeo)
 
 const mapChartRef = ref(null)
 let mapChart = null
-let rawData = []
+const rawData = ref([])
 
-const coveredCount = computed(() => rawData.length)
+const coveredCount = computed(() => rawData.value.length)
 const topProvinces = computed(() =>
-  [...rawData].sort((a, b) => b.count - a.count).slice(0, 10)
+  [...rawData.value].sort((a, b) => b.count - a.count).slice(0, 10)
 )
-const maxCount = computed(() => rawData.reduce((m, d) => Math.max(m, d.count), 0))
+const maxCount = computed(() => rawData.value.reduce((m, d) => Math.max(m, d.count), 0))
 
 function barColor(i) {
   if (i === 0) return 'linear-gradient(90deg, #d9b877, #c9a45c)'
@@ -166,8 +166,8 @@ function renderMap(data) {
 async function fetchData() {
   try {
     const res = await fetchProvinceStats()
-    rawData = res.data?.data || []
-    renderMap(rawData)
+    rawData.value = res.data?.data || []
+    renderMap(rawData.value)
   } catch (e) {
     console.error('获取地理分布数据失败:', e)
   }
