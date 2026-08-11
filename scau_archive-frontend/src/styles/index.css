@@ -680,6 +680,203 @@ body {
   font-weight: 500;
 }
 
+/* ===================== PAGE-LEVEL COMPONENT STYLES ===================== */
+/* 「森屿」统一页面级组件：卡片头、筛选栏、统计卡、上传/聊天/预测等
+   注：页面组件多为 scoped 样式，此处关键属性使用 !important 覆盖 */
+
+/* ---- 页面卡片头：图标徽章 + 标题 ---- */
+.page-card .el-card__header {
+  padding: 16px 22px !important;
+}
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.card-header-left > span {
+  font-family: var(--font-display);
+  font-size: 15.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--text-primary);
+}
+.card-header-left .el-icon {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(140deg, #14a06f, #0b5c40) !important;
+  color: #e6cd95 !important;
+  border: 1px solid rgba(201, 164, 92, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(6, 40, 28, 0.25) !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.el-card:hover .card-header-left .el-icon {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 6px 16px rgba(6, 40, 28, 0.35) !important;
+}
+
+/* ---- 分页 ---- */
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-light);
+}
+.pagination-wrap .el-pagination {
+  --el-pagination-button-bg-color: var(--bg-tertiary);
+}
+.pagination-wrap .el-pagination.is-background .el-pager li.is-active {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark)) !important;
+}
+
+/* ---- 筛选卡片（图表页） ---- */
+.filter-card,
+.control-card,
+.toolbar-card {
+  background: linear-gradient(135deg, var(--card-bg), var(--bg-primary)) !important;
+  border: 1px solid var(--card-border) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 4px 16px rgba(7, 39, 28, 0.05) !important;
+}
+
+/* ---- 图表容器 ---- */
+.chart-container {
+  background: var(--card-bg);
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 6px 20px rgba(7, 39, 28, 0.05);
+  padding: 10px;
+}
+
+/* ---- 统计卡（OCR / 报告页结构） ---- */
+.stat-cards .stat-card,
+.chart-grid .stat-card,
+.analysis-card .stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px !important;
+  border: 1px solid var(--card-border) !important;
+  background: var(--card-bg) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+.stat-cards .stat-card:hover,
+.chart-grid .stat-card:hover,
+.analysis-card .stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(7, 39, 28, 0.12) !important;
+}
+.stat-cards .stat-card::after,
+.chart-grid .stat-card::after,
+.analysis-card .stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+}
+.stat-cards .stat-value,
+.analysis-card .stat-value {
+  color: var(--color-primary) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 预测页指标 ---- */
+.metrics-grid .metric-item {
+  border-radius: 14px !important;
+  border: 1px solid var(--card-border) !important;
+  background: linear-gradient(160deg, var(--card-bg), var(--bg-primary)) !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+.metrics-grid .metric-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(7, 39, 28, 0.1) !important;
+}
+.metrics-grid .metric-value,
+.overview-card .overview-value {
+  color: var(--color-primary) !important;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- 上传页：类型卡片 + 拖拽区 ---- */
+.type-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+.type-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px rgba(7, 39, 28, 0.12) !important;
+}
+.type-card.active {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 3px rgba(14, 138, 95, 0.12), 0 12px 26px rgba(7, 39, 28, 0.1) !important;
+}
+.drop-zone {
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease !important;
+}
+.drop-zone--dragover {
+  border-color: var(--color-gold) !important;
+  box-shadow: inset 0 0 0 3px rgba(201, 164, 92, 0.12) !important;
+}
+
+/* ---- AI 助手聊天卡 ---- */
+.chat-card {
+  border-radius: 18px !important;
+  border: 1px solid var(--card-border) !important;
+  background: var(--card-bg) !important;
+  box-shadow: 0 10px 30px rgba(7, 39, 28, 0.08) !important;
+}
+.chat-card .chat-header {
+  background: linear-gradient(120deg, var(--color-primary-dark), var(--color-primary)) !important;
+  border-radius: 18px 18px 0 0 !important;
+}
+.bubble {
+  border-radius: 14px !important;
+}
+
+/* ---- 报告页分析卡 ---- */
+.analysis-card {
+  border-radius: 16px !important;
+  border: 1px solid var(--card-border) !important;
+  box-shadow: 0 8px 24px rgba(7, 39, 28, 0.07) !important;
+}
+.section-title {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px !important;
+}
+.section-title::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-dark));
+  margin-right: 8px;
+  vertical-align: -2px;
+}
+
+/* ---- 知识库上传区（与档案上传统一） ---- */
+.knowledge-page .drop-zone {
+  transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease !important;
+}
+.knowledge-page .drop-zone:hover {
+  border-color: var(--color-gold) !important;
+}
+
+/* ---- 深色模式：渐变亮度微调 ---- */
+.dark .card-header-left .el-icon {
+  background: linear-gradient(140deg, #14a06f, #0b5c40) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
+}
+
 /* ===================== UTILITY ===================== */
 
 .glass-card {
