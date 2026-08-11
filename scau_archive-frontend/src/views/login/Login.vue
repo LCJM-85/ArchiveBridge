@@ -134,8 +134,6 @@
             {{ isLoading ? '登录中...' : '登 录' }}
           </el-button>
         </el-form>
-
-        <div class="login-tip">ARCHIVE BRIDGE · V1.0 · 建议使用 Chrome / Edge 浏览器</div>
       </div>
     </div>
   </div>
@@ -480,11 +478,11 @@ const handleLogin = () => login(route, router)
   left: -70px;
   background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.28), transparent);
   transform: skewX(-18deg);
-  animation: sweep 3.4s ease infinite;
+  animation: sweep 8s ease infinite;
 }
 @keyframes sweep {
   0% { left: -70px; }
-  55% { left: 115%; }
+  60% { left: 115%; }
   100% { left: 115%; }
 }
 

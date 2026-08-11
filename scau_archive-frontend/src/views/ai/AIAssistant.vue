@@ -17,6 +17,20 @@
       </template>
 
       <div class="message-list" ref="messageListRef">
+        <div v-if="!messages.length && !loading" class="welcome">
+          <div class="welcome-badge"><el-icon :size="30"><Cpu /></el-icon></div>
+          <h3 class="welcome-title">你好，我是 AI 分析助手</h3>
+          <p class="welcome-desc">基于全校招生 / 学籍 / 毕业数据与 RAG 知识库，回答你的任何问题</p>
+          <div class="welcome-suggests">
+            <button v-for="q in suggestQuestions" :key="q" class="suggest-card" @click="askSuggest(q)">
+              <span class="suggest-arrow">→</span>
+              {{ q }}
+            </button>
+          </div>
+          <div class="welcome-cap">
+            <span>📊 实时数据查询</span><span>🤖 智能分析</span><span>📚 知识库检索</span>
+          </div>
+        </div>
         <div v-for="(msg, i) in messages" :key="i" class="message-row" :class="msg.role">
           <div class="avatar" :class="msg.role"><el-icon :size="18"><component :is="msg.role === 'user' ? UserFilled : Cpu" /></el-icon></div>
           <div class="bubble" v-html="renderMarkdown(msg.content)"></div>
@@ -64,6 +78,18 @@ const loading = ref(false)
 const statusText = ref('')
 const messageListRef = ref(null)
 let streamController = null
+
+const suggestQuestions = [
+  '今年录取人数最多的专业是哪个？',
+  '近三年本科生平均录取分数线是多少？',
+  '各学院的毕业生去向分布如何？',
+  '帮我分析一下招生趋势的变化',
+]
+
+function askSuggest(q) {
+  question.value = q
+  sendMessage()
+}
 
 function renderMarkdown(text) {
   if (!text) return ''
@@ -188,14 +214,14 @@ onActivated(() => {
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 1.5px;
-  color: var(--text-primary);
+  color: #fff;
 }
 .chat-status {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: var(--text-tertiary);
+  color: rgba(255, 255, 255, 0.75);
   margin-top: 2px;
 }
 .status-dot {
@@ -210,8 +236,91 @@ onActivated(() => {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.45; }
 }
-.clear-btn { color: var(--text-tertiary) !important; }
-.clear-btn:hover { color: var(--color-danger) !important; }
+.clear-btn { color: rgba(255, 255, 255, 0.8) !important; }
+.clear-btn:hover { color: #fff !important; background: rgba(255, 255, 255, 0.12) !important; }
+
+/* ===== 欢迎态（空对话） ===== */
+.welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px 20px;
+  animation: msg-in 0.5s ease both;
+}
+.welcome-badge {
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  background: linear-gradient(140deg, #14a06f, #0b5c40);
+  border: 1px solid rgba(201, 164, 92, 0.5);
+  color: #e6cd95;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 16px 40px rgba(6, 40, 28, 0.35);
+  margin-bottom: 20px;
+  animation: floaty 4s ease-in-out infinite;
+}
+@keyframes floaty {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+.welcome-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-primary);
+  margin: 0 0 8px;
+}
+.welcome-desc {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin: 0 0 26px;
+}
+.welcome-suggests {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 460px;
+}
+.suggest-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+.suggest-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  box-shadow: 0 8px 18px rgba(7, 39, 28, 0.1);
+}
+.suggest-arrow {
+  color: var(--color-gold);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.welcome-cap {
+  display: flex;
+  gap: 18px;
+  margin-top: 22px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
 
 /* ===== 消息区 ===== */
 .message-list {

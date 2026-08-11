@@ -833,9 +833,10 @@ body {
   background: var(--card-bg) !important;
   box-shadow: 0 10px 30px rgba(7, 39, 28, 0.08) !important;
 }
-.chat-card .chat-header {
+.chat-card .el-card__header {
   background: linear-gradient(120deg, var(--color-primary-dark), var(--color-primary)) !important;
   border-radius: 18px 18px 0 0 !important;
+  border-bottom: 1px solid rgba(201, 164, 92, 0.3);
 }
 .bubble {
   border-radius: 14px !important;

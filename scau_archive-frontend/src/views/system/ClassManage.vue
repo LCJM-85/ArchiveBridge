@@ -6,7 +6,6 @@
         <div class="ph-kicker">SCAU ARCHIVE BRIDGE · 系统管理</div>
         <h2 class="font-display">班级管理</h2>
         <div class="ph-rule"></div>
-        <p class="ph-sub">维护班级维表 · 挂靠专业并登记年级与学制</p>
       </div>
       <div class="ph-right">
         <svg class="ph-art" viewBox="0 0 220 90" preserveAspectRatio="xMidYMax meet">
@@ -245,8 +244,8 @@ onActivated(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 26px 34px;
-  min-height: 116px;
+  padding: 18px 28px;
+  min-height: 84px;
   animation: rise-up 0.7s cubic-bezier(0.2, 0.75, 0.3, 1) both;
 }
 .page-hero::after {
@@ -273,16 +272,15 @@ onActivated(() => {
 .ph-rule {
   width: 48px;
   height: 2px;
-  margin: 12px 0;
+  margin: 8px 0;
   border-radius: 2px;
   background: linear-gradient(90deg, #d9b877, rgba(201, 164, 92, 0));
 }
-.ph-sub { font-size: 12.5px; color: rgba(255, 255, 255, 0.6); margin: 0; }
 .ph-right { position: relative; z-index: 2; }
 .ph-art { width: 220px; height: 84px; flex-shrink: 0; }
 @media (max-width: 900px) {
   .ph-art { display: none; }
-  .page-hero { padding: 22px 24px; }
+  .page-hero { padding: 14px 20px; }
 }
 
 /* ===== 表格 ===== */
