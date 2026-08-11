@@ -62,9 +62,6 @@
         </div>
         <div class="s-label">{{ s.label }}</div>
         <div class="s-sub">{{ s.sub }}</div>
-        <svg v-if="s.sparkPoints" class="s-spark" viewBox="0 0 90 32">
-          <path :d="s.sparkPoints" fill="none" :stroke="s.sparkColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
       </div>
     </div>
 
@@ -519,8 +516,7 @@ onBeforeUnmount(() => {
 .s-num { font-size: 27px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); line-height: 1.05; }
 .s-num small { font-size: 12.5px; font-weight: 500; color: var(--text-tertiary); margin-left: 3px; }
 .s-label { font-size: 13px; color: var(--text-secondary); margin-top: 9px; }
-.s-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; margin-right: 96px; }
-.s-spark { position: absolute; right: 10px; bottom: 10px; opacity: 0.8; pointer-events: none; }
+.s-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
 .stat-card.c1 { --sc1: #14a06f; --sc2: #0b5c40; --sc-sd: rgba(20, 160, 111, 0.32); }
 .stat-card.c2 { --sc1: #c9a45c; --sc2: #9a7a3c; --sc-sd: rgba(201, 164, 92, 0.32); }
 .stat-card.c3 { --sc1: #2fb984; --sc2: #0e8a5f; --sc-sd: rgba(47, 185, 132, 0.32); }
