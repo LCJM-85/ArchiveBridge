@@ -23,3 +23,7 @@ export function fetchQualityScores(fileIds) {
 export function fetchProcessingCount() {
   return request.get('/api/storage/processing-count')
 }
+
+export function cancelOcrTask(logId) {
+  return request.post(`/api/ocr/log/${logId}/cancel`)
+}

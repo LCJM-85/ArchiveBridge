@@ -112,13 +112,16 @@
         </el-table-column>
         <el-table-column label="提示信息" min-width="300">
           <template #default="{ row }">
-            <span v-if="row.recognizeStatus === 'failed' && row.errorMessage" style="color:#f56c6c">{{ row.errorMessage }}</span>
+            <span v-if="row.recognizeStatus === 'processing' && row.message" style="color:var(--color-primary)">{{ row.message }}</span>
+            <span v-else-if="row.recognizeStatus === 'failed' && row.errorMessage" style="color:#f56c6c">{{ row.errorMessage }}</span>
             <span v-else-if="row.recognizeStatus === 'warning' && row.errorMessage" style="color:#e6a23c">{{ row.errorMessage }}</span>
+            <span v-else-if="row.recognizeStatus === 'cancelled'">用户已取消</span>
             <span v-else style="color:var(--text-secondary)">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="70" align="center">
+        <el-table-column label="操作" width="120" align="center">
           <template #default="{ row }">
+            <el-button v-if="row.recognizeStatus === 'processing'" size="small" type="warning" text @click="handleCancelTask(row.logId)">取消</el-button>
             <el-button size="small" class="op-danger-round" :icon="Delete" circle @click="handleDeleteLog(row.logId)" />
           </template>
         </el-table-column>
@@ -183,9 +186,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onMounted, onActivated, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onActivated, onUnmounted } from 'vue'
 import { Refresh, Monitor, Timer, Delete, Loading, WarningFilled, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
-import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog, fetchQualityScores, fetchProcessingCount } from '@/api/modules/ocr'
+import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog, fetchQualityScores, fetchProcessingCount, cancelOcrTask } from '@/api/modules/ocr'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
@@ -209,25 +212,6 @@ const stats = computed(() => ({
   error: todayLogs.value.filter(f => f.recognizeStatus === 'failed').length,
 }))
 
-/* 数字滚动 */
-function animateCount(el) {
-  const to = Number(el.dataset.to)
-  if (Number.isNaN(to)) return
-  const dur = 900
-  const start = performance.now()
-  function tick(t) {
-    const p = Math.min((t - start) / dur, 1)
-    const eased = 1 - Math.pow(1 - p, 3)
-    el.textContent = Math.round(to * eased)
-    if (p < 1) requestAnimationFrame(tick)
-  }
-  requestAnimationFrame(tick)
-}
-watch(stats, async () => {
-  await nextTick()
-  document.querySelectorAll('.stat-card .count').forEach(animateCount)
-}, { deep: true })
-
 function statusTag(status) {
   return status === 'processing' ? 'warning'
        : status === 'warning'   ? 'warning'
@@ -246,6 +230,7 @@ function statusText(status) {
   return status === 'processing' ? '处理中'
        : status === 'warning'   ? '有警告'
        : status === 'success'   ? '已完成'
+       : status === 'cancelled' ? '已取消'
        : '处理失败'
 }
 
@@ -270,7 +255,6 @@ async function syncAndRefresh() {
     await fetchQualityScoresForLogs(todayLogs.value)
     ElMessage.success('同步完成')
   } catch {
-    todayLogs.value = []
     ElMessage.error('同步失败')
   } finally {
     loading.value = false
@@ -303,7 +287,7 @@ async function fetchToday() {
     todayLogs.value = res.data.data || []
     await fetchQualityScoresForLogs(todayLogs.value)
   } catch {
-    todayLogs.value = []
+    // 轮询失败时保留上一次成功结果，避免统计卡片瞬间归零
   }
 }
 
@@ -339,10 +323,24 @@ async function handleDeleteLog(logId) {
   }
 }
 
+async function handleCancelTask(logId) {
+  try {
+    await ElMessageBox.confirm('确定取消该任务吗？', '提示', { type: 'warning' })
+    await cancelOcrTask(logId)
+    ElMessage.success('任务已取消')
+    await fetchToday()
+  } catch {
+    // cancelled or error
+  }
+}
+
 onMounted(() => {
   fetchToday()
   pollProcessingCount()
-  pollTimer = setInterval(pollProcessingCount, 3000)
+  pollTimer = setInterval(() => {
+    pollProcessingCount()
+    fetchToday()
+  }, 3000)
 })
 
 onActivated(() => {

@@ -22,6 +22,9 @@ public class PPStructureService {
     @Autowired
     private MetaDataService metaDataService;
 
+    @Autowired
+    private OCRTaskManager ocrTaskManager;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ObjectMapper lenientMapper = JsonMapper.builder()
             .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
@@ -60,6 +63,7 @@ public class PPStructureService {
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
+            ocrTaskManager.registerProcess(process);
 
             String output;
             try (InputStream is = process.getInputStream()) {
@@ -67,6 +71,7 @@ public class PPStructureService {
             }
 
             int exitCode = process.waitFor();
+            ocrTaskManager.unregisterProcess(process);
             Files.deleteIfExists(rulesFile);
 
             int jsonStart = output.indexOf('{');

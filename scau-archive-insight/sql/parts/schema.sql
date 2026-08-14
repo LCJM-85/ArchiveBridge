@@ -263,7 +263,9 @@ CREATE TABLE IF NOT EXISTS public.ocr_log_dim (
     f1_score          NUMERIC(5, 2),
     file_name         VARCHAR(255),
     file_type         VARCHAR(50),
-    error_message     TEXT
+    error_message     TEXT,
+    message           TEXT,
+    updated_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE SEQUENCE IF NOT EXISTS public.ocr_log_dim_log_id_seq AS INTEGER
     START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;

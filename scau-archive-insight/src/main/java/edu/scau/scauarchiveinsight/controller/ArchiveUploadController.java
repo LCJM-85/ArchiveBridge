@@ -6,6 +6,8 @@ import edu.scau.scauarchiveinsight.processor.ImageProcessor;
 import edu.scau.scauarchiveinsight.processor.LLMProcessor;
 import edu.scau.scauarchiveinsight.processor.PDFProcessor;
 import edu.scau.scauarchiveinsight.service.StorageService;
+import edu.scau.scauarchiveinsight.service.OCRLogService;
+import edu.scau.scauarchiveinsight.service.OCRTaskManager;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,17 +29,22 @@ public class ArchiveUploadController {
     private final PDFProcessor pdfProcessor;
     private final ImageProcessor imageProcessor;
     private final LLMProcessor llmProcessor;
+    private final OCRLogService ocrLogService;
+    private final OCRTaskManager ocrTaskManager;
 
     public ArchiveUploadController(StorageService storageService, CSVProcessor csvProcessor,
                                    ExcelProcessor excelProcessor, PDFProcessor pdfProcessor,
                                    ImageProcessor imageProcessor,
-                                   LLMProcessor llmProcessor) {
+                                   LLMProcessor llmProcessor, OCRLogService ocrLogService,
+                                   OCRTaskManager ocrTaskManager) {
         this.storageService = storageService;
         this.csvProcessor = csvProcessor;
         this.excelProcessor = excelProcessor;
         this.pdfProcessor = pdfProcessor;
         this.imageProcessor = imageProcessor;
         this.llmProcessor = llmProcessor;
+        this.ocrLogService = ocrLogService;
+        this.ocrTaskManager = ocrTaskManager;
     }
 
     @Operation(summary = "上传档案文件并自动处理")
@@ -60,109 +67,62 @@ public class ArchiveUploadController {
             return ResponseEntity.ok(result);
         }
 
-        List<Map<String, Object>> allResults = new ArrayList<>();
-        List<String> imageBatch = new ArrayList<>();
-
+        List<Map<String, Object>> tasks = new ArrayList<>();
         for (Map<String, String> fileInfo : uploaded) {
-            String name = fileInfo.get("name");
+            String originalName = fileInfo.get("name");
             String path = fileInfo.get("path");
-            String ext = getExtension(name).toLowerCase();
+            String storedName = Paths.get(path).getFileName().toString();
+            String ext = getExtension(originalName).toLowerCase();
+            Integer logId = ocrLogService.createProcessingLog(storedName, ext);
+            tasks.add(Map.of("taskId", logId, "fileName", originalName));
+            ocrTaskManager.submit(logId, () -> processFile(logId, storedName, path, ext, archiveType,
+                    provinceName, admissionDate, degreeName, useLlm));
+        }
+        result.put("tasks", tasks);
+        result.put("message", "文件已上传，正在后台处理");
+        return ResponseEntity.ok(result);
+    }
 
+    private void processFile(Integer logId, String storedName, String path, String ext, String archiveType,
+                             String provinceName, String admissionDate, String degreeName, boolean useLlm) {
+        try {
             switch (ext) {
                 case "csv" -> {
-                    Map<String, Object> csvResult = csvProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
-                    allResults.add(Map.of("file", name, "type", "csv", "data", csvResult.get("data"), "errors", csvResult.get("errors")));
+                    ocrLogService.updateMessage(logId, "解析 CSV 文件");
+                    csvProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
                 }
                 case "xls", "xlsx" -> {
-                    Map<String, Object> excelResult = excelProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
-                    allResults.add(Map.of("file", name, "type", "excel", "data", excelResult.get("data"), "errors", excelResult.get("errors")));
+                    ocrLogService.updateMessage(logId, "解析 Excel 文件");
+                    excelProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
                 }
                 case "pdf" -> {
                     if (useLlm) {
-                        // LLM 模式：PDF 先转图片，页面图片不进入 imageBatch（避免计数和日志被拆分）
-                        try {
-                            List<String> pageImages = pdfToImage(path);
-                            // 统一处理所有页面，只归档一次 PDF 原始文件（计数只 +1/-1）
-                            List<Map<String, Object>> pdfResult = llmProcessor.processPdfPages(
-                                    path, pageImages, archiveType, provinceName, admissionDate, degreeName);
-                            allResults.add(Map.of("file", name, "type", "pdf-llm", "data", pdfResult));
-                        } catch (Exception e) {
-                            Map<String, Object> entry = new LinkedHashMap<>();
-                            entry.put("file", name);
-                            entry.put("type", "pdf");
-                            entry.put("data", List.of());
-                            entry.put("errors", List.of(Map.of("msg", "PDF 转图片失败: " + e.getMessage())));
-                            allResults.add(entry);
-                        }
+                        ocrLogService.updateMessage(logId, "PDF 转换为图片");
+                        List<String> pages = pdfToImage(path);
+                        ocrLogService.updateMessage(logId, "LLM：处理 1/" + pages.size() + " 页");
+                        llmProcessor.processPdfPages(path, pages, archiveType, provinceName, admissionDate, degreeName);
                     } else {
-                        List<Map<String, Object>> pages = pdfProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
-                        allResults.add(Map.of("file", name, "type", "pdf", "data", pages));
+                        ocrLogService.updateMessage(logId, "OCR：识别 PDF");
+                        pdfProcessor.process(path, archiveType, provinceName, admissionDate, degreeName);
                     }
                 }
                 case "jpg", "jpeg", "png", "bmp", "gif", "tiff", "webp" -> {
-                    imageBatch.add(path);
+                    ocrLogService.updateMessage(logId, useLlm ? "LLM：等待模型响应" : "OCR：识别图片");
+                    if (useLlm) llmProcessor.process(List.of(path), archiveType, provinceName, admissionDate, degreeName);
+                    else imageProcessor.process(List.of(path), archiveType, provinceName, admissionDate, degreeName);
+                }
+                default -> {
+                    storageService.failedFile(storedName, "不支持的文件类型: " + ext);
+                    ocrLogService.markFailed(logId, "不支持的文件类型: " + ext);
+                    return;
                 }
             }
+            ocrLogService.updateMessage(logId, "确认处理结果");
+            ocrLogService.syncTodayLogs();
+        } catch (Exception e) {
+            ocrLogService.markFailed(logId, e.getMessage());
+            try { storageService.failedFile(storedName, e.getMessage()); } catch (Exception ignored) {}
         }
-
-        if (!imageBatch.isEmpty()) {
-            List<Map<String, Object>> allErrors = new ArrayList<>();
-            List<Map<String, Object>> imageResults = new ArrayList<>();
-
-            for (String imgPath : imageBatch) {
-                String fileName = uploaded.stream()
-                        .filter(f -> f.get("path").equals(imgPath))
-                        .map(f -> f.get("name"))
-                        .findFirst().orElse("unknown");
-
-                try {
-                    if (useLlm) {
-                        List<Map<String, Object>> llmResults = llmProcessor.process(List.of(imgPath), archiveType,
-                                provinceName, admissionDate, degreeName);
-                        imageResults.addAll(llmResults);
-                    } else {
-                        List<Map<String, Object>> ocrResults = imageProcessor.process(
-                                List.of(imgPath), archiveType, provinceName, admissionDate, degreeName);
-                        imageResults.addAll(ocrResults);
-                    }
-                } catch (Exception e) {
-                    Map<String, Object> item = new LinkedHashMap<>();
-                    item.put("originalPath", imgPath);
-                    item.put("data", List.of());
-                    item.put("errors", List.of(Map.of("msg", e.getMessage())));
-                    imageResults.add(item);
-                }
-            }
-
-            for (Map<String, Object> wr : imageResults) {
-                @SuppressWarnings("unchecked")
-                var errs = (List<Map<String, Object>>) wr.get("errors");
-                if (errs != null && !errs.isEmpty()) {
-                    allErrors.addAll(errs);
-                }
-            }
-
-            // 清理 PDF 转换产生的临时图片目录
-            for (String imgPath : imageBatch) {
-                Path dir = Paths.get(imgPath).getParent();
-                if (dir != null && dir.toString().endsWith("_pages")) {
-                    try (var walk = Files.walk(dir)) {
-                        walk.forEach(p -> { try { Files.deleteIfExists(p); } catch (Exception ignored) {} });
-                    } catch (Exception ignored) {}
-                }
-            }
-
-            Map<String, Object> entry = new LinkedHashMap<>();
-            entry.put("type", useLlm ? "image-llm" : "image");
-            entry.put("data", imageResults);
-            if (!allErrors.isEmpty()) {
-                entry.put("errors", allErrors);
-            }
-            allResults.add(entry);
-        }
-
-        result.put("processed", allResults);
-        return ResponseEntity.ok(result);
     }
 
     private List<String> pdfToImage(String pdfPath) throws Exception {
@@ -178,8 +138,10 @@ public class ArchiveUploadController {
         ProcessBuilder pb = new ProcessBuilder(python, script, pdfPath, outputDir.toString());
         pb.environment().put("PYTHONIOENCODING", "utf-8");
         Process process = pb.start();
+        ocrTaskManager.registerProcess(process);
         String output = new String(process.getInputStream().readAllBytes(), "UTF-8").trim();
         process.waitFor();
+        ocrTaskManager.unregisterProcess(process);
 
         @SuppressWarnings("unchecked")
         Map<String, Object> result = new ObjectMapper().readValue(output, Map.class);

@@ -112,9 +112,6 @@
           :class="{ 'llm-enabled': useLlm }"
         >
           LLM 智能提取
-          <el-tooltip content="使用 AI 直接识别图片内容，无需 OCR 匹配规则" placement="top">
-            <el-icon size="14" style="margin-left:2px;cursor:pointer;vertical-align:-2px"><QuestionFilled /></el-icon>
-          </el-tooltip>
         </span>
       </div>
 
@@ -256,7 +253,6 @@ import {
   CircleCheck,
   CircleClose,
   Close,
-  QuestionFilled,
 } from '@element-plus/icons-vue'
 
 const fileTypes = [
@@ -436,13 +432,15 @@ async function handleUpload() {
       useLlm.value
     )
 
+    const tasksByName = new Map((data.tasks || []).map((task) => [task.fileName, task]))
     toUpload.forEach((f) => {
-      f.status = data.success ? 'done' : 'error'
+      f.status = tasksByName.has(f.name) ? 'done' : 'error'
       f.progress = 100
+      f.taskId = tasksByName.get(f.name)?.taskId
     })
 
     if (data.success) {
-      ElMessage.success(`成功上传 ${data.uploaded.length} 个文件`)
+      ElMessage.success(`已上传 ${data.uploaded.length} 个文件，正在后台处理，可在 OCR 识别进程中查看`)
       setTimeout(() => clearAll(), 1500)
     } else {
       ElNotification.warning({

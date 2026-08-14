@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import edu.scau.scauarchiveinsight.dto.R;
 import edu.scau.scauarchiveinsight.pojo.OCRLogDim;
 import edu.scau.scauarchiveinsight.service.OCRLogService;
+import edu.scau.scauarchiveinsight.service.OCRTaskManager;
+import edu.scau.scauarchiveinsight.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,12 @@ public class OCRLogController {
 
     @Autowired
     private OCRLogService ocrLogService;
+
+    @Autowired
+    private OCRTaskManager ocrTaskManager;
+
+    @Autowired
+    private StorageService storageService;
 
     @Operation(summary = "同步今日 OCR 日志")
     @PostMapping("/sync")
@@ -55,5 +63,19 @@ public class OCRLogController {
     public R<Void> delete(@PathVariable Integer logId) {
         ocrLogService.removeById(logId);
         return R.ok(null, "删除成功");
+    }
+
+    @Operation(summary = "取消正在处理的 OCR/LLM 任务")
+    @PostMapping("/{logId}/cancel")
+    public R<Void> cancel(@PathVariable Integer logId) {
+        if (!ocrLogService.markCancelled(logId)) {
+            return R.error(400, "任务不存在或已结束");
+        }
+        ocrTaskManager.cancel(logId);
+        OCRLogDim log = ocrLogService.getById(logId);
+        if (log != null && log.getFileName() != null) {
+            try { storageService.failedFile(log.getFileName(), "用户已取消"); } catch (Exception ignored) {}
+        }
+        return R.ok(null, "已取消");
     }
 }

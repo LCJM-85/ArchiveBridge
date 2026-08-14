@@ -1,6 +1,7 @@
 package edu.scau.scauarchiveinsight.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import edu.scau.scauarchiveinsight.mapper.ArchiveFileDimMapper;
@@ -9,6 +10,8 @@ import edu.scau.scauarchiveinsight.pojo.ArchiveFileDim;
 import edu.scau.scauarchiveinsight.pojo.OCRLogDim;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
@@ -55,10 +59,8 @@ public class OCRLogService {
                       String typePart = dataFile.getNameCount() > 2
                               ? dataFile.getName(dataFile.getNameCount() - 2).toString() : "unknown";
 
-                      // 检查是否已记录（任一状态均视为已处理）
-                      LambdaQueryWrapper<OCRLogDim> check = new LambdaQueryWrapper<>();
-                      check.eq(OCRLogDim::getFileName, fileName);
-                      if (ocrLogDimMapper.selectCount(check) > 0) return;
+                      OCRLogDim existing = findLatestByFileName(fileName).orElse(null);
+                      if (existing != null && !"processing".equals(existing.getRecognizeStatus())) return;
 
                       // 从 archive_file_dim 查找 fileId
                       Integer fileId = null;
@@ -69,12 +71,14 @@ public class OCRLogService {
                           fileId = archiveFile.getFileId();
                       }
 
-                      OCRLogDim log = new OCRLogDim();
+                      OCRLogDim log = existing != null ? existing : new OCRLogDim();
                       log.setFileId(fileId);
                       log.setFileName(fileName);
                       log.setFileType(typePart);
                       log.setRecognizeStatus(status);
                       log.setRecognizeTime(LocalDateTime.now());
+                      log.setMessage(null);
+                      log.setUpdatedAt(LocalDateTime.now());
 
                       // 尝试读取对应的错误侧边文件
                       Path errorFile = dataFile.resolveSibling(dataFile.getFileName() + ".error.json");
@@ -84,7 +88,8 @@ public class OCRLogService {
                           } catch (IOException ignored) {}
                       }
 
-                      ocrLogDimMapper.insert(log);
+                      if (existing == null) ocrLogDimMapper.insert(log);
+                      else ocrLogDimMapper.updateById(log);
                   });
         } catch (IOException ignored) {
         }
@@ -94,14 +99,80 @@ public class OCRLogService {
      * 手动写入一条日志
      */
     public void addLog(Integer fileId, String fileName, String fileType, String status, String errorMessage) {
-        OCRLogDim log = new OCRLogDim();
+        OCRLogDim log = findLatestByFileName(fileName).orElseGet(OCRLogDim::new);
+        if ("cancelled".equals(log.getRecognizeStatus())) return;
         log.setFileId(fileId);
         log.setFileName(fileName);
         log.setFileType(fileType);
         log.setRecognizeStatus(status);
         log.setRecognizeTime(LocalDateTime.now());
         log.setErrorMessage(errorMessage);
+        log.setMessage(null);
+        log.setUpdatedAt(LocalDateTime.now());
+        if (log.getLogId() == null) ocrLogDimMapper.insert(log);
+        else ocrLogDimMapper.updateById(log);
+    }
+
+    public Integer createProcessingLog(String fileName, String fileType) {
+        OCRLogDim log = new OCRLogDim();
+        log.setFileName(fileName);
+        log.setFileType(fileType);
+        log.setRecognizeStatus("processing");
+        log.setRecognizeTime(LocalDateTime.now());
+        log.setMessage("等待处理");
+        log.setUpdatedAt(LocalDateTime.now());
         ocrLogDimMapper.insert(log);
+        return log.getLogId();
+    }
+
+    public void updateMessage(Integer logId, String message) {
+        ocrLogDimMapper.update(null, new LambdaUpdateWrapper<OCRLogDim>()
+                .eq(OCRLogDim::getLogId, logId)
+                .eq(OCRLogDim::getRecognizeStatus, "processing")
+                .set(OCRLogDim::getMessage, message)
+                .set(OCRLogDim::getUpdatedAt, LocalDateTime.now()));
+    }
+
+    public void markFailed(Integer logId, String errorMessage) {
+        ocrLogDimMapper.update(null, new LambdaUpdateWrapper<OCRLogDim>()
+                .eq(OCRLogDim::getLogId, logId)
+                .ne(OCRLogDim::getRecognizeStatus, "cancelled")
+                .set(OCRLogDim::getRecognizeStatus, "failed")
+                .set(OCRLogDim::getMessage, null)
+                .set(OCRLogDim::getErrorMessage, errorMessage)
+                .set(OCRLogDim::getUpdatedAt, LocalDateTime.now()));
+    }
+
+    public boolean markCancelled(Integer logId) {
+        return ocrLogDimMapper.update(null, new LambdaUpdateWrapper<OCRLogDim>()
+                .eq(OCRLogDim::getLogId, logId)
+                .eq(OCRLogDim::getRecognizeStatus, "processing")
+                .set(OCRLogDim::getRecognizeStatus, "cancelled")
+                .set(OCRLogDim::getMessage, "用户已取消")
+                .set(OCRLogDim::getErrorMessage, null)
+                .set(OCRLogDim::getUpdatedAt, LocalDateTime.now())) > 0;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void markInterruptedTasksAfterRestart() {
+        ocrLogDimMapper.update(null, new LambdaUpdateWrapper<OCRLogDim>()
+                .eq(OCRLogDim::getRecognizeStatus, "processing")
+                .set(OCRLogDim::getRecognizeStatus, "failed")
+                .set(OCRLogDim::getMessage, null)
+                .set(OCRLogDim::getErrorMessage, "服务重启导致任务中断")
+                .set(OCRLogDim::getUpdatedAt, LocalDateTime.now()));
+    }
+
+    public Optional<OCRLogDim> findLatestByFileName(String fileName) {
+        return Optional.ofNullable(ocrLogDimMapper.selectOne(
+                new LambdaQueryWrapper<OCRLogDim>()
+                        .eq(OCRLogDim::getFileName, fileName)
+                        .orderByDesc(OCRLogDim::getLogId)
+                        .last("LIMIT 1")));
+    }
+
+    public OCRLogDim getById(Integer logId) {
+        return ocrLogDimMapper.selectById(logId);
     }
 
     public void removeById(Integer logId) {

@@ -20,17 +20,20 @@ public class LLMProcessor {
     private final OCRLogService ocrLogService;
     private final QualityScoreService qualityScoreService;
     private final StorageService storageService;
+    private final OCRTaskManager ocrTaskManager;
 
     public LLMProcessor(LLMExtractionService llmExtractionService,
                         DataPersistenceService dataPersistenceService,
                         OCRLogService ocrLogService,
                         QualityScoreService qualityScoreService,
-                        StorageService storageService) {
+                        StorageService storageService,
+                        OCRTaskManager ocrTaskManager) {
         this.llmExtractionService = llmExtractionService;
         this.dataPersistenceService = dataPersistenceService;
         this.ocrLogService = ocrLogService;
         this.qualityScoreService = qualityScoreService;
         this.storageService = storageService;
+        this.ocrTaskManager = ocrTaskManager;
     }
 
     public List<Map<String, Object>> process(List<String> imagePaths, String archiveType) {
@@ -129,7 +132,13 @@ public class LLMProcessor {
         try {
             // 1. 提取所有页面的数据
             List<Map<String, String>> allData = new ArrayList<>();
-            for (String pagePath : pagePaths) {
+            for (int pageIndex = 0; pageIndex < pagePaths.size(); pageIndex++) {
+                String pagePath = pagePaths.get(pageIndex);
+                Integer taskId = ocrTaskManager.getCurrentTaskId();
+                if (taskId != null) {
+                    ocrLogService.updateMessage(taskId,
+                            "LLM：处理第 " + (pageIndex + 1) + "/" + pagePaths.size() + " 页");
+                }
                 try {
                     List<Map<String, Object>> pageRecords = llmExtractionService.extract(pagePath);
                     for (Map<String, Object> record : pageRecords) {

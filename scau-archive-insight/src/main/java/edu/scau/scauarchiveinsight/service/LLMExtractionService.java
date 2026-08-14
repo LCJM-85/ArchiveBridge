@@ -22,6 +22,9 @@ public class LLMExtractionService {
     @Autowired
     private MetaDataService metaDataService;
 
+    @Autowired
+    private OCRTaskManager ocrTaskManager;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${llm.api-key:}")
@@ -80,6 +83,7 @@ public class LLMExtractionService {
             pb.redirectErrorStream(true);
 
             Process process = pb.start();
+            ocrTaskManager.registerProcess(process);
 
             String output;
             try (InputStream is = process.getInputStream()) {
@@ -87,6 +91,7 @@ public class LLMExtractionService {
             }
 
             int exitCode = process.waitFor();
+            ocrTaskManager.unregisterProcess(process);
             Files.deleteIfExists(rulesFile);
 
             int jsonStart = output.indexOf('{');

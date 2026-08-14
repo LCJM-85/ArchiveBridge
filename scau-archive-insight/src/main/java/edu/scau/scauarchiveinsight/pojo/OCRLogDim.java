@@ -34,4 +34,10 @@ public class OCRLogDim {
 
     @TableField("error_message")
     private String errorMessage;
+
+    @TableField("message")
+    private String message;
+
+    @TableField("updated_at")
+    private LocalDateTime updatedAt;
 }
