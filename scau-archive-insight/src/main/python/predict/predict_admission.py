@@ -36,7 +36,7 @@ def train_arima(series):
                     continue
                 try:
                     model = ARIMA(series, order=(p, d, q))
-                    result = model.fit(disp=False)
+                    result = model.fit()
                     if result.aic < best_aic:
                         best_aic = result.aic
                         best_order = (p, d, q)
