@@ -23,6 +23,9 @@ public class QualityScoreService {
     @Autowired
     private MetaDataService metaDataService;
 
+    @Autowired
+    private CacheService cacheService;
+
     /**
      * 对已处理的文件进行质量评分并入库
      *
@@ -64,6 +67,7 @@ public class QualityScoreService {
         score.setCheckTime(LocalDateTime.now());
 
         qualityScoreDimMapper.insert(score);
+        cacheService.evictDashboard();
     }
 
     /**

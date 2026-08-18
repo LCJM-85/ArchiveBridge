@@ -35,6 +35,20 @@ spring:
       # 是否缓存preparedStatement，也就是PSCache
       pool-prepared-statements: true
 
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: 2s
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 0
+          max-wait: 2s
+
   servlet:
     multipart:
       enabled: true
@@ -87,4 +101,3 @@ jwt:
   header: Authorization
   # 可选：刷新 Token 过期时间（7天），用于 Token 续期
   refresh-expiration: 604800
-

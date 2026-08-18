@@ -3,6 +3,7 @@ package edu.scau.scauarchiveinsight.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -22,6 +23,9 @@ public class StorageService {
     private static final Path FAILED_ROOT = Paths.get(System.getProperty("user.dir"), "storage", "failed");
 
     private final AtomicInteger processingCount = new AtomicInteger(0);
+
+    @Autowired
+    private CacheService cacheService;
 
     /**
      * 当前处理中的文件数
@@ -120,6 +124,8 @@ public class StorageService {
 
             processingCount.decrementAndGet();
 
+            cacheService.evictDashboard();
+
             return target.toString();
         }
     }
@@ -157,6 +163,8 @@ public class StorageService {
             Files.move(source, target);
 
             processingCount.decrementAndGet();
+
+            cacheService.evictDashboard();
 
             if (errorMessage != null && !errorMessage.isEmpty()) {
                 Path errorFile = target.resolveSibling(target.getFileName() + ".error.json");

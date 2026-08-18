@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class GraduationService {
@@ -31,6 +32,9 @@ public class GraduationService {
 
     @Autowired
     private ArchiveFileDimMapper archiveFileDimMapper;
+
+    @Autowired
+    private CacheService cacheService;
 
     public IPage<GraduationVO> page(int current, int size, String keyword,
                                     String createTimeStart, String createTimeEnd,
@@ -49,16 +53,19 @@ public class GraduationService {
         entity.setCreateTime(LocalDateTime.now());
         entity.setUpdateTime(LocalDateTime.now());
         graduationFactMapper.insert(entity);
+        cacheService.evictDashboard();
     }
 
     public void update(GraduationDTO dto) {
         GraduationFact entity = toEntity(dto);
         entity.setUpdateTime(LocalDateTime.now());
         graduationFactMapper.updateById(entity);
+        cacheService.evictDashboard();
     }
 
     public void delete(Long id) {
         graduationFactMapper.deleteById(id);
+        cacheService.evictDashboard();
     }
 
     public List<DegreeDim> listDegrees() {
@@ -66,7 +73,11 @@ public class GraduationService {
     }
 
     public List<DestinationDim> listDestinations() {
-        return destinationDimMapper.selectList(null);
+        List<DestinationDim> cached = cacheService.get(CacheService.DESTINATION_KEY, new TypeReference<>() {});
+        if (cached != null) return cached;
+        List<DestinationDim> result = destinationDimMapper.selectList(null);
+        cacheService.put(CacheService.DESTINATION_KEY, result, CacheService.DIMENSION_TTL);
+        return result;
     }
 
     private LambdaQueryWrapper<GraduationFact> buildQueryWrapper(String keyword,

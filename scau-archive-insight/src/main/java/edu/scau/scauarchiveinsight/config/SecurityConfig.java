@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .logout(AbstractHttpConfigurer::disable)
                 // 启用 CORS，具体规则见下方 corsConfigurationSource()
                 .cors(Customizer.withDefaults())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 未认证访问受保护接口时，统一返回 JSON（而不是默认 HTML）
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jsonAuthenticationEntryPoint))
                 .authorizeHttpRequests(auth -> auth

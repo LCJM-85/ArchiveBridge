@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class DashboardService {
@@ -33,9 +34,15 @@ public class DashboardService {
     @Autowired
     private QualityScoreDimMapper qualityScoreDimMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     private static final Path STORAGE_ROOT = Paths.get(System.getProperty("user.dir"), "storage");
 
     public Map<String, Object> getStats() {
+        Map<String, Object> cached = cacheService.get(CacheService.DASHBOARD_KEY, new TypeReference<>() {});
+        if (cached != null) return cached;
+
         Map<String, Object> result = new HashMap<>();
 
         result.put("totalAdmissions", Optional.ofNullable(admissionFactMapper.dashboardTotalAdmissions()).orElse(0));
@@ -74,6 +81,7 @@ public class DashboardService {
         // 系统概览：数据质量（平均总分）
         result.put("avgQuality", Optional.ofNullable(qualityScoreDimMapper.selectAvgTotalScore()).orElse(0.0));
 
+        cacheService.put(CacheService.DASHBOARD_KEY, result, CacheService.DASHBOARD_TTL);
         return result;
     }
 

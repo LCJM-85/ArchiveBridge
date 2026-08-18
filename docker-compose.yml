@@ -23,6 +23,20 @@ services:
       timeout: 5s
       retries: 5
 
+  # Redis（验证码、限流和查询缓存）
+  redis:
+    image: redis:7-alpine
+    container_name: scau-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    command: ["sh", "-c", "exec redis-server --appendonly no $${REDIS_PASSWORD:+--requirepass \"$$REDIS_PASSWORD\"}"]
+    healthcheck:
+      test: ["CMD-SHELL", "if [ -n \"$$REDIS_PASSWORD\" ]; then redis-cli -a \"$$REDIS_PASSWORD\" ping; else redis-cli ping; fi"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Spring Boot 后端（含 Python+PaddlePaddle）
   backend:
     build: ./scau-archive-insight
@@ -30,6 +44,8 @@ services:
     restart: unless-stopped
     depends_on:
       db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "8080:8080"
@@ -44,6 +60,10 @@ services:
       LLM_BASE_URL: ${LLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
       LLM_MODEL: ${LLM_MODEL:-glm-4v-plus-0111}
       JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_DATABASE: ${REDIS_DATABASE:-0}
       python.venv-path: /app/src/main/python/.venv/bin/python3
     volumes:
       # 文件上传存储（Docker 命名卷，换机器自动创建）

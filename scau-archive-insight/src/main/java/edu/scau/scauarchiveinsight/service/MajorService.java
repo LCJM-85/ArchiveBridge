@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class MajorService {
@@ -44,7 +45,15 @@ public class MajorService {
     @Autowired
     private AdmissionFactMapper admissionFactMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     public List<Map<String, Object>> list(String keyword) {
+        boolean cacheable = !StringUtils.hasText(keyword);
+        if (cacheable) {
+            List<Map<String, Object>> cached = cacheService.get(CacheService.MAJOR_KEY, new TypeReference<>() {});
+            if (cached != null) return cached;
+        }
         LambdaQueryWrapper<MajorDim> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.hasText(keyword)) {
             wrapper.like(MajorDim::getMajorName, keyword).or().like(MajorDim::getMajorCode, keyword);
@@ -55,7 +64,7 @@ public class MajorService {
                 .collect(Collectors.toMap(CollegeDim::getCollegeId, CollegeDim::getCollegeName, (a, b) -> a));
         Map<Integer, String> degreeMap = degreeDimMapper.selectList(null).stream()
                 .collect(Collectors.toMap(DegreeDim::getDegreeId, DegreeDim::getDegreeName, (a, b) -> a));
-        return majors.stream().map(m -> {
+        List<Map<String, Object>> result = majors.stream().map(m -> {
             Map<String, Object> row = new HashMap<>();
             row.put("majorId", m.getMajorId());
             row.put("collegeId", m.getCollegeId());
@@ -66,15 +75,21 @@ public class MajorService {
             row.put("majorCode", m.getMajorCode());
             return row;
         }).collect(Collectors.toList());
+        if (cacheable) cacheService.put(CacheService.MAJOR_KEY, result, CacheService.DIMENSION_TTL);
+        return result;
     }
 
     public boolean add(MajorDim dim) {
         if (dim.getCollegeId() == null) return false;
-        return majorDimMapper.insert(dim) > 0;
+        boolean success = majorDimMapper.insert(dim) > 0;
+        if (success) evictAfterWrite();
+        return success;
     }
 
     public boolean update(MajorDim dim) {
-        return majorDimMapper.updateById(dim) > 0;
+        boolean success = majorDimMapper.updateById(dim) > 0;
+        if (success) evictAfterWrite();
+        return success;
     }
 
     public boolean delete(Integer id) {
@@ -84,6 +99,15 @@ public class MajorService {
         if (stuRef != null && stuRef > 0) throw new IllegalStateException("该专业下存在学籍数据，请先调整学生专业");
         Long admRef = admissionFactMapper.selectCount(new LambdaQueryWrapper<AdmissionFact>().eq(AdmissionFact::getMajorId, id));
         if (admRef != null && admRef > 0) throw new IllegalStateException("该专业下存在招生记录，请先调整");
-        return majorDimMapper.deleteById(id) > 0;
+        boolean success = majorDimMapper.deleteById(id) > 0;
+        if (success) evictAfterWrite();
+        return success;
+    }
+
+    private void evictAfterWrite() {
+        // Class 列表缓存内嵌专业名称，专业变化时必须级联失效。
+        cacheService.evict(CacheService.MAJOR_KEY, CacheService.MAJOR_DROPDOWN_KEY,
+                CacheService.CLASS_KEY, CacheService.CLASS_DROPDOWN_KEY);
+        cacheService.evictDashboard();
     }
 }

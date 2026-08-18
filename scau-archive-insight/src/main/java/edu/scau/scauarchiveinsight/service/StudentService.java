@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class StudentService {
@@ -40,6 +41,9 @@ public class StudentService {
     @Autowired
     private CollegeDimMapper collegeDimMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     public IPage<StudentVO> page(int current, int size, String keyword,
                                  String createTimeStart, String createTimeEnd,
                                  String updateTimeStart, String updateTimeEnd,
@@ -59,6 +63,7 @@ public class StudentService {
         entity.setCreateTime(LocalDateTime.now());
         entity.setUpdateTime(LocalDateTime.now());
         studentFactMapper.insert(entity);
+        cacheService.evictDashboard();
     }
 
     public void update(StudentDTO dto) {
@@ -67,6 +72,7 @@ public class StudentService {
         entity.setClassId(resolveClassId(dto.getClassId(), dto.getClassName(), entity.getMajorId()));
         entity.setUpdateTime(LocalDateTime.now());
         studentFactMapper.updateById(entity);
+        cacheService.evictDashboard();
     }
 
     private Integer resolveMajorId(Integer majorId, String majorName) {
@@ -79,6 +85,9 @@ public class StudentService {
                 dim.setCollegeId(ensureDefaultCollege());
                 dim.setMajorCode("GEN" + System.currentTimeMillis());
                 majorDimMapper.insert(dim);
+                cacheService.evict(CacheService.MAJOR_KEY, CacheService.MAJOR_DROPDOWN_KEY,
+                        CacheService.CLASS_KEY, CacheService.CLASS_DROPDOWN_KEY);
+                cacheService.evictDashboard();
             }
             return dim.getMajorId();
         }
@@ -92,6 +101,7 @@ public class StudentService {
             college = new CollegeDim();
             college.setCollegeName("未知学院");
             collegeDimMapper.insert(college);
+            cacheService.evict(CacheService.COLLEGE_KEY, CacheService.MAJOR_KEY, CacheService.MAJOR_DROPDOWN_KEY);
         }
         return college.getCollegeId();
     }
@@ -108,6 +118,7 @@ public class StudentService {
                 dim.setGrade(String.valueOf(LocalDate.now().getYear()));
                 dim.setStudyLength(4);
                 classDimMapper.insert(dim);
+                cacheService.evict(CacheService.CLASS_KEY, CacheService.CLASS_DROPDOWN_KEY);
             }
             return dim.getClassId();
         }
@@ -123,24 +134,40 @@ public class StudentService {
             major.setCollegeId(ensureDefaultCollege());
             major.setMajorCode("GEN" + System.currentTimeMillis());
             majorDimMapper.insert(major);
+            cacheService.evict(CacheService.MAJOR_KEY, CacheService.MAJOR_DROPDOWN_KEY,
+                    CacheService.CLASS_KEY, CacheService.CLASS_DROPDOWN_KEY);
+            cacheService.evictDashboard();
         }
         return major.getMajorId();
     }
 
     public void delete(Long id) {
         studentFactMapper.deleteById(id);
+        cacheService.evictDashboard();
     }
 
     public List<ProvinceDim> listProvinces() {
-        return provinceDimMapper.selectList(null);
+        List<ProvinceDim> cached = cacheService.get(CacheService.PROVINCE_KEY, new TypeReference<>() {});
+        if (cached != null) return cached;
+        List<ProvinceDim> result = provinceDimMapper.selectList(null);
+        cacheService.put(CacheService.PROVINCE_KEY, result, CacheService.DIMENSION_TTL);
+        return result;
     }
 
     public List<MajorDim> listMajors() {
-        return majorDimMapper.selectList(null);
+        List<MajorDim> cached = cacheService.get(CacheService.MAJOR_DROPDOWN_KEY, new TypeReference<>() {});
+        if (cached != null) return cached;
+        List<MajorDim> result = majorDimMapper.selectList(null);
+        cacheService.put(CacheService.MAJOR_DROPDOWN_KEY, result, CacheService.DIMENSION_TTL);
+        return result;
     }
 
     public List<ClassDim> listClasses() {
-        return classDimMapper.selectList(null);
+        List<ClassDim> cached = cacheService.get(CacheService.CLASS_DROPDOWN_KEY, new TypeReference<>() {});
+        if (cached != null) return cached;
+        List<ClassDim> result = classDimMapper.selectList(null);
+        cacheService.put(CacheService.CLASS_DROPDOWN_KEY, result, CacheService.DIMENSION_TTL);
+        return result;
     }
 
     public List<DegreeDim> listDegrees() {

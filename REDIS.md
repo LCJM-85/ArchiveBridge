@@ -1,7 +1,7 @@
 # Redis 接入指南（方案文档）
 
-> **状态：本文件仅为实施方案，当前仓库代码未做任何改动。**
-> 按本文档执行后即可完成：验证码/登录限流迁移到 Redis（第 1 层）+ Dashboard/维度表查询缓存（第 2 层）。
+> **状态：已于 2026-08-18 完成代码接入。**
+> 已实现验证码/登录限流迁移到 Redis（第 1 层）以及 Dashboard/维度表查询缓存（第 2 层）。单元测试、前端构建、真实 Redis 读写和 Compose Redis 健康检查均已通过；完整应用上下文测试仍受当前本机 PostgreSQL 密码不匹配影响，不能据此宣称端到端登录已验证。
 
 ---
 
@@ -41,8 +41,10 @@ Key 命名规范（统一前缀，全部带 TTL，防止无界增长）：
 | `scau:auth:captcha:{uuid}` | 验证码答案 | 120s |
 | `scau:auth:login:fail:{ip}:{user}` | 登录失败计数 | 600s |
 | `scau:auth:captcha:req:{ip}` | 验证码请求限流 | 60s |
-| `scau:cache:dashboard` | Dashboard 统计 | 300s |
-| `scau:cache:dim:province` / `college` / `major` / `class` / `destination` | 维度表整表（degree 表太小且查询口径不同，不缓存，见 4.4） | 1800s |
+| `scau:cache:dashboard:stats` | Dashboard 统计 | 300s |
+| `scau:cache:dim:province:all` / `college:all` / `destination:all` | 结构一致的维度表整表 | 1800s |
+| `scau:cache:dim:major:all` / `major:dropdown` | 专业管理列表 / 招生学籍下拉，结构不同必须分 key | 1800s |
+| `scau:cache:dim:class:all` / `class:dropdown` | 班级管理列表 / 学籍下拉，结构不同必须分 key | 1800s |
 
 ---
 
@@ -100,9 +102,10 @@ spring:
       timeout: 2s
       lettuce:
         pool:
-          max-active: 8
+          max-active: 16
           max-idle: 8
           min-idle: 0
+          max-wait: 2s
 ```
 
 > 沿用项目现有 `${VAR:default}` 风格，未设置环境变量时本地默认 `localhost:6379` 无密码，开箱即用。
@@ -147,7 +150,7 @@ if (count != null && count >= 8L) { /* 返回 429 拒绝 */ }
 
 | 功能 | 策略 | 原因 |
 |---|---|---|
-| 验证码生成/校验 | **fail-closed**（抛 500"验证码服务异常"） | 宁可不可登录，不能无验证码 |
+| 验证码生成/校验 | **fail-closed**（返回 503“验证码服务暂时不可用”） | 宁可不可登录，不能无验证码 |
 | 登录/验证码限流 | **fail-open**（放行 + `log.warn`） | 限流是保护不是功能，Redis 挂了不能把用户全锁死 |
 
 ### 4.4 第 2 层：新建 `CacheService`
@@ -156,18 +159,17 @@ if (count != null && count >= 8L) { /* 返回 429 拒绝 */ }
 
 ```java
 // 核心方法（全部 try-catch，Redis 异常时静默降级为直接查库）
-public <T> T get(String key, Class<T> type)            // 读缓存，异常返回 null
+public <T> T get(String key, TypeReference<T> type)    // 保留 List/Map 泛型，异常返回 null
 public void put(String key, Object value, Duration ttl) // 写缓存，异常忽略
 public void evict(String... keys)                       // DEL，key 不存在无害（幂等）
-public void evictDashboard()                            // 删 scau:cache:dashboard
-public void evictDim(String table)                      // 删 scau:cache:dim:{table}
-public void evictAllDims()
+public void evictDashboard()                            // 删 scau:cache:dashboard:stats
+public void evictAllDimensions()
 ```
 
 **Dashboard 缓存**（`DashboardService.getStats()`）——cache-aside：
 
 ```java
-Map<String, Object> cached = cacheService.get(CacheService.KEY_DASHBOARD, Map.class);
+Map<String, Object> cached = cacheService.get(CacheService.DASHBOARD_KEY, new TypeReference<>() {});
 if (cached != null) return cached;
 // ... 原有聚合查询逻辑不变 ...
 cacheService.put(CacheService.KEY_DASHBOARD, result, Duration.ofMinutes(5));
@@ -189,6 +191,8 @@ return result;
 
 > ⚠ **keyword 处理**：`CollegeService/MajorService/ClassService` 的 `list` 带模糊搜索参数，缓存时必须**只在 keyword 为空时命中缓存**（key 用 `scau:cache:dim:{table}:all`），否则搜索结果会被"全量"缓存污染。
 
+> ⚠ **返回结构隔离**：`MajorService.list` / `ClassService.list` 返回的是含关联名称的 `Map`，招生/学籍下拉返回的是维度实体。它们不能共用同一个 Redis key，因此分别使用 `:all` 与 `:dropdown`。学院名称变化还要级联失效专业管理列表，专业名称变化还要级联失效班级管理列表。
+
 ### 4.5 缓存失效（evict）埋点清单 —— 关键，漏一个就脏数据
 
 原则：
@@ -204,7 +208,7 @@ return result;
 | 文件失败归档（影响后续日志同步与处理状态） | `StorageService.failedFile`；若同时写入/同步 `ocr_log_dim`，也必须 evict dashboard | dashboard |
 | 维度表自动创建（OCR/LLM 入库时） | `DataPersistenceService.fuzzyLookupMajor/Class/Destination`、`ensureDefaultCollege` | 对应 dim + dashboard |
 | 学历/学位自动创建 | `DataPersistenceService.fuzzyLookupDegree` | dashboard（degree 不缓存 dim，但 `degreeDistribution` 依赖 degree 名称） |
-| OCR 日志（影响 todayUploads） | `OCRLogService.syncTodayLogs`（**独立入口**，扫描归档目录补日志，不伴随事实表写入）、`addLog`、`removeById` | dashboard |
+| OCR 日志（影响 todayUploads） | `OCRLogService.syncTodayLogs`（**独立入口**，扫描归档目录补日志，不伴随事实表写入）、`addLog`、`createProcessingLog`、`removeById` | dashboard |
 | 质量评分（影响 avgQuality） | `QualityScoreService.scoreFile` | dashboard |
 | 学籍/招生/毕业 CRUD | `StudentService.add/update/delete`、`AdmissionService.add/update/delete`、`GraduationService.add/update/delete` | dashboard |
 | 学籍自由输入自动建专业/班级 | `StudentService.resolveMajorId` / `resolveClassId` / `ensureDefaultMajor` / `ensureDefaultCollege` | major/class/college dim |
@@ -215,6 +219,8 @@ return result;
 > 注意 `DashboardService.totalFiles` 直接遍历 `storage/archive`，不是查询 `archive_file_dim`。因此只在 `DataPersistenceService.saveArchiveFileDimData` 后 evict 不够，必须覆盖 `StorageService.moveArchiveFile` 成功路径。
 
 > 注意 `todayUploads` 依赖 `ocr_log_dim`。目前部分 Processor 只有 warning / failed 场景才显式写 `OCRLogService.addLog`，成功无 warning 时可能依赖 `syncTodayLogs` 补日志；若业务要求“上传成功立即反映今日上传数”，应统一在成功处理后写日志并 evict dashboard。
+
+> `updateMessage`、`markFailed`、`markCancelled` 只改变已有日志的状态/提示，不改变 Dashboard 使用的“今日日志数量”，因此不在每页进度更新时反复删除 Dashboard 缓存；否则 PDF 每页更新会造成无意义的缓存抖动。
 
 > **明确不需要 evict 的写入口**（已核对）：`MetaDataService`（metadata_standard，不参与统计）、`UserManageService`/`UserService`（sys_user）、`DataPersistenceService.saveArchiveFileDimData`（archive_file_dim 不参与 Dashboard 统计）、`FieldCorrectionService`/`MetaDataMappingService`（纯内存映射不写库）。
 
@@ -238,9 +244,9 @@ return result;
     image: redis:7-alpine
     container_name: scau-redis
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "no"]
-    ports:
-      - "6379:6379"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    command: ["sh", "-c", "exec redis-server --appendonly no $${REDIS_PASSWORD:+--requirepass \"$$REDIS_PASSWORD\"}"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -263,7 +269,7 @@ return result;
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
 ```
 
-> **Dockerfile 不需要改**——Redis 是独立进程，不进后端镜像。
+> **Dockerfile 不需要改**——Redis 是独立进程，不进后端镜像。Compose 中不映射宿主机端口，后端通过内部网络访问 `redis:6379`，避免与本机 WSL/Memurai Redis 冲突并减少暴露面；本地直启后端仍使用 `localhost:6379`。
 
 ### 6.2 环境变量
 
@@ -271,7 +277,6 @@ return result;
 
 ```
 # Redis（本地开发默认 localhost:6379 无密码，可不填）
-REDIS_HOST=redis          # docker 部署填 redis，本地填 localhost
 REDIS_PORT=6379
 REDIS_PASSWORD=
 REDIS_DATABASE=0
@@ -285,8 +290,8 @@ REDIS_DATABASE=0
 2. 启动后端，观察日志无 Redis 连接报错。
 3. 浏览器打开登录页 → 抓包确认 `GET /api/captcha` 返回 `{uuid, imageBase64}` → 输入验证码登录成功。
 4. 验证限流：连续错 8 次密码 → 第 9 次返回 429。
-5. 验证缓存：`redis-cli keys 'scau:*'` 能看到 `scau:cache:dashboard`；`redis-cli monitor` 观察 Dashboard 接口只打一次聚合 SQL，5 分钟内再次访问走缓存。
-6. 验证 evict：在数据管理页增删一条记录 → `redis-cli get scau:cache:dashboard` 返回 nil（已失效）。
+5. 验证缓存：`redis-cli keys 'scau:*'` 能看到 `scau:cache:dashboard:stats`；`redis-cli monitor` 观察 Dashboard 接口只打一次聚合 SQL，5 分钟内再次访问走缓存。
+6. 验证 evict：在数据管理页增删一条记录 → `redis-cli get scau:cache:dashboard:stats` 返回 nil（已失效）。
 7. 验证降级：停掉 Redis 再访问 Dashboard → 页面仍正常（直接查库）；登录 → 提示"验证码服务异常"而非崩溃。
 
 ---

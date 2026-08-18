@@ -59,6 +59,8 @@ public class DataPersistenceService {
     private DegreeDimMapper degreeDimMapper;
     @Autowired
     private DestinationDimMapper destinationDimMapper;
+    @Autowired
+    private CacheService cacheService;
 
 /**
      * 持久化提取的结构化数据
@@ -68,8 +70,10 @@ public class DataPersistenceService {
     public void saveExtractedData(String archiveType, Map<String, String> data, Integer fileId) {
         if ("admission".equals(archiveType)) {
             saveAdmissionData(data, fileId);
+            cacheService.evictDashboard();
         } else if ("graduation".equals(archiveType)) {
             saveGraduationData(data, fileId);
+            cacheService.evictDashboard();
         }
     }
 
@@ -345,6 +349,9 @@ public class DataPersistenceService {
             dim.setCollegeId(ensureDefaultCollege());
             dim.setMajorCode("GEN" + System.currentTimeMillis());
             majorDimMapper.insert(dim);
+            cacheService.evict(CacheService.MAJOR_KEY, CacheService.MAJOR_DROPDOWN_KEY,
+                    CacheService.CLASS_KEY, CacheService.CLASS_DROPDOWN_KEY);
+            cacheService.evictDashboard();
             log.warn("自动创建维度记录 [专业]: {} → major_id={}", majorName, dim.getMajorId());
         }
         return dim;
@@ -357,6 +364,7 @@ public class DataPersistenceService {
             college = new CollegeDim();
             college.setCollegeName("未知学院");
             collegeDimMapper.insert(college);
+            cacheService.evict(CacheService.COLLEGE_KEY, CacheService.MAJOR_KEY, CacheService.MAJOR_DROPDOWN_KEY);
         }
         return college.getCollegeId();
     }
@@ -385,6 +393,7 @@ public class DataPersistenceService {
             dim.setGrade(String.valueOf(LocalDate.now().getYear()));
             dim.setStudyLength(4);
             classDimMapper.insert(dim);
+            cacheService.evict(CacheService.CLASS_KEY, CacheService.CLASS_DROPDOWN_KEY);
             log.warn("自动创建维度记录 [班级]: {} → class_id={}", className, dim.getClassId());
         }
         return dim;
@@ -429,6 +438,8 @@ public class DataPersistenceService {
             dim = new DegreeDim();
             dim.setDegreeName(v);
             degreeDimMapper.insert(dim);
+            // degree 不缓存，但 Dashboard 的学位分布依赖它。
+            cacheService.evictDashboard();
             log.warn("自动创建维度记录 [学历]: {} → degree_id={}", degreeName, dim.getDegreeId());
         }
         return dim;
@@ -453,6 +464,8 @@ public class DataPersistenceService {
             dim = new DestinationDim();
             dim.setDestName(v);
             destinationDimMapper.insert(dim);
+            cacheService.evict(CacheService.DESTINATION_KEY);
+            cacheService.evictDashboard();
             log.warn("自动创建维度记录 [去向]: {} → dest_id={}", destName, dim.getDestId());
         }
         return dim;

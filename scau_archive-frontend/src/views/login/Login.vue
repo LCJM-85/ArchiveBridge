@@ -107,7 +107,7 @@
                 class="login-input captcha-input"
               />
               <img
-                :src="captchaUrl"
+                :src="captchaImg"
                 class="captcha-img"
                 alt="验证码，点击刷新"
                 tabindex="0"
@@ -156,7 +156,7 @@ const {
   isLoading,
   errorMessage,
   captcha,
-  captchaUrl,
+  captchaImg,
 } = storeToRefs(userStore)
 const { initLoginState, refreshCaptcha, login } = userStore
 

@@ -10,6 +10,7 @@ import edu.scau.scauarchiveinsight.pojo.StudentFact;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,15 @@ public class ClassService {
     @Autowired
     private StudentFactMapper studentFactMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     public List<Map<String, Object>> list(String keyword) {
+        boolean cacheable = !StringUtils.hasText(keyword);
+        if (cacheable) {
+            List<Map<String, Object>> cached = cacheService.get(CacheService.CLASS_KEY, new TypeReference<>() {});
+            if (cached != null) return cached;
+        }
         LambdaQueryWrapper<ClassDim> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.hasText(keyword)) {
             wrapper.like(ClassDim::getClassName, keyword).or().like(ClassDim::getGrade, keyword);
@@ -37,7 +46,7 @@ public class ClassService {
         List<ClassDim> classes = classDimMapper.selectList(wrapper);
         Map<Integer, String> majorMap = majorDimMapper.selectList(null).stream()
                 .collect(Collectors.toMap(MajorDim::getMajorId, MajorDim::getMajorName, (a, b) -> a));
-        return classes.stream().map(c -> {
+        List<Map<String, Object>> result = classes.stream().map(c -> {
             Map<String, Object> row = new HashMap<>();
             row.put("classId", c.getClassId());
             row.put("majorId", c.getMajorId());
@@ -47,20 +56,33 @@ public class ClassService {
             row.put("studyLength", c.getStudyLength());
             return row;
         }).collect(Collectors.toList());
+        if (cacheable) cacheService.put(CacheService.CLASS_KEY, result, CacheService.DIMENSION_TTL);
+        return result;
     }
 
     public boolean add(ClassDim dim) {
         if (dim.getMajorId() == null) return false;
-        return classDimMapper.insert(dim) > 0;
+        boolean success = classDimMapper.insert(dim) > 0;
+        if (success) evictAfterWrite();
+        return success;
     }
 
     public boolean update(ClassDim dim) {
-        return classDimMapper.updateById(dim) > 0;
+        boolean success = classDimMapper.updateById(dim) > 0;
+        if (success) evictAfterWrite();
+        return success;
     }
 
     public boolean delete(Integer id) {
         Long ref = studentFactMapper.selectCount(new LambdaQueryWrapper<StudentFact>().eq(StudentFact::getClassId, id));
         if (ref != null && ref > 0) throw new IllegalStateException("该班级下存在学籍数据，请先调整学生班级");
-        return classDimMapper.deleteById(id) > 0;
+        boolean success = classDimMapper.deleteById(id) > 0;
+        if (success) evictAfterWrite();
+        return success;
+    }
+
+    private void evictAfterWrite() {
+        cacheService.evict(CacheService.CLASS_KEY, CacheService.CLASS_DROPDOWN_KEY);
+        cacheService.evictDashboard();
     }
 }

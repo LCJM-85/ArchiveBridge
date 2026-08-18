@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getCaptchaUrl, getCaptchaUrlWithTimestamp, loginRequest } from '@/api/modules/auth'
+import { fetchCaptcha, loginRequest } from '@/api/modules/auth'
 import {
   clearAuthInfo,
   clearRememberedUser,
@@ -24,7 +24,8 @@ export const useUserStore = defineStore('user', () => {
   const isLoading = ref(false)
   const errorMessage = ref('')
   const captcha = ref('')
-  const captchaUrl = ref(getCaptchaUrl())
+  const captchaUuid = ref('')
+  const captchaImg = ref('')
 
   function initLoginState(route) {
     refreshCaptcha()
@@ -42,8 +43,20 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  function refreshCaptcha() {
-    captchaUrl.value = getCaptchaUrlWithTimestamp()
+  async function refreshCaptcha(showError = true) {
+    try {
+      const response = await fetchCaptcha()
+      const data = response.data?.data
+      if (!data?.uuid || !data?.imageBase64) throw new Error('验证码响应格式错误')
+      captchaUuid.value = data.uuid
+      captchaImg.value = data.imageBase64
+    } catch (error) {
+      captchaUuid.value = ''
+      captchaImg.value = ''
+      if (showError) {
+        errorMessage.value = error.response?.data?.message || '验证码加载失败，请点击重试'
+      }
+    }
   }
 
   async function login(route, router) {
@@ -64,6 +77,11 @@ export const useUserStore = defineStore('user', () => {
       return
     }
 
+    if (!captchaUuid.value) {
+      errorMessage.value = '验证码尚未加载，请刷新后重试'
+      return
+    }
+
     isLoading.value = true
 
     try {
@@ -71,6 +89,7 @@ export const useUserStore = defineStore('user', () => {
         username: username.value.trim(),
         password: password.value,
         captcha: captcha.value.trim(),
+        uuid: captchaUuid.value,
       })
 
       if (response.data.success) {
@@ -95,7 +114,7 @@ export const useUserStore = defineStore('user', () => {
         router.push(redirectPath)
       }
     } catch (error) {
-      refreshCaptcha()
+      await refreshCaptcha(false)
       captcha.value = ''
       errorMessage.value = getLoginErrorMessage(error)
     } finally {
@@ -120,7 +139,8 @@ export const useUserStore = defineStore('user', () => {
     isLoading,
     errorMessage,
     captcha,
-    captchaUrl,
+    captchaUuid,
+    captchaImg,
     initLoginState,
     refreshCaptcha,
     login,

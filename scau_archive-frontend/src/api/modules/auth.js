@@ -1,11 +1,7 @@
 import request from '../request'
 
-export function getCaptchaUrl() {
-  return `${request.defaults.baseURL}/api/captcha`
-}
-
-export function getCaptchaUrlWithTimestamp() {
-  return `${getCaptchaUrl()}?time=${Date.now()}`
+export function fetchCaptcha() {
+  return request.get('/api/captcha')
 }
 
 export function loginRequest(payload) {

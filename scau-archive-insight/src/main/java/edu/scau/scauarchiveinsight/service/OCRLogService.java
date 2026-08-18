@@ -33,6 +33,9 @@ public class OCRLogService {
     @Autowired
     private ArchiveFileDimMapper archiveFileDimMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     private static final Path STORAGE_ROOT = Paths.get(System.getProperty("user.dir"), "storage");
 
     /**
@@ -44,6 +47,7 @@ public class OCRLogService {
 
         scanDir(STORAGE_ROOT.resolve("archive"), dateStr, "success");
         scanDir(STORAGE_ROOT.resolve("failed"), dateStr, "failed");
+        cacheService.evictDashboard();
     }
 
     private void scanDir(Path root, String dateStr, String status) {
@@ -111,6 +115,7 @@ public class OCRLogService {
         log.setUpdatedAt(LocalDateTime.now());
         if (log.getLogId() == null) ocrLogDimMapper.insert(log);
         else ocrLogDimMapper.updateById(log);
+        cacheService.evictDashboard();
     }
 
     public Integer createProcessingLog(String fileName, String fileType) {
@@ -122,6 +127,7 @@ public class OCRLogService {
         log.setMessage("等待处理");
         log.setUpdatedAt(LocalDateTime.now());
         ocrLogDimMapper.insert(log);
+        cacheService.evictDashboard();
         return log.getLogId();
     }
 
@@ -182,6 +188,7 @@ public class OCRLogService {
             deleteStorageFile(log.getFileName());
         }
         ocrLogDimMapper.deleteById(logId);
+        cacheService.evictDashboard();
     }
 
     /**

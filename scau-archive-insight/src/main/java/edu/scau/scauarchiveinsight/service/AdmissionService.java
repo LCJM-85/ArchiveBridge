@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 @Service
 public class AdmissionService {
@@ -42,6 +43,9 @@ public class AdmissionService {
     @Autowired
     private DegreeDimMapper degreeDimMapper;
 
+    @Autowired
+    private CacheService cacheService;
+
     public IPage<AdmissionVO> page(int current, int size, String keyword,
                                    String createTimeStart, String createTimeEnd,
                                    String updateTimeStart, String updateTimeEnd,
@@ -59,24 +63,35 @@ public class AdmissionService {
         entity.setCreateTime(LocalDateTime.now());
         entity.setUpdateTime(LocalDateTime.now());
         admissionFactMapper.insert(entity);
+        cacheService.evictDashboard();
     }
 
     public void update(AdmissionDTO dto) {
         AdmissionFact entity = toEntity(dto);
         entity.setUpdateTime(LocalDateTime.now());
         admissionFactMapper.updateById(entity);
+        cacheService.evictDashboard();
     }
 
     public void delete(Long id) {
         admissionFactMapper.deleteById(id);
+        cacheService.evictDashboard();
     }
 
     public List<ProvinceDim> listProvinces() {
-        return provinceDimMapper.selectList(null);
+        List<ProvinceDim> cached = cacheService.get(CacheService.PROVINCE_KEY, new TypeReference<>() {});
+        if (cached != null) return cached;
+        List<ProvinceDim> result = provinceDimMapper.selectList(null);
+        cacheService.put(CacheService.PROVINCE_KEY, result, CacheService.DIMENSION_TTL);
+        return result;
     }
 
     public List<MajorDim> listMajors() {
-        return majorDimMapper.selectList(null);
+        List<MajorDim> cached = cacheService.get(CacheService.MAJOR_DROPDOWN_KEY, new TypeReference<>() {});
+        if (cached != null) return cached;
+        List<MajorDim> result = majorDimMapper.selectList(null);
+        cacheService.put(CacheService.MAJOR_DROPDOWN_KEY, result, CacheService.DIMENSION_TTL);
+        return result;
     }
 
     public List<DegreeDim> listDegrees() {
