@@ -287,7 +287,7 @@ export DB_PASS=123456 JWT_SECRET=your_strong_secret
 A：上传前可开启「LLM 智能提取」开关（需配置 LLM API Key）；图片质量差时可先经 OpenCV 增强。
 
 **Q：默认账号是什么？**
-A：`admin / 123456`，登录后可在「系统管理 → 用户管理」中修改。
+A：`admin / 12345678`，登录后可在「系统管理 → 用户管理」中修改。
 
 ---
 
