@@ -8,6 +8,7 @@
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?logo=springboot)
 ![Vue](https://img.shields.io/badge/Vue-3-4FC08D?logo=vuedotjs)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?logo=postgresql)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?logo=redis)
 ![Java](https://img.shields.io/badge/Java-17%2F21-007396?logo=openjdk)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/LCJM-85/ArchiveBridge/blob/main/LICENSE)
@@ -68,7 +69,7 @@ ArchiveBridge 不只是一个传统档案管理系统，而是一套面向未来
   <img src="docs/images/系统架构图.svg" alt="系统架构图" width="100%" />
 </p>
 
-四项服务通过 `docker-compose.yml` 一键编排（`db` + `backend` + `frontend`）
+四个服务通过 `docker-compose.yml` 一键编排（`db` + `redis` + `backend` + `frontend`）。Redis 仅保存验证码、限流计数和可重建查询缓存，档案事实数据仍以 PostgreSQL 为准。
 
 ---
 
@@ -85,6 +86,7 @@ cd ArchiveBridge
 cp .env.example .env
 # 编辑 .env，填入 GLM_API_KEY=your_api_key（可选，AI 功能需要）
 # 填入 DB_PASSWORD（必填！！数据库强密码）
+# 建议填入 REDIS_PASSWORD（留空则 Redis 无密码，仅适合受控开发环境）
 
 # 3. 启动（首次构建需下载 PaddlePaddle ~1.8GB，约 10-20 分钟）
 docker compose up -d
@@ -94,6 +96,8 @@ docker compose up -d
 ```
 
 > 首次启动时，数据库会自动初始化表结构、维度数据及演示业务数据（280 条录取、215 条毕业、280 条学籍），无需手动导入。
+
+> Compose 中的 Redis 不映射宿主机端口，仅供后端通过 `redis:6379` 访问。`REDIS_PASSWORD` 会在容器每次启动时应用，并非只在首次初始化时设置。
 
 ### 方式二：本地开发
 
@@ -105,14 +109,31 @@ PGPASSWORD=123456 psql -h localhost -U postgres -f scau-archive-insight/sql/init
 
 > 数据库初始化 SQL 文件位于 `sql/` 目录，`init.sql` 为主入口，通过 `\ir` 依次加载 `parts/` 下的表结构、维度数据、地理数据和演示业务数据。
 
-**2. 后端**（端口 8080）
+**2. Redis 7**（默认端口 6379）
+
+本机已有 WSL Redis 时可直接使用：
+
+```bash
+sudo service redis-server start
+redis-cli ping  # 应返回 PONG
+```
+
+也可以单独启动一个供本地开发使用的 Redis 容器：
+
+```bash
+docker run -d --name scau-redis-dev -p 6379:6379 redis:7-alpine
+```
+
+> 本地直启后端默认连接 `localhost:6379`。它与 Compose 内部的 `scau-redis` 是两套独立实例；Compose Redis 未映射端口，不能被本地后端通过 `localhost` 访问。
+
+**3. 后端**（端口 8080）
 ```bash
 cd scau-archive-insight
 ./mvnw spring-boot:run
 # API 文档: http://localhost:8080/swagger-ui.html
 ```
 
-**3. 前端**（端口 5173，新终端）
+**4. 前端**（端口 5173，新终端）
 ```bash
 cd scau_archive-frontend
 npm install
@@ -120,7 +141,7 @@ npm run dev
 # 访问 http://localhost:5173
 ```
 
-**4. AI 助手**（端口 8765，可选，需要 AI 对话 & 知识库时启动）
+**5. AI 助手**（端口 8765，可选，需要 AI 对话 & 知识库时启动）
 ```
 # 后端启动会自动拉起AI助手服务
 ```
@@ -134,6 +155,7 @@ npm run dev
 | JDK | 17 或 21 | 后端运行环境（构建推荐 21） |
 | Node.js | 20.19+ 或 22.12+ | 前端构建（Vite 8） |
 | PostgreSQL | 15+ | 需启用 PostGIS 与 pgvector 扩展 |
+| Redis | 7+ | 验证码、限流与查询缓存；本地默认连接 `localhost:6379` |
 | Python | 3.10+ | 仅 AI 助手 / OCR / 预测脚本需要 |
 | Docker | 20.10+ | Docker Compose 部署需要（推荐方式，无需上述本地环境） |
 
@@ -155,6 +177,7 @@ npm run dev
 | **元数据管理** | 自定义字段编码与映射规则 |
 | **学院/专业/班级管理** | 系统管理下维护「学院→专业→班级」三级维度挂载，专业可选培养层次，删除带引用保护 |
 | **数据脱敏** | 身份证号、姓名等敏感信息一键遮挡，不修改原始数据 |
+| **认证与查询缓存** | Redis 保存一次性验证码、登录/验证码限流计数，并缓存 Dashboard 与常用维度列表 |
 | **API 文档** | Swagger UI 在线接口文档与调试 |
 
 ---
@@ -163,7 +186,8 @@ npm run dev
 
 | 层 | 技术 |
 |----|------|
-| 后端 | Spring Boot 3.5.13, MyBatis-Plus 3.5.13, PostgreSQL 15 + pgvector + PostGIS, Druid |
+| 后端 | Spring Boot 3.5.13, MyBatis-Plus 3.5.13, Druid, Spring Data Redis（Lettuce） |
+| 数据 | PostgreSQL 15 + pgvector + PostGIS, Redis 7（临时状态与 Cache-Aside 查询缓存） |
 | 前端 | Vue 3, Vite 8, Element Plus, ECharts 5, Pinia, Axios |
 | Python | FastAPI, LangChain, PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.2.2 (CPU), PyMuPDF, OpenCV, Playwright |
 | LLM | 智谱 GLM-4-Plus (聊天) / GLM-4V-Plus-0111 (视觉) / embedding-3 (向量), 通义千问 Qwen-VL-Plus |
@@ -246,6 +270,17 @@ OCR 管道：精确 → 去空白 → 包含 → Levenshtein 距离（≤3 字�
 | `DB_PASS` / `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` | 本地开发数据库连接（`application.yaml` 读取，`DB_PASS` 无默认值） |
 | `JWT_SECRET` | JWT 签名密钥，32 位以上（必填，无默认值） |
 
+### Redis
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `REDIS_HOST` | `localhost` | 本地后端连接地址；Compose 会固定为服务名 `redis` |
+| `REDIS_PORT` | `6379` | Redis 端口 |
+| `REDIS_PASSWORD` | 空 | Redis 密码；Compose 中设置后，Redis 服务与后端会同时使用该密码 |
+| `REDIS_DATABASE` | `0` | Redis 逻辑数据库编号 |
+
+验证码有效期为 120 秒；登录失败计数窗口为 10 分钟，达到 8 次后限流；Dashboard 缓存有效期为 5 分钟，维度列表缓存为 30 分钟。缓存采用 Cache-Aside，写操作主动失效，Redis 异常时查询回退 PostgreSQL。
+
 ### 数据脱敏
 
 Header 右上角「脱敏/原始」开关 — 后端 Jackson 注解驱动，不修改数据库原始数据。
@@ -259,6 +294,9 @@ cd scau-archive-insight
 
 # 运行全部测试
 ./mvnw test
+
+# 运行真实 Redis 读写测试（需先启动 localhost:6379）
+RUN_REDIS_INTEGRATION=true ./mvnw -Dtest=RedisLiveIntegrationTest test
 
 # 运行单个测试方法
 ./mvnw test -Dtest=TestClass#method
@@ -282,6 +320,9 @@ A：这两个变量无默认值，启动前需导出：
 ```bash
 export DB_PASS=123456 JWT_SECRET=your_strong_secret
 ```
+
+**Q：登录页验证码加载失败或登录返回 503？**
+A：验证码采用 Redis fail-closed 策略。请先确认 Redis 已启动，并检查 `REDIS_HOST`、`REDIS_PORT`、`REDIS_PASSWORD` 是否与实际实例一致。Dashboard 等查询缓存故障会自动回退 PostgreSQL，但验证码服务不会绕过校验。
 
 **Q：OCR 识别精度不理想？**
 A：上传前可开启「LLM 智能提取」开关（需配置 LLM API Key）；图片质量差时可先经 OpenCV 增强。
