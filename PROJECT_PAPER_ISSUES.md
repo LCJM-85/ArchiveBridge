@@ -4,35 +4,41 @@
 
 ---
 
-## 1. Redis、CORS 与 Session（下次处理）
+## 1. 论文尚未同步 Redis 实现
 
-### 1.1 当前问题
+Redis 改造已完成，原先“验证码依赖 `HttpSession`、限流仅存在单个 JVM、查询缺少缓存”的代码问题不再作为待办。论文仍需按实际实现同步以下内容。
 
-- 验证码依赖 `HttpSession`，与 JWT 无状态目标不一致。
-- 登录/验证码限流保存在单个 JVM 内存中，无法跨实例共享。
-- Dashboard 统计与维度列表存在重复聚合或整表查询。
-- 生产环境的 CORS 白名单与 Session 策略仍需收紧。
+### 1.1 正文修改
 
-### 1.2 Redis 方案的边界
+- 技术栈补充 Redis 7、Spring Data Redis 与 Lettuce。
+- 身份认证部分说明：验证码使用 UUID 标识并通过 Redis `GETDEL` 一次性消费，验证码与登录限流使用 `INCR`、`EXPIRE` 和 TTL，Spring Security 使用无状态 Session 策略。
+- 查询优化部分说明：Dashboard 与维度列表采用 Cache-Aside；Dashboard 默认缓存 5 分钟，维度列表默认缓存 30 分钟，并结合写操作主动失效与 TTL 兜底。
+- 部署部分区分两套独立实例：本地开发访问 WSL Redis 的 `localhost:6379`，Docker Compose 后端通过内部网络访问 `redis:6379`。
+- 明确 Redis 只保存验证码、限流计数和可重建缓存，不保存档案事实数据，也不承担 OCR/LLM 任务队列与跨实例取消。
+- 在没有对照实验前，不应把 Redis 描述为论文创新点，也不能直接宣称其带来了确定的性能提升。
 
-Redis 可用于验证码、限流和查询缓存，但不承担档案事实数据持久化，也不能解决：
+### 1.2 图示修改
 
-- 管理接口的角色授权；
-- OCR/LLM 算法准确率；
-- 云端 LLM 的真正远程撤销；
-- 论文实验数据缺少真实记录。
+- 图 2“技术栈总览”：补充 Redis 7、Spring Data Redis/Lettuce。
+- 图 3“分层架构”：补充 Redis 临时状态与缓存层，以及认证、限流、Dashboard、维度查询到 Redis 的访问关系。
+- 图 5“Docker Compose 部署”：补充 Redis 容器及 Spring Boot 到 `redis:6379` 的内部连接。
+- 图 1“功能流程”不需要加入 Redis，避免把基础设施混入业务流程。
 
-实施时仍需保留以下缓存一致性规则：
-
-- `StorageService.moveArchiveFile`、`QualityScoreService.scoreFile` 和学位分布变化需要清理 Dashboard 缓存。
-- Dashboard 缓存采用主动 evict 与 TTL 双保险。
-- 验证码迁移 Redis 后，应同步移除对 `HttpSession` 的依赖。
-
-详细方案继续以 `REDIS.md` 为准，本轮不改 Redis 代码。
+完成论文正文和图示修改并核对后，应删除本节。
 
 ---
 
-## 2. 论文实验数据仍需替换
+## 2. 生产环境 CORS 仍待收紧
+
+当前跨域配置仍允许较宽泛的来源模式。生产部署前需要：
+
+- 将允许来源改为通过环境变量或配置文件提供的明确白名单；
+- 根据实际是否使用 Cookie 决定是否允许凭据，当前 JWT 请求不应无条件开启；
+- 结合反向代理域名验证预检请求、认证失败和跨域错误响应。
+
+---
+
+## 3. 论文实验数据仍需替换
 
 第五章已明确标注为实验模板，但正文和摘要仍保留 F1、耗时、成本、RAG 准确率等占位数值。该事项按当前决定暂缓，最终定稿前仍需：
 
@@ -45,9 +51,9 @@ Redis 可用于验证码、限流和查询缓存，但不承担档案事实数�
 
 ---
 
-## 3. 仍待人工验证的工程边界
+## 4. 仍待人工验证的工程边界
 
-### 3.1 OCR/LLM 异步任务
+### 4.1 OCR/LLM 异步任务
 
 代码和论文已经统一为“单文件 taskId + 数据库阶段日志 + 后台线程池 + 人工取消”，但仍建议完整回归以下场景：
 
@@ -56,17 +62,18 @@ Redis 可用于验证码、限流和查询缓存，但不承担档案事实数�
 - 服务重启后遗留 `processing` 任务转为 `failed`；
 - 文件最终进入 `archive` 或 `failed` 的状态一致性。
 
-### 3.2 Docker 实际运行
+### 4.2 Redis 与 Docker 实际运行
 
-`docker compose config --quiet` 已通过，但尚未重新构建并启动完整镜像验证。后续需确认：
+Redis 配置、独立 Redis 容器连通性及相关测试已经通过，但尚未重新构建并启动完整应用镜像验证。完整 Spring 应用上下文测试目前还受到本地 PostgreSQL 密码不匹配影响。后续需确认：
 
 - 新数据库卷按完整 `schema.sql` 创建 `message`、`updated_at`；
-- 后端容器内 Java、Python 虚拟环境、FastAPI、OCR/LLM 子进程均可运行；
+- 后端容器能连接 Compose 内部 Redis，且 Java、Python 虚拟环境、FastAPI、OCR/LLM 子进程均可运行；
+- 验证码、限流、Dashboard 和维度缓存能在完整应用环境中正常读写与失效；
 - 已有 `postgres_data` 卷不会自动补字段，保留旧数据时必须先备份再人工升级结构。
 
 ---
 
-## 4. 当前已知的部署限制
+## 5. 当前已知的部署限制
 
 - OCR/LLM 的 `Future` 与本地 `Process` 注册表位于单个后端 JVM 内，只适用于当前单后端实例。
 - 多实例部署需要共享任务队列、任务归属和取消转发机制。

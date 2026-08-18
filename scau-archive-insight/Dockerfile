@@ -21,11 +21,11 @@ COPY --from=java-provider /opt/java/openjdk /opt/java/openjdk
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
 
-# 2. 安装字体（验证码需要）—— 使用清华 TUNA 国内镜像，并移除 deb822 格式源避免重复配置
+# 2. 安装字体（验证码需要）—— 使用阿里云国内镜像，并移除 deb822 格式源避免重复配置
 RUN rm -f /etc/apt/sources.list.d/debian.sources && \
-    echo 'deb https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie main' > /etc/apt/sources.list && \
-    echo 'deb https://mirrors.tuna.tsinghua.edu.cn/debian/ trixie-updates main' >> /etc/apt/sources.list && \
-    echo 'deb https://mirrors.tuna.tsinghua.edu.cn/debian-security/ trixie-security main' >> /etc/apt/sources.list && \
+    echo 'deb https://mirrors.aliyun.com/debian/ trixie main' > /etc/apt/sources.list && \
+    echo 'deb https://mirrors.aliyun.com/debian/ trixie-updates main' >> /etc/apt/sources.list && \
+    echo 'deb https://mirrors.aliyun.com/debian-security/ trixie-security main' >> /etc/apt/sources.list && \
     apt-get update && apt-get install -y --no-install-recommends \
     fonts-dejavu-core fontconfig \
     && rm -rf /var/lib/apt/lists/*
@@ -39,13 +39,13 @@ RUN python3 -m venv /app/src/main/python/.venv && \
     ln -sf /app/src/main/python/.venv/bin/python3 /app/src/main/python/.venv/Scripts/python.exe && \
     ln -sf /app/src/main/python/.venv/bin/pip3 /app/src/main/python/.venv/Scripts/pip3.exe
 
-# 5. 安装 Python 依赖 —— pip 使用清华镜像源（paddlepaddle 官方 CPU 站保留为 extra-index）
+# 5. 安装 Python 依赖 —— pip 使用阿里云镜像源（paddlepaddle 官方 CPU 站保留为 extra-index）
 COPY src/main/python/requirements.txt /tmp/
-RUN /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple --upgrade pip && \
-    /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple \
+RUN /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ --upgrade pip && \
+    /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ \
     --extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cpu/ \
     paddlepaddle==3.0.0 && \
-    /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple -r /tmp/requirements.txt
+    /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ -r /tmp/requirements.txt
 
 # 6. 创建 models 目录（PaddlePaddle 模型缓存）
 RUN mkdir -p models/.paddlex
