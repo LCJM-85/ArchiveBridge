@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="670" viewBox="0 0 1100 670"><rect width="100%" height="100%" fill="white"/>
+<rect x="25.0" y="10.0" width="1050.0" height="125.0" rx="12" fill="#EBF5FB" stroke="#5DADE2" stroke-width="2"/>
+<rect x="25.0" y="177.0" width="1050.0" height="110.0" rx="12" fill="#D4E6F1" stroke="#1B4F72" stroke-width="2"/>
+<rect x="25.0" y="339.0" width="700.0" height="155.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<rect x="780.0" y="339.0" width="295.0" height="155.0" rx="12" fill="#FEF5E7" stroke="#D35400" stroke-width="2"/>
+<polyline points="550,135 550,177" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="550,177 545.0,167.0 555.0,167.0" fill="#1B4F72"/>
+<polyline points="195,287 195,391" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="195,391 190.0,381.0 200.0,381.0" fill="#1B4F72"/>
+<polyline points="550,287 550,391" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="550,391 545.0,381.0 555.0,381.0" fill="#1B4F72"/>
+<polyline points="930,287 930,339" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="930,339 925.0,329.0 935.0,329.0" fill="#B95E00"/>
+<polyline points="705,432 800,432" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="800,432 790.0,437.0 790.0,427.0" fill="#B95E00"/>
+<polyline points="25,260 10,260 10,605 35,605" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="35,605 25.0,610.0 25.0,600.0" fill="#B95E00"/>
+<polyline points="200,472 200,526 600,526 600,563" fill="none" stroke="#C0392B" stroke-width="2"/>
+<polygon points="600,563 595.0,553.0 605.0,553.0" fill="#C0392B"/>
+<polyline points="550,472 550,507 875,507 875,563" fill="none" stroke="#C0392B" stroke-width="2"/>
+<polygon points="875,563 870.0,553.0 880.0,553.0" fill="#C0392B"/>
+<text x="215.0" y="32.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#1B4F72">表现层  Vue 3 / Element Plus</text>
+<rect x="45.0" y="60.0" width="315.0" height="54.0" rx="12" fill="#FFFFFF" stroke="#2E86AB" stroke-width="2"/>
+<text x="202.5" y="87.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#1B4F72">档案上传与任务状态</text>
+<rect x="392.0" y="60.0" width="315.0" height="54.0" rx="12" fill="#FFFFFF" stroke="#2E86AB" stroke-width="2"/>
+<text x="549.5" y="87.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#1B4F72">业务数据与统计图表</text>
+<rect x="739.0" y="60.0" width="315.0" height="54.0" rx="12" fill="#FFFFFF" stroke="#2E86AB" stroke-width="2"/>
+<text x="896.5" y="87.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#1B4F72">AI 助手与知识库</text>
+<text x="345.0" y="199.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#1B4F72">业务层  Spring Boot / MyBatis-Plus</text>
+<rect x="45.0" y="231.0" width="230.0" height="40.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<text x="160.0" y="251.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">任务创建与进程管理</text>
+<rect x="297.0" y="231.0" width="230.0" height="40.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<text x="412.0" y="251.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">字段处理与持久化</text>
+<rect x="549.0" y="231.0" width="230.0" height="40.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<text x="664.0" y="251.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#1B4F72">文件归档与质量参考分</text>
+<rect x="801.0" y="231.0" width="252.0" height="40.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<text x="927.0" y="251.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">业务查询与报告</text>
+<text x="382.5" y="361.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="700" fill="#1B4F72">Python 组件</text>
+<rect x="45.0" y="391.0" width="305.0" height="81.0" rx="12" fill="#E8F8F5" stroke="#1ABC9C" stroke-width="2"/>
+<text x="197.5" y="416.65" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#14816B">任务子进程</text>
+<text x="197.5" y="446.35" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#14816B">OCR / 视觉提取 / 预测</text>
+<rect x="395.0" y="391.0" width="310.0" height="81.0" rx="12" fill="#EBF5FB" stroke="#5DADE2" stroke-width="2"/>
+<text x="550.0" y="417.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">FastAPI 辅助进程</text>
+<text x="550.0" y="445.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">Agent / RAG / 数据库工具</text>
+<text x="925.0" y="360.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24.0" font-weight="700" fill="#B95E00">PostgreSQL</text>
+<rect x="800.0" y="394.0" width="250.0" height="77.0" rx="12" fill="#FFFFFF" stroke="#D35400" stroke-width="2"/>
+<text x="925.0" y="418.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">业务记录与任务日志</text>
+<text x="925.0" y="446.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">知识文本与向量</text>
+<rect x="35.0" y="563.0" width="300.0" height="85.0" rx="12" fill="#FEF5E7" stroke="#B95E00" stroke-width="2"/>
+<text x="185.0" y="590.65" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#B95E00">Redis</text>
+<text x="185.0" y="620.35" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#B95E00">临时状态与查询缓存</text>
+<rect x="450.0" y="563.0" width="575.0" height="85.0" rx="12" fill="#FDEDEC" stroke="#E74C3C" stroke-width="2"/>
+<text x="737.5" y="590.65" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#922B21">外部模型服务</text>
+<text x="737.5" y="620.35" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#922B21">视觉提取 / 文本生成 / 向量嵌入</text>
+<text x="640.0" y="154.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#1B4F72">HTTP / SSE</text>
+<text x="332.0" y="314.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#1B4F72">启动 / 读取结果</text>
+<text x="709.5" y="314.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#1B4F72">管理 + HTTP / SSE</text>
+<text x="990.0" y="314.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#B95E00">JDBC</text>
+<text x="754.5" y="413.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#B95E00">SQL</text>
+<text x="357.0" y="510.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#922B21">视觉路径调用</text>
+<text x="860.0" y="533.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#922B21">文本 / 嵌入调用</text>
+</svg>

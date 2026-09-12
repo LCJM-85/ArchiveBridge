@@ -18,14 +18,32 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class StorageService {
 
-    private static final Path STORAGE_ROOT = Paths.get(System.getProperty("user.dir"), "storage", "temp");
-    private static final Path ARCHIVE_ROOT = Paths.get(System.getProperty("user.dir"), "storage", "archive");
-    private static final Path FAILED_ROOT = Paths.get(System.getProperty("user.dir"), "storage", "failed");
+    private static final Map<String, Set<String>> ALLOWED_EXTENSIONS_BY_TYPE = Map.of(
+            "image", Set.of("jpg", "jpeg", "png", "bmp", "gif", "tif", "tiff", "webp"),
+            "pdf", Set.of("pdf"),
+            "excel", Set.of("xls", "xlsx"),
+            "csv", Set.of("csv")
+    );
+
+    private final Path storageRoot;
+    private final Path archiveRoot;
+    private final Path failedRoot;
 
     private final AtomicInteger processingCount = new AtomicInteger(0);
 
     @Autowired
     private CacheService cacheService;
+
+    public StorageService() {
+        this(Paths.get(System.getProperty("user.dir"), "storage"));
+    }
+
+    StorageService(Path storageBase) {
+        Path normalizedBase = storageBase.toAbsolutePath().normalize();
+        this.storageRoot = normalizedBase.resolve("temp");
+        this.archiveRoot = normalizedBase.resolve("archive");
+        this.failedRoot = normalizedBase.resolve("failed");
+    }
 
     /**
      * 当前处理中的文件数
@@ -38,19 +56,39 @@ public class StorageService {
         List<Map<String, String>> uploaded = new ArrayList<>();
         List<String> errors = new ArrayList<>();
 
+        Set<String> allowedExtensions = ALLOWED_EXTENSIONS_BY_TYPE.get(type);
+        if (allowedExtensions == null) {
+            errors.add("不支持的上传类型: " + type);
+            return uploadResult(uploaded, errors);
+        }
+
         for (MultipartFile file : files) {
             if (file.isEmpty()) {
                 errors.add("空文件: " + file.getOriginalFilename());
                 continue;
             }
             try {
+                String extension = extractExtension(file.getOriginalFilename());
+                if (!allowedExtensions.contains(extension)) {
+                    errors.add("文件类型与上传类型不匹配: " + file.getOriginalFilename());
+                    continue;
+                }
+
                 String dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-                Path dir = STORAGE_ROOT.resolve(dateStr).resolve(type);
+                Path dir = storageRoot.resolve(dateStr).resolve(type).normalize();
+                if (!dir.startsWith(storageRoot)) {
+                    errors.add("非法上传路径: " + file.getOriginalFilename());
+                    continue;
+                }
                 Files.createDirectories(dir);
 
-                String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                Path target = dir.resolve(filename);
-                file.transferTo(target.toFile());
+                String filename = buildStoredFileName(file.getOriginalFilename(), extension);
+                Path target = dir.resolve(filename).normalize();
+                if (!target.startsWith(dir)) {
+                    errors.add("非法上传路径: " + file.getOriginalFilename());
+                    continue;
+                }
+                Files.copy(file.getInputStream(), target);
 
                 Map<String, String> info = new HashMap<>();
                 info.put("name", file.getOriginalFilename());
@@ -62,21 +100,50 @@ public class StorageService {
             }
         }
 
+        processingCount.addAndGet(uploaded.size());
+        return uploadResult(uploaded, errors);
+    }
+
+    private Map<String, Object> uploadResult(List<Map<String, String>> uploaded, List<String> errors) {
         Map<String, Object> result = new HashMap<>();
         result.put("success", errors.isEmpty());
         result.put("uploaded", uploaded);
         result.put("errors", errors);
-
-        processingCount.addAndGet(uploaded.size());
-
         return result;
+    }
+
+    private String extractExtension(String originalFilename) {
+        String leafName = leafName(originalFilename);
+        int dot = leafName.lastIndexOf('.');
+        if (dot <= 0 || dot == leafName.length() - 1) return "";
+        return leafName.substring(dot + 1).toLowerCase(Locale.ROOT);
+    }
+
+    private String buildStoredFileName(String originalFilename, String extension) {
+        String leafName = leafName(originalFilename);
+        int dot = leafName.lastIndexOf('.');
+        String baseName = dot > 0 ? leafName.substring(0, dot) : leafName;
+        String safeBaseName = baseName.replaceAll("[^\\p{L}\\p{N}._-]", "_");
+        if (safeBaseName.isBlank()) safeBaseName = "file";
+        int codePointCount = safeBaseName.codePointCount(0, safeBaseName.length());
+        if (codePointCount > 80) {
+            safeBaseName = safeBaseName.substring(0, safeBaseName.offsetByCodePoints(0, 80));
+        }
+        return UUID.randomUUID().toString().replace("-", "") + "_" + safeBaseName + "." + extension;
+    }
+
+    private String leafName(String originalFilename) {
+        if (originalFilename == null) return "file";
+        String normalized = originalFilename.replace('\\', '/');
+        String leafName = normalized.substring(normalized.lastIndexOf('/') + 1).trim();
+        return leafName.isEmpty() ? "file" : leafName;
     }
 
     /**
      * 删除 temp 下的文件并调整处理计数（用于 PDF 转图片后清理原始 PDF）
      */
     public void removeTempFile(String fileName) throws IOException {
-        try (var stream = Files.walk(STORAGE_ROOT)) {
+        try (var stream = Files.walk(storageRoot)) {
             Optional<Path> matched = stream
                     .filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().equals(fileName))
@@ -97,7 +164,7 @@ public class StorageService {
      */
     public String moveArchiveFile(String fileName) throws IOException {
         // 递归搜索 storage/temp 下匹配的文件
-        try (var stream = Files.walk(STORAGE_ROOT)) {
+        try (var stream = Files.walk(storageRoot)) {
             Optional<Path> matched = stream
                     .filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().equals(fileName))
@@ -107,9 +174,9 @@ public class StorageService {
                     () -> new IOException("文件未找到: " + fileName)
             );
 
-            // 计算相对路径（相对于 STORAGE_ROOT），保持目录结构
-            Path relative = STORAGE_ROOT.relativize(source);
-            Path target = ARCHIVE_ROOT.resolve(relative);
+            // 计算相对路径（相对于 storageRoot），保持目录结构
+            Path relative = storageRoot.relativize(source);
+            Path target = archiveRoot.resolve(relative);
 
             // 创建目标目录
             Files.createDirectories(target.getParent());
@@ -141,7 +208,7 @@ public class StorageService {
      * 将文件转移到 failed 并写入错误原因
      */
     public String failedFile(String fileName, String errorMessage) throws IOException {
-        try (var stream = Files.walk(STORAGE_ROOT)) {
+        try (var stream = Files.walk(storageRoot)) {
             Optional<Path> matched = stream
                     .filter(Files::isRegularFile)
                     .filter(p -> p.getFileName().toString().equals(fileName))
@@ -151,8 +218,8 @@ public class StorageService {
                     () -> new IOException("文件未找到: " + fileName)
             );
 
-            Path relative = STORAGE_ROOT.relativize(source);
-            Path target = FAILED_ROOT.resolve(relative);
+            Path relative = storageRoot.relativize(source);
+            Path target = failedRoot.resolve(relative);
 
             Files.createDirectories(target.getParent());
 

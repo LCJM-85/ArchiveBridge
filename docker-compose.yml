@@ -47,8 +47,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
       TZ: Asia/Shanghai
       DB_HOST: ${DB_HOST:-db}
@@ -64,6 +64,8 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
       REDIS_DATABASE: ${REDIS_DATABASE:-0}
+      # 后端不发布到宿主机，仅信任 Compose 私网中的反向代理来源
+      TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
       python.venv-path: /app/src/main/python/.venv/bin/python3
     volumes:
       # 文件上传存储（Docker 命名卷，换机器自动创建）

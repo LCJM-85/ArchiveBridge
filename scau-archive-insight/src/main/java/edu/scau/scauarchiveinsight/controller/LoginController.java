@@ -7,6 +7,7 @@ import cn.hutool.captcha.LineCaptcha;
 import edu.scau.scauarchiveinsight.dto.LoginDTO;
 import edu.scau.scauarchiveinsight.pojo.SysUser;
 import edu.scau.scauarchiveinsight.service.UserService;
+import edu.scau.scauarchiveinsight.service.ClientIpResolver;
 import edu.scau.scauarchiveinsight.util.JwtUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,6 +47,9 @@ public class LoginController {
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private ClientIpResolver clientIpResolver;
 
     @Operation(summary = "用户登录", description = "需要先获取验证码，提交用户名+密码+验证码")
     @PostMapping("/login")
@@ -153,15 +157,7 @@ public class LoginController {
     }
 
     private String resolveClientIp(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isBlank()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-        String realIp = request.getHeader("X-Real-IP");
-        if (realIp != null && !realIp.isBlank()) {
-            return realIp.trim();
-        }
-        return request.getRemoteAddr();
+        return clientIpResolver.resolve(request);
     }
 
     private boolean isBlocked(String key, int maxAttempts) {

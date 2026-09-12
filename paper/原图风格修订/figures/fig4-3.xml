@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="Electron" agent="Cursor">
+  <diagram id="fig4-3" name="fig4-3">
+    <mxGraphModel dx="1001" dy="690" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="580" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="sidebar" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#1B4F72;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="20" y="87" width="210" height="405" as="geometry" />
+        </mxCell>
+        <mxCell id="tabbar" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#F4F7FA;strokeColor=#A9BCC9;strokeWidth=2;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="251" y="87" width="829" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="content" value="" vertex="1" parent="1" style="html=1;strokeColor=#A9BCC9;fillColor=#F8FBFD;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=0;fontColor=#1B4F72;whiteSpace=wrap;spacing=8;rounded=1;arcSize=12;dashed=0;strokeWidth=2;">
+          <mxGeometry x="251" y="159" width="829" height="333" as="geometry" />
+        </mxCell>
+        <mxCell id="header" value="ArchiveBridge     当前页面 / 业务入口                              用户菜单" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBF5FB;strokeColor=#1B4F72;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=1;align=center;verticalAlign=middle;spacing=8;fontColor=#1B4F72;arcSize=12;dashed=0;strokeWidth=2;">
+          <mxGeometry x="20" y="10" width="1060" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="sb-brand" value="数智档桥" vertex="1" parent="1" style="html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=25;fontStyle=1;fontColor=#FFFFFF;whiteSpace=wrap;spacing=8;text=1;dashed=0;">
+          <mxGeometry x="35" y="99" width="180" height="41" as="geometry" />
+        </mxCell>
+        <mxCell id="mi1" value="仪表盘" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#1B4F72;strokeColor=none;strokeWidth=1.5;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="35" y="151" width="180" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="mi2" value="档案上传与任务" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#EBF5FB;strokeColor=none;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="35" y="202" width="180" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="mi3" value="数据管理" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#1B4F72;strokeColor=none;strokeWidth=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="35" y="253" width="180" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="mi4" value="图表分析" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#1B4F72;strokeColor=none;strokeWidth=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="35" y="304" width="180" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="mi5" value="AI 助手 / 知识库" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#1B4F72;strokeColor=none;strokeWidth=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="35" y="355" width="180" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="mi6" value="系统管理" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#1B4F72;strokeColor=none;strokeWidth=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="35" y="406" width="180" height="39" as="geometry" />
+        </mxCell>
+        <mxCell id="t1" value="仪表盘" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EBF5FB;strokeColor=#AED6F1;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="264" y="96" width="165" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" value="档案上传" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#1B4F72;strokeColor=#1B4F72;strokeWidth=2;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="444" y="96" width="175" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="t3" value="图表分析" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EBF5FB;strokeColor=#AED6F1;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="634" y="96" width="175" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="t4" value="AI 助手" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EBF5FB;strokeColor=#AED6F1;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="824" y="96" width="240" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="comp-title" value="业务内容区：当前激活组件" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=27;fontStyle=1;fontColor=#1B4F72;whiteSpace=wrap;spacing=8;dashed=0;">
+          <mxGeometry x="290" y="205" width="750" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="comp-sub" value="由 tabStore.activeTab 选择动态组件&lt;br&gt;keep-alive 保留组件状态" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=23;fontColor=#1B4F72;whiteSpace=wrap;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="290" y="281" width="750" height="81" as="geometry" />
+        </mxCell>
+        <mxCell id="ph-note" value="界面布局示意，非系统运行截图" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=23;fontColor=#B95E00;fontStyle=1;whiteSpace=wrap;spacing=8;dashed=0;">
+          <mxGeometry x="290" y="399" width="750" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="flow" value="点击菜单 → 添加或激活内部标签 → 切换业务组件；刷新后返回默认页面" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#EBF5FB;strokeColor=#2E86AB;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="30" y="518" width="1040" height="43" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

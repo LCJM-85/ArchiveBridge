@@ -1,0 +1,1492 @@
+{
+  "figures": [
+    {
+      "figure": "fig3-1",
+      "source": "图3.xml",
+      "source_sha256": "b30e57df66512ecdc7c38c60e519358957cf4fb2f5dce157fb098974a081d88d",
+      "nodes": [
+        {
+          "id": "L1",
+          "source_cell": "L1",
+          "value": "",
+          "box": [
+            25,
+            10,
+            1050,
+            125
+          ]
+        },
+        {
+          "id": "L1-title",
+          "source_cell": "L1-title",
+          "value": "表现层  Vue 3 / Element Plus",
+          "box": [
+            45,
+            17,
+            340,
+            30
+          ]
+        },
+        {
+          "id": "m1",
+          "source_cell": "m1",
+          "value": "档案上传与任务状态",
+          "box": [
+            45,
+            60,
+            315,
+            54
+          ]
+        },
+        {
+          "id": "m2",
+          "source_cell": "m2",
+          "value": "业务数据与统计图表",
+          "box": [
+            392,
+            60,
+            315,
+            54
+          ]
+        },
+        {
+          "id": "m3",
+          "source_cell": "m3",
+          "value": "AI 助手与知识库",
+          "box": [
+            739,
+            60,
+            315,
+            54
+          ]
+        },
+        {
+          "id": "L2",
+          "source_cell": "L2",
+          "value": "",
+          "box": [
+            25,
+            177,
+            1050,
+            110
+          ]
+        },
+        {
+          "id": "L2-title",
+          "source_cell": "L2-title",
+          "value": "业务层  Spring Boot / MyBatis-Plus",
+          "box": [
+            45,
+            184,
+            600,
+            31
+          ]
+        },
+        {
+          "id": "p1",
+          "source_cell": "p1",
+          "value": "任务创建与进程管理",
+          "box": [
+            45,
+            231,
+            230,
+            40
+          ]
+        },
+        {
+          "id": "p2",
+          "source_cell": "p2",
+          "value": "字段处理与持久化",
+          "box": [
+            297,
+            231,
+            230,
+            40
+          ]
+        },
+        {
+          "id": "p3",
+          "source_cell": "p3",
+          "value": "文件归档与质量参考分",
+          "box": [
+            549,
+            231,
+            230,
+            40
+          ]
+        },
+        {
+          "id": "p4",
+          "source_cell": "p4",
+          "value": "业务查询与报告",
+          "box": [
+            801,
+            231,
+            252,
+            40
+          ]
+        },
+        {
+          "id": "L3",
+          "source_cell": "L3",
+          "value": "",
+          "box": [
+            25,
+            339,
+            700,
+            155
+          ]
+        },
+        {
+          "id": "L3-title",
+          "source_cell": "L3-title",
+          "value": "Python 组件",
+          "box": [
+            285,
+            346,
+            195,
+            30
+          ]
+        },
+        {
+          "id": "ai2",
+          "source_cell": "ai2",
+          "value": "任务子进程\nOCR / 视觉提取 / 预测",
+          "box": [
+            45,
+            391,
+            305,
+            81
+          ]
+        },
+        {
+          "id": "ai1",
+          "source_cell": "ai1",
+          "value": "FastAPI 辅助进程\nAgent / RAG / 数据库工具",
+          "box": [
+            395,
+            391,
+            310,
+            81
+          ]
+        },
+        {
+          "id": "DB",
+          "source_cell": "DB",
+          "value": "",
+          "box": [
+            780,
+            339,
+            295,
+            155
+          ]
+        },
+        {
+          "id": "DB-title",
+          "source_cell": "DB-title",
+          "value": "PostgreSQL",
+          "box": [
+            800,
+            345,
+            250,
+            30
+          ]
+        },
+        {
+          "id": "db1",
+          "source_cell": "db1",
+          "value": "业务记录与任务日志\n知识文本与向量",
+          "box": [
+            800,
+            394,
+            250,
+            77
+          ]
+        },
+        {
+          "id": "redis",
+          "source_cell": "db2",
+          "value": "Redis\n临时状态与查询缓存",
+          "box": [
+            35,
+            563,
+            300,
+            85
+          ]
+        },
+        {
+          "id": "external",
+          "source_cell": "ai3",
+          "value": "外部模型服务\n视觉提取 / 文本生成 / 向量嵌入",
+          "box": [
+            450,
+            563,
+            575,
+            85
+          ]
+        },
+        {
+          "id": "e12-text",
+          "source_cell": "L1",
+          "value": "HTTP / SSE",
+          "box": [
+            555,
+            140,
+            170,
+            28
+          ]
+        },
+        {
+          "id": "e2task-text",
+          "source_cell": "L1",
+          "value": "启动 / 读取结果",
+          "box": [
+            202,
+            300,
+            260,
+            28
+          ]
+        },
+        {
+          "id": "e2api-text",
+          "source_cell": "L1",
+          "value": "管理 + HTTP / SSE",
+          "box": [
+            558,
+            300,
+            303,
+            28
+          ]
+        },
+        {
+          "id": "e2db-text",
+          "source_cell": "L1",
+          "value": "JDBC",
+          "box": [
+            935,
+            300,
+            110,
+            28
+          ]
+        },
+        {
+          "id": "eaidb-text",
+          "source_cell": "L1",
+          "value": "SQL",
+          "box": [
+            717,
+            399,
+            75,
+            28
+          ]
+        },
+        {
+          "id": "vision-label",
+          "source_cell": "L1",
+          "value": "视觉路径调用",
+          "box": [
+            237,
+            496,
+            240,
+            28
+          ]
+        },
+        {
+          "id": "agent-label",
+          "source_cell": "L1",
+          "value": "文本 / 嵌入调用",
+          "box": [
+            700,
+            519,
+            320,
+            28
+          ]
+        }
+      ],
+      "edges": [
+        "e12",
+        "e2task",
+        "e2api",
+        "e2db",
+        "eaidb",
+        "e2redis",
+        "evision",
+        "eagent"
+      ]
+    },
+    {
+      "figure": "fig3-2",
+      "source": "图1.xml",
+      "source_sha256": "280d637dc1501abc564418ab9597bdbc6d35421b95f8574c3b03639546ca792b",
+      "nodes": [
+        {
+          "id": "n1",
+          "source_cell": "n1",
+          "value": "档案文件输入并创建任务\nCSV / Excel / 图像 / PDF",
+          "box": [
+            285,
+            12,
+            530,
+            64
+          ]
+        },
+        {
+          "id": "n2",
+          "source_cell": "n2",
+          "value": "按扩展名和 useLlm 选择路径",
+          "box": [
+            345,
+            108,
+            410,
+            53
+          ]
+        },
+        {
+          "id": "n2-note",
+          "source_cell": "n2-note",
+          "value": "图像 / PDF 由用户选路\n不按清晰度自动分流",
+          "box": [
+            805,
+            105,
+            270,
+            60
+          ]
+        },
+        {
+          "id": "zone1",
+          "source_cell": "zone1",
+          "value": "",
+          "box": [
+            25,
+            198,
+            1050,
+            253
+          ]
+        },
+        {
+          "id": "csv",
+          "source_cell": "n3-ocr",
+          "value": "CSV / Excel",
+          "box": [
+            55,
+            223,
+            300,
+            64
+          ]
+        },
+        {
+          "id": "csv-detail",
+          "source_cell": "n3-ocr",
+          "value": "结构化解析\n列名适配与基础校验",
+          "box": [
+            55,
+            320,
+            300,
+            95
+          ]
+        },
+        {
+          "id": "n3-ocr",
+          "source_cell": "n3-ocr",
+          "value": "OCR 路径",
+          "box": [
+            400,
+            223,
+            300,
+            64
+          ]
+        },
+        {
+          "id": "n3-ocr-detail",
+          "source_cell": "n3-ocr",
+          "value": "PPStructureV3 表格识别\n值特征校正与表头映射",
+          "box": [
+            400,
+            320,
+            300,
+            95
+          ]
+        },
+        {
+          "id": "n3-mllm",
+          "source_cell": "n3-mllm",
+          "value": "MLLM 路径",
+          "box": [
+            745,
+            223,
+            300,
+            64
+          ]
+        },
+        {
+          "id": "n3-mllm-detail",
+          "source_cell": "n3-mllm",
+          "value": "动态字段提示词\n视觉模型生成 JSON",
+          "box": [
+            745,
+            320,
+            300,
+            95
+          ]
+        },
+        {
+          "id": "n4",
+          "source_cell": "n4",
+          "value": "业务持久化：新增或更新匹配记录",
+          "box": [
+            255,
+            488,
+            590,
+            58
+          ]
+        },
+        {
+          "id": "n5",
+          "source_cell": "n5",
+          "value": "记录质量参考分、文件归档与任务终态",
+          "box": [
+            255,
+            579,
+            590,
+            54
+          ]
+        }
+      ],
+      "edges": [
+        "csv-next",
+        "route-csv",
+        "n3-ocr-next",
+        "route-n3-ocr",
+        "n3-mllm-next",
+        "route-n3-mllm",
+        "e12",
+        "merge-csv",
+        "merge-n3-ocr",
+        "merge-n3-mllm",
+        "e45"
+      ]
+    },
+    {
+      "figure": "fig3-3",
+      "source": "图6.xml",
+      "source_sha256": "6444ce738821a3bc7086621295d98c2204c5d23770ee436c09c8447497f0cd91",
+      "nodes": [
+        {
+          "id": "dim-zone",
+          "source_cell": "dim-zone",
+          "value": "",
+          "box": [
+            20,
+            10,
+            1060,
+            132
+          ]
+        },
+        {
+          "id": "dim-title",
+          "source_cell": "dim-title",
+          "value": "基础维度与业务支持",
+          "box": [
+            40,
+            16,
+            510,
+            30
+          ]
+        },
+        {
+          "id": "d1",
+          "source_cell": "d1",
+          "value": "college_dim / major_dim / class_dim\nprovince_dim / degree_dim / destination_dim",
+          "box": [
+            40,
+            60,
+            650,
+            65
+          ]
+        },
+        {
+          "id": "d-more",
+          "source_cell": "d-more",
+          "value": "archive_file_dim\n来源文件",
+          "box": [
+            720,
+            60,
+            335,
+            65
+          ]
+        },
+        {
+          "id": "fact-zone",
+          "source_cell": "fact-zone",
+          "value": "",
+          "box": [
+            20,
+            185,
+            1060,
+            208
+          ]
+        },
+        {
+          "id": "fact-title",
+          "source_cell": "fact-title",
+          "value": "业务事实记录",
+          "box": [
+            260,
+            191,
+            240,
+            30
+          ]
+        },
+        {
+          "id": "f1",
+          "source_cell": "f1",
+          "value": "",
+          "box": [
+            40,
+            232,
+            290,
+            142
+          ]
+        },
+        {
+          "id": "f1-h",
+          "source_cell": "f1-h",
+          "value": "admission_fact",
+          "box": [
+            40,
+            232,
+            290,
+            34
+          ]
+        },
+        {
+          "id": "f1-b",
+          "source_cell": "f1-b",
+          "value": "PK  id\nstudent_no / exam_no\nprovince_id / major_id\ndegree_id / file_id",
+          "box": [
+            48,
+            270,
+            274,
+            100
+          ]
+        },
+        {
+          "id": "f2",
+          "source_cell": "f2",
+          "value": "",
+          "box": [
+            405,
+            232,
+            290,
+            142
+          ]
+        },
+        {
+          "id": "f2-h",
+          "source_cell": "f2-h",
+          "value": "student_fact",
+          "box": [
+            405,
+            232,
+            290,
+            34
+          ]
+        },
+        {
+          "id": "f2-b",
+          "source_cell": "f2-b",
+          "value": "PK  id\nstudent_no / id_card\nmajor_id / class_id\ngraduated",
+          "box": [
+            413,
+            270,
+            274,
+            100
+          ]
+        },
+        {
+          "id": "f3",
+          "source_cell": "f3",
+          "value": "",
+          "box": [
+            770,
+            232,
+            290,
+            142
+          ]
+        },
+        {
+          "id": "f3-h",
+          "source_cell": "f3-h",
+          "value": "graduation_fact",
+          "box": [
+            770,
+            232,
+            290,
+            34
+          ]
+        },
+        {
+          "id": "f3-b",
+          "source_cell": "f3-b",
+          "value": "PK  id\nstudent_no / degree_id\ndest_id / file_id\ngraduation_date",
+          "box": [
+            778,
+            270,
+            274,
+            100
+          ]
+        },
+        {
+          "id": "meta",
+          "source_cell": "meta",
+          "value": "",
+          "box": [
+            20,
+            425,
+            1060,
+            70
+          ]
+        },
+        {
+          "id": "meta-title",
+          "source_cell": "meta-title",
+          "value": "metadata_standard\nPK  metadata_id",
+          "box": [
+            40,
+            432,
+            330,
+            52
+          ]
+        },
+        {
+          "id": "meta-fields",
+          "source_cell": "meta-fields",
+          "value": "field_code / field_name / source_field\nfield_type / is_required",
+          "box": [
+            390,
+            434,
+            655,
+            48
+          ]
+        },
+        {
+          "id": "kb-zone",
+          "source_cell": "kb-zone",
+          "value": "",
+          "box": [
+            20,
+            528,
+            1060,
+            112
+          ]
+        },
+        {
+          "id": "kb1",
+          "source_cell": "kb1",
+          "value": "knowledge_base\nPK  id · title · status",
+          "box": [
+            40,
+            548,
+            365,
+            72
+          ]
+        },
+        {
+          "id": "kb2",
+          "source_cell": "kb2",
+          "value": "knowledge_chunks\nPK  id · FK  kb_id · vector(1024)",
+          "box": [
+            660,
+            548,
+            395,
+            72
+          ]
+        },
+        {
+          "id": "ekb-label",
+          "source_cell": "frame",
+          "value": "1 : N  外键关联",
+          "box": [
+            416,
+            548,
+            232,
+            28
+          ]
+        },
+        {
+          "id": "leg",
+          "source_cell": "frame",
+          "value": "虚线：服务层维护的逻辑关联；知识库为独立入口。完整表清单见表3-1。",
+          "box": [
+            35,
+            647,
+            1030,
+            28
+          ]
+        }
+      ],
+      "edges": [
+        "dimension-admission",
+        "dimension-student",
+        "file-graduation",
+        "ekb"
+      ]
+    },
+    {
+      "figure": "fig3-4",
+      "source": "图5.xml",
+      "source_sha256": "af353eac882a510211b19a274cb18c66604877e5ec5e67201b0df3ea0d0537b8",
+      "nodes": [
+        {
+          "id": "docker",
+          "source_cell": "docker",
+          "value": "",
+          "box": [
+            15,
+            10,
+            1070,
+            405
+          ]
+        },
+        {
+          "id": "docker-badge",
+          "source_cell": "docker-badge",
+          "value": "Docker Compose",
+          "box": [
+            35,
+            20,
+            235,
+            34
+          ]
+        },
+        {
+          "id": "docker-sub",
+          "source_cell": "docker-sub",
+          "value": "四个服务：frontend · backend · db · redis",
+          "box": [
+            290,
+            20,
+            730,
+            34
+          ]
+        },
+        {
+          "id": "c1",
+          "source_cell": "c1",
+          "value": "",
+          "box": [
+            40,
+            107,
+            205,
+            147
+          ]
+        },
+        {
+          "id": "c1-title",
+          "source_cell": "c1-title",
+          "value": "frontend",
+          "box": [
+            50,
+            122,
+            185,
+            35
+          ]
+        },
+        {
+          "id": "c1-i1",
+          "source_cell": "c1-i1",
+          "value": "Nginx\nVue 静态资源",
+          "box": [
+            53,
+            171,
+            179,
+            62
+          ]
+        },
+        {
+          "id": "c2",
+          "source_cell": "c2",
+          "value": "",
+          "box": [
+            352,
+            86,
+            407,
+            278
+          ]
+        },
+        {
+          "id": "c2-title",
+          "source_cell": "c2-title",
+          "value": "backend  Java + Python",
+          "box": [
+            367,
+            96,
+            377,
+            37
+          ]
+        },
+        {
+          "id": "c2-i1",
+          "source_cell": "c2-i1",
+          "value": "Spring Boot 业务服务",
+          "box": [
+            372,
+            148,
+            367,
+            56
+          ]
+        },
+        {
+          "id": "task",
+          "source_cell": "c4-i2",
+          "value": "任务子进程\nOCR / 视觉 / 预测",
+          "box": [
+            372,
+            259,
+            171,
+            79
+          ]
+        },
+        {
+          "id": "c4",
+          "source_cell": "c4",
+          "value": "FastAPI 进程\nAgent / RAG",
+          "box": [
+            568,
+            259,
+            171,
+            79
+          ]
+        },
+        {
+          "id": "c3",
+          "source_cell": "c3",
+          "value": "db\nPostgreSQL\npgvector",
+          "box": [
+            850,
+            94,
+            210,
+            113
+          ]
+        },
+        {
+          "id": "redis",
+          "source_cell": "c3",
+          "value": "redis\n临时状态与缓存",
+          "box": [
+            850,
+            267,
+            210,
+            97
+          ]
+        },
+        {
+          "id": "cloud",
+          "source_cell": "cloud",
+          "value": "外部模型服务：视觉、文本与嵌入接口",
+          "box": [
+            230,
+            447,
+            640,
+            65
+          ]
+        },
+        {
+          "id": "proxy",
+          "source_cell": "docker",
+          "value": "/api 代理",
+          "box": [
+            245,
+            139,
+            115,
+            28
+          ]
+        },
+        {
+          "id": "start-label",
+          "source_cell": "docker",
+          "value": "启动",
+          "box": [
+            382,
+            218,
+            64,
+            28
+          ]
+        },
+        {
+          "id": "api-label",
+          "source_cell": "docker",
+          "value": "HTTP",
+          "box": [
+            660,
+            218,
+            77,
+            28
+          ]
+        },
+        {
+          "id": "boundary",
+          "source_cell": "docker",
+          "value": "辅助进程不另计服务",
+          "box": [
+            680,
+            374,
+            386,
+            28
+          ]
+        }
+      ],
+      "edges": [
+        "e12",
+        "task-start",
+        "api-start",
+        "e23",
+        "redis-link",
+        "e43",
+        "vision-api",
+        "agent-api"
+      ]
+    },
+    {
+      "figure": "fig4-1",
+      "source": "图1.xml",
+      "source_sha256": "280d637dc1501abc564418ab9597bdbc6d35421b95f8574c3b03639546ca792b",
+      "nodes": [
+        {
+          "id": "n1",
+          "source_cell": "n1",
+          "value": "一行 OCR 网格：表头与字段值",
+          "box": [
+            300,
+            10,
+            500,
+            59
+          ]
+        },
+        {
+          "id": "zone1",
+          "source_cell": "zone1",
+          "value": "",
+          "box": [
+            30,
+            108,
+            1040,
+            244
+          ]
+        },
+        {
+          "id": "n3-ocr",
+          "source_cell": "n3-ocr",
+          "value": "表头适配（后计算）",
+          "box": [
+            60,
+            133,
+            440,
+            65
+          ]
+        },
+        {
+          "id": "header-detail",
+          "source_cell": "n3-ocr",
+          "value": "精确匹配 → 去普通空格\n→ 包含匹配 → 编辑距离\n候选来自元数据字段配置",
+          "box": [
+            60,
+            220,
+            440,
+            108
+          ]
+        },
+        {
+          "id": "n3-mllm",
+          "source_cell": "n3-mllm",
+          "value": "值特征校正（先计算）",
+          "box": [
+            600,
+            133,
+            440,
+            65
+          ]
+        },
+        {
+          "id": "value-detail",
+          "source_cell": "n3-mllm",
+          "value": "启发式评分 → 选最高正分配对\n锁定该值与字段 → 继续选择\n每个值与字段至多使用一次",
+          "box": [
+            600,
+            220,
+            440,
+            108
+          ]
+        },
+        {
+          "id": "n4",
+          "source_cell": "n4",
+          "value": "先放表头映射结果，再以校正结果覆盖同名字段",
+          "box": [
+            215,
+            394,
+            670,
+            63
+          ]
+        },
+        {
+          "id": "scope",
+          "source_cell": "n1",
+          "value": "两项均在 OCR 链执行；MLLM 路径不重复执行这套 Java 字段适配。",
+          "box": [
+            45,
+            477,
+            1010,
+            28
+          ]
+        }
+      ],
+      "edges": [
+        "table-path",
+        "value-path",
+        "header-next",
+        "value-next",
+        "header-merge",
+        "value-merge"
+      ]
+    },
+    {
+      "figure": "fig4-2",
+      "source": "图8.xml",
+      "source_sha256": "50b33b59a683271cab3feaf74b4bcd9a5aab73a2a7aefd480e18339cbb8ed37c",
+      "nodes": [
+        {
+          "id": "row1-zone",
+          "source_cell": "row1-zone",
+          "value": "",
+          "box": [
+            20,
+            10,
+            1060,
+            220
+          ]
+        },
+        {
+          "id": "row1-badge",
+          "source_cell": "row1-badge",
+          "value": "知识文档入库",
+          "box": [
+            40,
+            22,
+            205,
+            36
+          ]
+        },
+        {
+          "id": "row1-sub",
+          "source_cell": "row1-sub",
+          "value": "独立资料入口，不自动同步结构化名册",
+          "box": [
+            275,
+            24,
+            760,
+            30
+          ]
+        },
+        {
+          "id": "a1",
+          "source_cell": "a1",
+          "value": "文档解析\n提取文本",
+          "box": [
+            40,
+            90,
+            180,
+            105
+          ]
+        },
+        {
+          "id": "a3",
+          "source_cell": "a3",
+          "value": "字符分块\n500 字符 / 重叠 50",
+          "box": [
+            255,
+            90,
+            245,
+            105
+          ]
+        },
+        {
+          "id": "a4",
+          "source_cell": "a4",
+          "value": "embedding-3\n1024 维向量",
+          "box": [
+            535,
+            90,
+            230,
+            105
+          ]
+        },
+        {
+          "id": "store",
+          "source_cell": "store",
+          "value": "knowledge_chunks\n文本块与向量",
+          "box": [
+            805,
+            90,
+            250,
+            105
+          ]
+        },
+        {
+          "id": "row2-zone",
+          "source_cell": "row2-zone",
+          "value": "",
+          "box": [
+            20,
+            281,
+            1060,
+            321
+          ]
+        },
+        {
+          "id": "row2-badge",
+          "source_cell": "row2-badge",
+          "value": "提问与回答",
+          "box": [
+            40,
+            293,
+            205,
+            36
+          ]
+        },
+        {
+          "id": "row2-sub",
+          "source_cell": "row2-sub",
+          "value": "限定 ready 资料，按余弦距离排序",
+          "box": [
+            427,
+            295,
+            620,
+            30
+          ]
+        },
+        {
+          "id": "b1",
+          "source_cell": "b1",
+          "value": "用户问题\n生成查询向量",
+          "box": [
+            40,
+            359,
+            180,
+            88
+          ]
+        },
+        {
+          "id": "b2",
+          "source_cell": "b2",
+          "value": "检索前 3 个文本块\n聊天 top_k = 3",
+          "box": [
+            255,
+            359,
+            245,
+            88
+          ]
+        },
+        {
+          "id": "b3",
+          "source_cell": "b3",
+          "value": "资料标题与片段\n拼接到用户问题",
+          "box": [
+            535,
+            359,
+            230,
+            88
+          ]
+        },
+        {
+          "id": "b4",
+          "source_cell": "b4",
+          "value": "LangChain Agent\n生成完整答案",
+          "box": [
+            805,
+            359,
+            250,
+            88
+          ]
+        },
+        {
+          "id": "retrieve-note",
+          "source_cell": "title",
+          "value": "精确检索",
+          "box": [
+            150,
+            243,
+            180,
+            28
+          ]
+        },
+        {
+          "id": "tools",
+          "source_cell": "out",
+          "value": "按需调用：20 个数据库工具 + 2 个联网工具\n知识检索在 Agent 之前完成",
+          "box": [
+            40,
+            497,
+            550,
+            79
+          ]
+        },
+        {
+          "id": "out",
+          "source_cell": "out",
+          "value": "SSE 过程状态\n最终完整答案一次发送",
+          "box": [
+            710,
+            500,
+            345,
+            74
+          ]
+        }
+      ],
+      "edges": [
+        "ingest0",
+        "ingest1",
+        "ingest2",
+        "answer0",
+        "answer1",
+        "answer2",
+        "esb2",
+        "tools-call",
+        "answer-out"
+      ]
+    },
+    {
+      "figure": "fig4-3",
+      "source": "图7.xml",
+      "source_sha256": "cb37450ad937fc8c4a21eaa14c360c199a9f9017c2a9f65b552d53d0d488ab96",
+      "nodes": [
+        {
+          "id": "header",
+          "source_cell": "header",
+          "value": "ArchiveBridge     当前页面 / 业务入口                              用户菜单",
+          "box": [
+            20,
+            10,
+            1060,
+            58
+          ]
+        },
+        {
+          "id": "sidebar",
+          "source_cell": "mi1",
+          "value": "",
+          "box": [
+            20,
+            87,
+            210,
+            405
+          ]
+        },
+        {
+          "id": "sb-brand",
+          "source_cell": "sb-brand",
+          "value": "数智档桥",
+          "box": [
+            35,
+            99,
+            180,
+            41
+          ]
+        },
+        {
+          "id": "mi1",
+          "source_cell": "mi1",
+          "value": "仪表盘",
+          "box": [
+            35,
+            151,
+            180,
+            39
+          ]
+        },
+        {
+          "id": "mi2",
+          "source_cell": "mi2",
+          "value": "档案上传与任务",
+          "box": [
+            35,
+            202,
+            180,
+            39
+          ]
+        },
+        {
+          "id": "mi3",
+          "source_cell": "mi3",
+          "value": "数据管理",
+          "box": [
+            35,
+            253,
+            180,
+            39
+          ]
+        },
+        {
+          "id": "mi4",
+          "source_cell": "mi4",
+          "value": "图表分析",
+          "box": [
+            35,
+            304,
+            180,
+            39
+          ]
+        },
+        {
+          "id": "mi5",
+          "source_cell": "mi5",
+          "value": "AI 助手 / 知识库",
+          "box": [
+            35,
+            355,
+            180,
+            39
+          ]
+        },
+        {
+          "id": "mi6",
+          "source_cell": "mi6",
+          "value": "系统管理",
+          "box": [
+            35,
+            406,
+            180,
+            39
+          ]
+        },
+        {
+          "id": "tabbar",
+          "source_cell": "t2",
+          "value": "",
+          "box": [
+            251,
+            87,
+            829,
+            55
+          ]
+        },
+        {
+          "id": "t1",
+          "source_cell": "t1",
+          "value": "仪表盘",
+          "box": [
+            264,
+            96,
+            165,
+            36
+          ]
+        },
+        {
+          "id": "t2",
+          "source_cell": "t2",
+          "value": "档案上传",
+          "box": [
+            444,
+            96,
+            175,
+            36
+          ]
+        },
+        {
+          "id": "t3",
+          "source_cell": "t3",
+          "value": "图表分析",
+          "box": [
+            634,
+            96,
+            175,
+            36
+          ]
+        },
+        {
+          "id": "t4",
+          "source_cell": "t4",
+          "value": "AI 助手",
+          "box": [
+            824,
+            96,
+            240,
+            36
+          ]
+        },
+        {
+          "id": "content",
+          "source_cell": "comp-title",
+          "value": "",
+          "box": [
+            251,
+            159,
+            829,
+            333
+          ]
+        },
+        {
+          "id": "comp-title",
+          "source_cell": "comp-title",
+          "value": "业务内容区：当前激活组件",
+          "box": [
+            290,
+            205,
+            750,
+            48
+          ]
+        },
+        {
+          "id": "comp-sub",
+          "source_cell": "comp-sub",
+          "value": "由 tabStore.activeTab 选择动态组件\nkeep-alive 保留组件状态",
+          "box": [
+            290,
+            281,
+            750,
+            81
+          ]
+        },
+        {
+          "id": "ph-note",
+          "source_cell": "ph-note",
+          "value": "界面布局示意，非系统运行截图",
+          "box": [
+            290,
+            399,
+            750,
+            44
+          ]
+        },
+        {
+          "id": "flow",
+          "source_cell": "fl1",
+          "value": "点击菜单 → 添加或激活内部标签 → 切换业务组件；刷新后返回默认页面",
+          "box": [
+            30,
+            518,
+            1040,
+            43
+          ]
+        }
+      ],
+      "edges": []
+    }
+  ],
+  "document": {
+    "input": "论文_最终代码一致性修订_实验待实测.docx",
+    "output": "论文_原图风格修订_实验待实测.docx",
+    "source_sha256": "311ee044da743cf894c15d5ab919776f98d37a932f3f6fdad22d1b702606020a",
+    "changed_zip_parts": [
+      "word/media/image1.png",
+      "word/media/image2.png",
+      "word/media/image3.png",
+      "word/media/image4.png",
+      "word/media/image5.png",
+      "word/media/image6.png",
+      "word/media/image7.png"
+    ],
+    "body_xml_identical": true,
+    "preserved_text_equations_tables_toc": true
+  }
+}

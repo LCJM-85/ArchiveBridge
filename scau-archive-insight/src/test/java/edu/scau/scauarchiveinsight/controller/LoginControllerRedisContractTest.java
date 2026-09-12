@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.scau.scauarchiveinsight.dto.LoginDTO;
 import edu.scau.scauarchiveinsight.pojo.SysUser;
 import edu.scau.scauarchiveinsight.service.UserService;
+import edu.scau.scauarchiveinsight.service.ClientIpResolver;
 import edu.scau.scauarchiveinsight.util.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,7 @@ class LoginControllerRedisContractTest {
         ReflectionTestUtils.setField(controller, "stringRedisTemplate", redisTemplate);
         ReflectionTestUtils.setField(controller, "userService", userService);
         ReflectionTestUtils.setField(controller, "jwtUtils", jwtUtils);
+        ReflectionTestUtils.setField(controller, "clientIpResolver", new ClientIpResolver(""));
     }
 
     @Test
@@ -68,6 +70,21 @@ class LoginControllerRedisContractTest {
         verify(valueOperations).set(
                 org.mockito.ArgumentMatchers.startsWith("scau:auth:captcha:"),
                 anyString(), eq(Duration.ofSeconds(120)));
+    }
+
+    @Test
+    void captchaIgnoresSpoofedProxyHeadersFromDirectClient() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setRemoteAddr("198.51.100.20");
+        request.addHeader("X-Forwarded-For", "203.0.113.99");
+        request.addHeader("X-Real-IP", "203.0.113.98");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        when(valueOperations.increment("scau:auth:captcha:req:198.51.100.20")).thenReturn(1L);
+
+        controller.captcha(request, response);
+
+        assertThat(response.getStatus()).isEqualTo(200);
+        verify(valueOperations).increment("scau:auth:captcha:req:198.51.100.20");
     }
 
     @Test

@@ -12,26 +12,41 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class KnowledgeService {
 
     private static final Logger log = LoggerFactory.getLogger(KnowledgeService.class);
-    private static final String PYTHON_BASE = "http://127.0.0.1:8765";
+    private static final String DEFAULT_PYTHON_BASE = "http://127.0.0.1:8765";
 
-    private final HttpClient httpClient = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(5))
-            .build();
+    private final HttpClient httpClient;
+    private final String pythonBase;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    private final JdbcTemplate jdbcTemplate;
+    private final KnowledgeFileStorage fileStorage;
+
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    public KnowledgeService(JdbcTemplate jdbcTemplate, KnowledgeFileStorage fileStorage) {
+        this(
+                jdbcTemplate,
+                fileStorage,
+                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build(),
+                DEFAULT_PYTHON_BASE
+        );
+    }
+
+    KnowledgeService(JdbcTemplate jdbcTemplate, KnowledgeFileStorage fileStorage,
+                     HttpClient httpClient, String pythonBase) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.fileStorage = fileStorage;
+        this.httpClient = Objects.requireNonNull(httpClient, "httpClient");
+        this.pythonBase = Objects.requireNonNull(pythonBase, "pythonBase").replaceAll("/+$", "");
+    }
 
     public Map<String, Object> processFile(String filePath, String title, String fileType) {
         try {
@@ -42,7 +57,7 @@ public class KnowledgeService {
                     "store_path", filePath
             ));
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(PYTHON_BASE + "/kb/process"))
+                    .uri(URI.create(pythonBase + "/kb/process"))
                     .header("Content-Type", "application/json")
                     .timeout(Duration.ofSeconds(180))
                     .POST(HttpRequest.BodyPublishers.ofString(json))
@@ -67,12 +82,24 @@ public class KnowledgeService {
                     "title", title
             ));
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(PYTHON_BASE + "/kb/process-url"))
+                    .uri(URI.create(pythonBase + "/kb/process-url"))
                     .header("Content-Type", "application/json")
                     .timeout(Duration.ofSeconds(180))
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                try {
+                    Map<String, Object> result = objectMapper.readValue(response.body(), Map.class);
+                    Object detail = result.get("detail");
+                    if (detail instanceof String message && !message.isBlank()) {
+                        return Map.of("error", message);
+                    }
+                } catch (IOException ignored) {
+                    // 非 JSON 错误响应不向调用方暴露原始响应体
+                }
+                return Map.of("error", "网页处理失败（HTTP " + response.statusCode() + "）");
+            }
             return objectMapper.readValue(response.body(), Map.class);
         } catch (Exception e) {
             log.error("知识库处理网页失败: {}", e.getMessage());
@@ -93,8 +120,12 @@ public class KnowledgeService {
                 "SELECT file_path FROM knowledge_base WHERE id = ?", String.class, id);
         if (!paths.isEmpty() && paths.get(0) != null) {
             try {
-                Files.deleteIfExists(Path.of(paths.get(0)));
-            } catch (IOException ignored) {}
+                if (!fileStorage.deleteManagedFile(paths.get(0))) {
+                    log.warn("知识库记录 {} 的文件不在受管目录内，已跳过文件删除", id);
+                }
+            } catch (IOException e) {
+                log.warn("删除知识库记录 {} 的受管文件失败", id, e);
+            }
         }
         int affected = jdbcTemplate.update("DELETE FROM knowledge_base WHERE id = ?", id);
         return affected > 0;

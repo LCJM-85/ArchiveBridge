@@ -1,0 +1,116 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="Electron" agent="Cursor">
+  <diagram id="fig3-3" name="fig3-3">
+    <mxGraphModel dx="1413" dy="974" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="680" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="dim-zone" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FEF5E7;strokeColor=#E67E22;strokeWidth=2;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;dashed=0;">
+          <mxGeometry x="20" y="10" width="1060" height="132" as="geometry" />
+        </mxCell>
+        <mxCell id="fact-zone" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;dashed=0;">
+          <mxGeometry x="20" y="185" width="1060" height="208" as="geometry" />
+        </mxCell>
+        <mxCell id="f1" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#2E86AB;strokeWidth=2;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;dashed=0;">
+          <mxGeometry x="40" y="232" width="290" height="142" as="geometry" />
+        </mxCell>
+        <mxCell id="f2" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#1B4F72;strokeWidth=2;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;dashed=0;">
+          <mxGeometry x="405" y="232" width="290" height="142" as="geometry" />
+        </mxCell>
+        <mxCell id="f3" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#377DAD;strokeWidth=2;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;dashed=0;">
+          <mxGeometry x="770" y="232" width="290" height="142" as="geometry" />
+        </mxCell>
+        <mxCell id="meta" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#E8F8F5;strokeColor=#1E8449;strokeWidth=2;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;dashed=0;">
+          <mxGeometry x="20" y="425" width="1060" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="kb-zone" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#F5EEF8;strokeColor=#6C3483;strokeWidth=2;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;dashed=0;">
+          <mxGeometry x="20" y="528" width="1060" height="112" as="geometry" />
+        </mxCell>
+        <mxCell id="dimension-admission" style="edgeStyle=none;rounded=0;html=1;strokeColor=#B95E00;strokeWidth=2;endArrow=block;endFill=1;dashed=1;exitX=0.27692307692307694;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="d1" target="f1">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="220" y="125" />
+            <mxPoint as="targetPoint" x="185" y="232" />
+            <Array as="points">
+              <mxPoint x="220" y="160" />
+              <mxPoint x="185" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dimension-student" style="edgeStyle=none;rounded=0;html=1;strokeColor=#B95E00;strokeWidth=2;endArrow=block;endFill=1;dashed=1;exitX=0.7615384615384615;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="d1" target="f2">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="535" y="125" />
+            <mxPoint as="targetPoint" x="550" y="232" />
+            <Array as="points">
+              <mxPoint x="535" y="160" />
+              <mxPoint x="550" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="file-graduation" style="edgeStyle=none;rounded=0;html=1;strokeColor=#B95E00;strokeWidth=2;endArrow=block;endFill=1;dashed=1;exitX=0.4925373134328358;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="d-more" target="f3">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="885" y="125" />
+            <mxPoint as="targetPoint" x="915" y="232" />
+            <Array as="points">
+              <mxPoint x="885" y="160" />
+              <mxPoint x="915" y="160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ekb" style="edgeStyle=none;rounded=0;html=1;strokeColor=#6C3483;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=1.0;exitY=0.5138888888888888;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.0;entryY=0.5138888888888888;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="kb1" target="kb2">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="405" y="585" />
+            <mxPoint as="targetPoint" x="660" y="585" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dim-title" value="基础维度与业务支持" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=24;fontStyle=1;fontColor=#B95E00;whiteSpace=wrap;spacing=8;dashed=0;">
+          <mxGeometry x="40" y="16" width="510" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" value="college_dim / major_dim / class_dim&lt;br&gt;province_dim / degree_dim / destination_dim" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#D35400;strokeWidth=2;fontColor=#B95E00;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="40" y="60" width="650" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="d-more" value="archive_file_dim&lt;br&gt;来源文件" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FDEBD0;strokeColor=#F5B041;strokeWidth=2;dashed=0;dashPattern=4 3;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#B95E00;">
+          <mxGeometry x="720" y="60" width="335" height="65" as="geometry" />
+        </mxCell>
+        <mxCell id="fact-title" value="业务事实记录" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=1;fontColor=#1B4F72;whiteSpace=wrap;spacing=8;dashed=0;">
+          <mxGeometry x="260" y="191" width="240" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="f1-h" value="admission_fact" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#2E86AB;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=1;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="40" y="232" width="290" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="f1-b" value="PK  id&lt;br&gt;student_no / exam_no&lt;br&gt;province_id / major_id&lt;br&gt;degree_id / file_id" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;whiteSpace=wrap;fontSize=18;fontStyle=0;spacing=8;fontColor=#1B4F72;dashed=0;">
+          <mxGeometry x="48" y="270" width="274" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="f2-h" value="student_fact" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#1B4F72;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=1;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="405" y="232" width="290" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="f2-b" value="PK  id&lt;br&gt;student_no / id_card&lt;br&gt;major_id / class_id&lt;br&gt;graduated" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;whiteSpace=wrap;fontSize=18;fontStyle=0;spacing=8;fontColor=#1B4F72;dashed=0;">
+          <mxGeometry x="413" y="270" width="274" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="f3-h" value="graduation_fact" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#377DAD;strokeColor=none;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=21;fontStyle=1;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+          <mxGeometry x="770" y="232" width="290" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="f3-b" value="PK  id&lt;br&gt;student_no / degree_id&lt;br&gt;dest_id / file_id&lt;br&gt;graduation_date" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;whiteSpace=wrap;fontSize=18;fontStyle=0;spacing=8;fontColor=#1B4F72;dashed=0;">
+          <mxGeometry x="778" y="270" width="274" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="meta-title" value="metadata_standard&lt;br&gt;PK  metadata_id" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=1;fontColor=#14816B;whiteSpace=wrap;spacing=8;dashed=0;">
+          <mxGeometry x="40" y="432" width="330" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="meta-fields" value="field_code / field_name / source_field&lt;br&gt;field_type / is_required" vertex="1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontSize=20;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#14816B;dashed=0;">
+          <mxGeometry x="390" y="434" width="655" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="kb1" value="knowledge_base&lt;br&gt;PK  id · title · status" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#8E44AD;strokeWidth=2;fontSize=21;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#6C3483;dashed=0;">
+          <mxGeometry x="40" y="548" width="365" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="kb2" value="knowledge_chunks&lt;br&gt;PK  id · FK  kb_id · vector(1024)" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=#FFFFFF;strokeColor=#8E44AD;strokeWidth=2;fontSize=19;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#6C3483;dashed=0;">
+          <mxGeometry x="660" y="548" width="395" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="ekb-label" value="1 : N  外键关联" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=5;fillColor=none;strokeColor=none;strokeWidth=1.5;fontSize=20;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#6C3483;text=1;dashed=0;">
+          <mxGeometry x="416" y="548" width="232" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="leg" value="虚线：服务层维护的逻辑关联；知识库为独立入口。完整表清单见表3-1。" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=5;fillColor=none;strokeColor=none;strokeWidth=1.5;fontSize=19;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;text=1;dashed=0;">
+          <mxGeometry x="35" y="647" width="1030" height="28" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

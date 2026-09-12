@@ -1,5 +1,43 @@
 import os
 import asyncio
+import socket
+
+from .url_security import (
+    validate_browser_subresource_url,
+    validate_public_http_url,
+)
+
+
+_NETWORK_API_BLOCK_SCRIPT = """
+(() => {
+    const blockedApis = [
+        'WebSocket',
+        'WebSocketStream',
+        'EventSource',
+        'Worker',
+        'SharedWorker',
+        'WebTransport',
+        'RTCPeerConnection',
+        'webkitRTCPeerConnection'
+    ];
+    for (const name of blockedApis) {
+        const BlockedNetworkApi = class {
+            constructor() {
+                throw new Error(`${name} is disabled while importing knowledge URLs`);
+            }
+        };
+        try {
+            Object.defineProperty(globalThis, name, {
+                configurable: false,
+                writable: false,
+                value: BlockedNetworkApi
+            });
+        } catch (_) {
+            try { globalThis[name] = BlockedNetworkApi; } catch (_) {}
+        }
+    }
+})();
+"""
 
 
 def load_pdf(path):
@@ -43,19 +81,71 @@ def load_txt(path):
     return [content]
 
 
-async def load_url(url):
+async def _guard_browser_request(route, *, resolver, blocked_reasons):
+    """阻止浏览器访问非公网 HTTP(S) 地址及其他网络协议。"""
+    try:
+        validate_browser_subresource_url(route.request.url, resolver=resolver)
+    except ValueError as exc:
+        blocked_reasons.append(str(exc))
+        await route.abort()
+        return
+    await route.continue_()
+
+
+async def load_url(url, *, resolver=socket.getaddrinfo):
     """用 Playwright + Chrome 渲染网页后提取文本，支持 JS 动态页面"""
+    validated_url = validate_public_http_url(url, resolver=resolver)
+
     from playwright.async_api import async_playwright
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
+        context = None
+        blocked_reasons = []
         try:
-            page = await browser.new_page()
-            await page.goto(url, wait_until="networkidle", timeout=30000)
+            # 禁用 Service Worker，确保页面网络请求不会绕过路由拦截。
+            context = await browser.new_context(service_workers="block")
+
+            async def guard_request(route):
+                await _guard_browser_request(
+                    route,
+                    resolver=resolver,
+                    blocked_reasons=blocked_reasons,
+                )
+
+            await context.route("**/*", guard_request)
+            # 禁用不受普通 HTTP 路由完整覆盖的长连接、Worker 和点对点网络 API。
+            await context.add_init_script(_NETWORK_API_BLOCK_SCRIPT)
+
+            page = await context.new_page()
+            try:
+                response = await page.goto(
+                    validated_url,
+                    wait_until="networkidle",
+                    timeout=30000,
+                )
+            except Exception as exc:
+                if blocked_reasons:
+                    raise ValueError(
+                        f"网页请求被安全策略阻止: {blocked_reasons[0]}"
+                    ) from exc
+                raise
+
+            if blocked_reasons:
+                raise ValueError(f"网页请求被安全策略阻止: {blocked_reasons[0]}")
+            if response is not None and response.status >= 400:
+                raise ValueError(f"网页请求失败，HTTP 状态码: {response.status}")
+
+            # 再校验最终地址，覆盖浏览器重定向后的落点。
+            validate_public_http_url(page.url, resolver=resolver)
             await page.wait_for_timeout(2000)
+            if blocked_reasons:
+                raise ValueError(f"网页请求被安全策略阻止: {blocked_reasons[0]}")
             text = await page.inner_text("body")
             return [text.strip()]
         finally:
+            if context is not None:
+                await context.close()
             await browser.close()
 
 

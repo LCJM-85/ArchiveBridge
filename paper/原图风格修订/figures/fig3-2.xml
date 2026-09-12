@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="Electron" agent="Cursor">
+  <diagram id="fig3-2" name="fig3-2">
+    <mxGraphModel dx="1501" dy="1035" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="650" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="zone1" value="" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=6;fillColor=#F8FBFD;strokeColor=#A8C6D8;strokeWidth=2;dashed=0;dashPattern=8 4;opacity=60;fontSize=22;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#17354A;">
+          <mxGeometry x="25" y="198" width="1050" height="253" as="geometry" />
+        </mxCell>
+        <mxCell id="csv-next" style="edgeStyle=none;rounded=0;html=1;strokeColor=#1B4F72;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="csv" target="csv-detail">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="205" y="287" />
+            <mxPoint as="targetPoint" x="205" y="320" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="route-csv" style="edgeStyle=none;rounded=0;html=1;strokeColor=#1B4F72;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n2" target="csv">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="550" y="161" />
+            <mxPoint as="targetPoint" x="205" y="223" />
+            <Array as="points">
+              <mxPoint x="550" y="184" />
+              <mxPoint x="205" y="184" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n3-ocr-next" style="edgeStyle=none;rounded=0;html=1;strokeColor=#14816B;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n3-ocr" target="n3-ocr-detail">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="550" y="287" />
+            <mxPoint as="targetPoint" x="550" y="320" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="route-n3-ocr" style="edgeStyle=none;rounded=0;html=1;strokeColor=#14816B;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n2" target="n3-ocr">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="550" y="161" />
+            <mxPoint as="targetPoint" x="550" y="223" />
+            <Array as="points">
+              <mxPoint x="550" y="184" />
+              <mxPoint x="550" y="184" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n3-mllm-next" style="edgeStyle=none;rounded=0;html=1;strokeColor=#B95E00;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n3-mllm" target="n3-mllm-detail">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="895" y="287" />
+            <mxPoint as="targetPoint" x="895" y="320" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="route-n3-mllm" style="edgeStyle=none;rounded=0;html=1;strokeColor=#B95E00;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n2" target="n3-mllm">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="550" y="161" />
+            <mxPoint as="targetPoint" x="895" y="223" />
+            <Array as="points">
+              <mxPoint x="550" y="184" />
+              <mxPoint x="895" y="184" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" style="edgeStyle=none;rounded=0;html=1;strokeColor=#1B4F72;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n1" target="n2">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="550" y="76" />
+            <mxPoint as="targetPoint" x="550" y="108" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="merge-csv" style="edgeStyle=none;rounded=0;html=1;strokeColor=#1B4F72;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="csv-detail" target="n4">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="205" y="415" />
+            <mxPoint as="targetPoint" x="550" y="488" />
+            <Array as="points">
+              <mxPoint x="205" y="467" />
+              <mxPoint x="550" y="467" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="merge-n3-ocr" style="edgeStyle=none;rounded=0;html=1;strokeColor=#14816B;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n3-ocr-detail" target="n4">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="550" y="415" />
+            <mxPoint as="targetPoint" x="550" y="488" />
+            <Array as="points">
+              <mxPoint x="550" y="467" />
+              <mxPoint x="550" y="467" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="merge-n3-mllm" style="edgeStyle=none;rounded=0;html=1;strokeColor=#B95E00;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n3-mllm-detail" target="n4">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="895" y="415" />
+            <mxPoint as="targetPoint" x="550" y="488" />
+            <Array as="points">
+              <mxPoint x="895" y="467" />
+              <mxPoint x="550" y="467" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e45" style="edgeStyle=none;rounded=0;html=1;strokeColor=#1B4F72;strokeWidth=2;endArrow=block;endFill=1;dashed=0;exitX=0.5;exitY=1.0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0.0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="n4" target="n5">
+          <mxGeometry as="geometry" relative="1">
+            <mxPoint as="sourcePoint" x="550" y="546" />
+            <mxPoint as="targetPoint" x="550" y="579" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n1" value="档案文件输入并创建任务&lt;br&gt;CSV / Excel / 图像 / PDF" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;shadow=0;fontSize=22;fontStyle=1;spacing=8;dashed=0;">
+          <mxGeometry x="285" y="12" width="530" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="按扩展名和 useLlm 选择路径" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=14;fillColor=#D6EAF8;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=22;fontStyle=1;spacing=8;dashed=0;">
+          <mxGeometry x="345" y="108" width="410" height="53" as="geometry" />
+        </mxCell>
+        <mxCell id="n2-note" value="图像 / PDF 由用户选路&lt;br&gt;不按清晰度自动分流" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=20;fillColor=#FDFEFE;strokeColor=#85929E;strokeWidth=2;dashed=0;dashPattern=4 3;fontColor=#1B4F72;fontSize=19;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontStyle=0;spacing=8;">
+          <mxGeometry x="805" y="105" width="270" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="csv" value="CSV / Excel" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;spacing=8;fontColor=#1B4F72;dashed=0;">
+          <mxGeometry x="55" y="223" width="300" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="csv-detail" value="结构化解析&lt;br&gt;列名适配与基础校验" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#1B4F72;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#1B4F72;dashed=0;">
+          <mxGeometry x="55" y="320" width="300" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="n3-ocr" value="OCR 路径" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#E8F8F5;strokeColor=#14816B;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;spacing=8;fontColor=#14816B;dashed=0;">
+          <mxGeometry x="400" y="223" width="300" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="n3-ocr-detail" value="PPStructureV3 表格识别&lt;br&gt;值特征校正与表头映射" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#14816B;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#14816B;dashed=0;">
+          <mxGeometry x="400" y="320" width="300" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="n3-mllm" value="MLLM 路径" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FEF9E7;strokeColor=#B95E00;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;spacing=8;fontColor=#B95E00;dashed=0;">
+          <mxGeometry x="745" y="223" width="300" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="n3-mllm-detail" value="动态字段提示词&lt;br&gt;视觉模型生成 JSON" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#B95E00;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#B95E00;dashed=0;">
+          <mxGeometry x="745" y="320" width="300" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="业务持久化：新增或更新匹配记录" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=23;fontStyle=1;spacing=8;dashed=0;">
+          <mxGeometry x="255" y="488" width="590" height="58" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="记录质量参考分、文件归档与任务终态" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=22;fontStyle=0;spacing=8;dashed=0;">
+          <mxGeometry x="255" y="579" width="590" height="54" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -250,12 +250,11 @@ async function handleUpload() {
       formData.append('files', file)
       const uploadRes = await uploadKnowledgeFiles(formData)
       const savedFile = uploadRes.data?.data?.[0]
-      if (!savedFile?.path) throw new Error('文件上传失败')
+      if (!savedFile?.fileId) throw new Error('文件上传失败')
 
       const res = await uploadKnowledge({
-        filePath: savedFile.path,
+        fileId: savedFile.fileId,
         fileName: savedFile.name,
-        fileType: ext,
       })
       if (res.data?.code === 200) {
         ElMessage.success(`${file.name} 处理完成`)

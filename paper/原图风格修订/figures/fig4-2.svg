@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620"><rect width="100%" height="100%" fill="white"/>
+<rect x="20.0" y="10.0" width="1060.0" height="220.0" rx="12" fill="#F5EEF8" stroke="#8E44AD" stroke-width="2"/>
+<rect x="20.0" y="281.0" width="1060.0" height="321.0" rx="12" fill="#EBF5FB" stroke="#2E86AB" stroke-width="2"/>
+<polyline points="220,143 255,143" fill="none" stroke="#6C3483" stroke-width="2"/>
+<polygon points="255,143 245.0,148.0 245.0,138.0" fill="#6C3483"/>
+<polyline points="500,143 535,143" fill="none" stroke="#6C3483" stroke-width="2"/>
+<polygon points="535,143 525.0,148.0 525.0,138.0" fill="#6C3483"/>
+<polyline points="765,143 805,143" fill="none" stroke="#6C3483" stroke-width="2"/>
+<polygon points="805,143 795.0,148.0 795.0,138.0" fill="#6C3483"/>
+<polyline points="220,403 255,403" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="255,403 245.0,408.0 245.0,398.0" fill="#1B4F72"/>
+<polyline points="500,403 535,403" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="535,403 525.0,408.0 525.0,398.0" fill="#1B4F72"/>
+<polyline points="765,403 805,403" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="805,403 795.0,408.0 795.0,398.0" fill="#1B4F72"/>
+<polyline points="930,195 930,253 377,253 377,359" fill="none" stroke="#B95E00" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="377,359 372.0,349.0 382.0,349.0" fill="#B95E00"/>
+<polyline points="855,447 855,473 480,473 480,497" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="480,497 475.0,487.0 485.0,487.0" fill="#14816B"/>
+<polyline points="990,447 990,500" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="990,500 985.0,490.0 995.0,490.0" fill="#14816B"/>
+<rect x="40.0" y="22.0" width="205.0" height="36.0" rx="12" fill="#6C3483" stroke="none" stroke-width="2"/>
+<text x="142.5" y="40.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#FFFFFF">知识文档入库</text>
+<text x="655.0" y="39.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#6C3483">独立资料入口，不自动同步结构化名册</text>
+<rect x="40.0" y="90.0" width="180.0" height="105.0" rx="12" fill="#FFFFFF" stroke="#6C3483" stroke-width="2"/>
+<text x="130.0" y="127.65" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#6C3483">文档解析</text>
+<text x="130.0" y="157.35" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#6C3483">提取文本</text>
+<rect x="255.0" y="90.0" width="245.0" height="105.0" rx="12" fill="#FFFFFF" stroke="#6C3483" stroke-width="2"/>
+<text x="377.5" y="128.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#6C3483">字符分块</text>
+<text x="377.5" y="156.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#6C3483">500 字符 / 重叠 50</text>
+<rect x="535.0" y="90.0" width="230.0" height="105.0" rx="12" fill="#FDEDEC" stroke="#C0392B" stroke-width="2"/>
+<text x="650.0" y="127.65" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#922B21">embedding-3</text>
+<text x="650.0" y="157.35" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#922B21">1024 维向量</text>
+<path d="M805.0,102.0 A125.0,12 0 0 1 1055.0,102.0 L1055.0,183.0 A125.0,12 0 0 1 805.0,183.0 Z" fill="#FEF5E7" stroke="#D35400" stroke-width="2"/><ellipse cx="930.0" cy="102.0" rx="125.0" ry="12" fill="#FEF5E7" stroke="#D35400" stroke-width="2"/>
+<text x="930.0" y="128.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#6C3483">knowledge_chunks</text>
+<text x="930.0" y="156.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#6C3483">文本块与向量</text>
+<rect x="40.0" y="293.0" width="205.0" height="36.0" rx="12" fill="#1B4F72" stroke="none" stroke-width="2"/>
+<text x="142.5" y="311.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#FFFFFF">提问与回答</text>
+<text x="737.0" y="310.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">限定 ready 资料，按余弦距离排序</text>
+<rect x="40.0" y="359.0" width="180.0" height="88.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<text x="130.0" y="388.825" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">用户问题</text>
+<text x="130.0" y="417.175" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">生成查询向量</text>
+<rect x="255.0" y="359.0" width="245.0" height="88.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<text x="377.5" y="388.825" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">检索前 3 个文本块</text>
+<text x="377.5" y="417.175" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">聊天 top_k = 3</text>
+<rect x="535.0" y="359.0" width="230.0" height="88.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<text x="650.0" y="388.825" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">资料标题与片段</text>
+<text x="650.0" y="417.175" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">拼接到用户问题</text>
+<rect x="805.0" y="359.0" width="250.0" height="88.0" rx="12" fill="#E8F8F5" stroke="#1E8449" stroke-width="2"/>
+<text x="930.0" y="388.825" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">LangChain Agent</text>
+<text x="930.0" y="417.175" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">生成完整答案</text>
+<text x="240.0" y="257.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#B95E00">精确检索</text>
+<rect x="40.0" y="497.0" width="550.0" height="79.0" rx="12" fill="#D5F5E3" stroke="#27AE60" stroke-width="2"/>
+<text x="315.0" y="523.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#14816B">按需调用：20 个数据库工具 + 2 个联网工具</text>
+<text x="315.0" y="550.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#14816B">知识检索在 Agent 之前完成</text>
+<rect x="710.0" y="500.0" width="345.0" height="74.0" rx="12" fill="#D5F5E3" stroke="#27AE60" stroke-width="2"/>
+<text x="882.5" y="522.825" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#14816B">SSE 过程状态</text>
+<text x="882.5" y="551.175" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#14816B">最终完整答案一次发送</text>
+</svg>

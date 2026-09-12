@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="530" viewBox="0 0 1100 530"><rect width="100%" height="100%" fill="white"/>
+<rect x="15.0" y="10.0" width="1070.0" height="405.0" rx="12" fill="#F7F9F9" stroke="#5D6D7E" stroke-width="2"/>
+<rect x="40.0" y="107.0" width="205.0" height="147.0" rx="12" fill="#FFFFFF" stroke="#1E8449" stroke-width="2"/>
+<rect x="352.0" y="86.0" width="407.0" height="278.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<polyline points="245,181 372,181" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="372,181 362.0,186.0 362.0,176.0" fill="#1B4F72"/>
+<polyline points="458,204 458,259" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="458,259 453.0,249.0 463.0,249.0" fill="#14816B"/>
+<polyline points="653,204 653,259" fill="none" stroke="#6C3483" stroke-width="2"/>
+<polygon points="653,259 648.0,249.0 658.0,249.0" fill="#6C3483"/>
+<polyline points="739,176 803,176 803,150 850,150" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="850,150 840.0,155.0 840.0,145.0" fill="#B95E00"/>
+<polyline points="739,183 795,183 795,314 850,314" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="850,314 840.0,319.0 840.0,309.0" fill="#B95E00"/>
+<polyline points="739,287 780,287 780,222 960,222 960,207" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="960,207 965.0,217.0 955.0,217.0" fill="#B95E00"/>
+<polyline points="458,338 458,447" fill="none" stroke="#C0392B" stroke-width="2"/>
+<polygon points="458,447 453.0,437.0 463.0,437.0" fill="#C0392B"/>
+<polyline points="653,338 653,447" fill="none" stroke="#C0392B" stroke-width="2"/>
+<polygon points="653,447 648.0,437.0 658.0,437.0" fill="#C0392B"/>
+<rect x="35.0" y="20.0" width="235.0" height="34.0" rx="12" fill="#2C3E50" stroke="none" stroke-width="2"/>
+<text x="152.5" y="37.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#FFFFFF">Docker Compose</text>
+<text x="655.0" y="37.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#1B4F72">四个服务：frontend · backend · db · redis</text>
+<text x="142.5" y="139.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24.0" font-weight="700" fill="#14816B">frontend</text>
+<rect x="53.0" y="171.0" width="179.0" height="62.0" rx="12" fill="#E8F8F5" stroke="#27AE60" stroke-width="2"/>
+<text x="142.5" y="187.15" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#14816B">Nginx</text>
+<text x="142.5" y="216.85" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#14816B">Vue 静态资源</text>
+<text x="555.5" y="114.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#1B4F72">backend  Java + Python</text>
+<rect x="372.0" y="148.0" width="367.0" height="56.0" rx="12" fill="#EBF5FB" stroke="#2E86AB" stroke-width="2"/>
+<text x="555.5" y="176.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#1B4F72">Spring Boot 业务服务</text>
+<rect x="372.0" y="259.0" width="171.0" height="79.0" rx="12" fill="#F5EEF8" stroke="#14816B" stroke-width="2"/>
+<text x="457.5" y="286.35" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#14816B">任务子进程</text>
+<text x="457.5" y="310.65" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#14816B">OCR / 视觉 / 预测</text>
+<rect x="568.0" y="259.0" width="171.0" height="79.0" rx="12" fill="#FFFFFF" stroke="#6C3483" stroke-width="2"/>
+<text x="653.5" y="285.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#6C3483">FastAPI 进程</text>
+<text x="653.5" y="312.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#6C3483">Agent / RAG</text>
+<rect x="850.0" y="94.0" width="210.0" height="113.0" rx="12" fill="#FFFFFF" stroke="#D35400" stroke-width="2"/>
+<text x="955.0" y="119.45" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#B95E00">db</text>
+<text x="955.0" y="150.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#B95E00">PostgreSQL</text>
+<text x="955.0" y="181.55" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#B95E00">pgvector</text>
+<rect x="850.0" y="267.0" width="210.0" height="97.0" rx="12" fill="#FFFFFF" stroke="#D35400" stroke-width="2"/>
+<text x="955.0" y="301.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">redis</text>
+<text x="955.0" y="329.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">临时状态与缓存</text>
+<rect x="230.0" y="447.0" width="640.0" height="65.0" rx="12" fill="#FDEDEC" stroke="#C0392B" stroke-width="2"/>
+<text x="550.0" y="479.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#922B21">外部模型服务：视觉、文本与嵌入接口</text>
+<text x="302.5" y="153.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#1B4F72">/api 代理</text>
+<text x="414.0" y="232.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#14816B">启动</text>
+<text x="698.5" y="232.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#6C3483">HTTP</text>
+<text x="873.0" y="388.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#1B4F72">辅助进程不另计服务</text>
+</svg>

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="650" viewBox="0 0 1100 650"><rect width="100%" height="100%" fill="white"/>
+<rect x="25.0" y="198.0" width="1050.0" height="253.0" rx="12" fill="#F8FBFD" stroke="#A8C6D8" stroke-width="2"/>
+<polyline points="205,287 205,320" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="205,320 200.0,310.0 210.0,310.0" fill="#1B4F72"/>
+<polyline points="550,161 550,184 205,184 205,223" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="205,223 200.0,213.0 210.0,213.0" fill="#1B4F72"/>
+<polyline points="550,287 550,320" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="550,320 545.0,310.0 555.0,310.0" fill="#14816B"/>
+<polyline points="550,161 550,184 550,184 550,223" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="550,223 545.0,213.0 555.0,213.0" fill="#14816B"/>
+<polyline points="895,287 895,320" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="895,320 890.0,310.0 900.0,310.0" fill="#B95E00"/>
+<polyline points="550,161 550,184 895,184 895,223" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="895,223 890.0,213.0 900.0,213.0" fill="#B95E00"/>
+<polyline points="550,76 550,108" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="550,108 545.0,98.0 555.0,98.0" fill="#1B4F72"/>
+<polyline points="205,415 205,467 550,467 550,488" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="550,488 545.0,478.0 555.0,478.0" fill="#1B4F72"/>
+<polyline points="550,415 550,467 550,467 550,488" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="550,488 545.0,478.0 555.0,478.0" fill="#14816B"/>
+<polyline points="895,415 895,467 550,467 550,488" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="550,488 545.0,478.0 555.0,478.0" fill="#B95E00"/>
+<polyline points="550,546 550,579" fill="none" stroke="#1B4F72" stroke-width="2"/>
+<polygon points="550,579 545.0,569.0 555.0,569.0" fill="#1B4F72"/>
+<rect x="285.0" y="12.0" width="530.0" height="64.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<text x="550.0" y="29.15" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="700" fill="#1B4F72">档案文件输入并创建任务</text>
+<text x="550.0" y="58.85" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="700" fill="#1B4F72">CSV / Excel / 图像 / PDF</text>
+<rect x="345.0" y="108.0" width="410.0" height="53.0" rx="12" fill="#D6EAF8" stroke="#1B4F72" stroke-width="2"/>
+<text x="550.0" y="134.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="700" fill="#1B4F72">按扩展名和 useLlm 选择路径</text>
+<rect x="805.0" y="105.0" width="270.0" height="60.0" rx="12" fill="#FDFEFE" stroke="#85929E" stroke-width="2"/>
+<text x="940.0" y="122.175" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#1B4F72">图像 / PDF 由用户选路</text>
+<text x="940.0" y="147.825" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#1B4F72">不按清晰度自动分流</text>
+<rect x="55.0" y="223.0" width="300.0" height="64.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<text x="205.0" y="255.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24.0" font-weight="700" fill="#1B4F72">CSV / Excel</text>
+<rect x="55.0" y="320.0" width="300.0" height="95.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<text x="205.0" y="353.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">结构化解析</text>
+<text x="205.0" y="381.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">列名适配与基础校验</text>
+<rect x="400.0" y="223.0" width="300.0" height="64.0" rx="12" fill="#E8F8F5" stroke="#14816B" stroke-width="2"/>
+<text x="550.0" y="255.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24.0" font-weight="700" fill="#14816B">OCR 路径</text>
+<rect x="400.0" y="320.0" width="300.0" height="95.0" rx="12" fill="#FFFFFF" stroke="#14816B" stroke-width="2"/>
+<text x="550.0" y="353.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#14816B">PPStructureV3 表格识别</text>
+<text x="550.0" y="381.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#14816B">值特征校正与表头映射</text>
+<rect x="745.0" y="223.0" width="300.0" height="64.0" rx="12" fill="#FEF9E7" stroke="#B95E00" stroke-width="2"/>
+<text x="895.0" y="255.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24.0" font-weight="700" fill="#B95E00">MLLM 路径</text>
+<rect x="745.0" y="320.0" width="300.0" height="95.0" rx="12" fill="#FFFFFF" stroke="#B95E00" stroke-width="2"/>
+<text x="895.0" y="353.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">动态字段提示词</text>
+<text x="895.0" y="381.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">视觉模型生成 JSON</text>
+<rect x="255.0" y="488.0" width="590.0" height="58.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<text x="550.0" y="517.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#1B4F72">业务持久化：新增或更新匹配记录</text>
+<rect x="255.0" y="579.0" width="590.0" height="54.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<text x="550.0" y="606.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="400" fill="#1B4F72">记录质量参考分、文件归档与任务终态</text>
+</svg>

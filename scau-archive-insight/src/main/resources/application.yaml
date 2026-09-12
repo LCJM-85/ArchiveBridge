@@ -75,6 +75,8 @@ llm:
 app:
   security:
     unauthorized-login-url: http://localhost/login
+    # 仅填写真实反向代理所在网段；为空时完全忽略客户端提交的代理 IP 请求头
+    trusted-proxies: ${TRUSTED_PROXY_CIDRS:}
 
 # SpringDoc Swagger 配置
 springdoc:

@@ -97,7 +97,7 @@ docker compose up -d
 
 > 首次启动时，数据库会自动初始化表结构、维度数据及演示业务数据（280 条录取、215 条毕业、280 条学籍），无需手动导入。
 
-> Compose 中的 Redis 不映射宿主机端口，仅供后端通过 `redis:6379` 访问。`REDIS_PASSWORD` 会在容器每次启动时应用，并非只在首次初始化时设置。
+> Compose 中的 Redis 和后端 `8080` 均不映射宿主机端口：Redis 仅供后端访问，后端 API 仅通过前端 Nginx 的 `http://localhost` 入口访问。`REDIS_PASSWORD` 会在容器每次启动时应用，并非只在首次初始化时设置。本地 Maven 开发仍可直接使用 `localhost:8080`。
 
 ### 方式二：本地开发
 
@@ -269,6 +269,7 @@ OCR 管道：精确 → 去空白 → 包含 → Levenshtein 距离（≤3 字�
 | `DB_PASSWORD` | Docker 部署专用数据库密码（必填，取自根目录 `.env`） |
 | `DB_PASS` / `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` | 本地开发数据库连接（`application.yaml` 读取，`DB_PASS` 无默认值） |
 | `JWT_SECRET` | JWT 签名密钥，32 位以上（必填，无默认值） |
+| `TRUSTED_PROXY_CIDRS` | 可信反向代理的 IP/CIDR；本地直启应留空，Compose 留空时使用内部私网范围 |
 
 ### Redis
 
@@ -294,6 +295,9 @@ cd scau-archive-insight
 
 # 运行全部测试
 ./mvnw test
+
+# 运行 Python 知识库路径/URL 安全测试（这组测试不由 Maven 执行）
+python -B -m unittest discover -s src/test/python -p "test_*.py"
 
 # 运行真实 Redis 读写测试（需先启动 localhost:6379）
 RUN_REDIS_INTEGRATION=true ./mvnw -Dtest=RedisLiveIntegrationTest test

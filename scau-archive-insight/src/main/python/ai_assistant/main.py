@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 import sys
 import json
 import uvicorn
@@ -13,6 +12,8 @@ from models import (
 )
 from agent import create_agent_executor, create_report_chain, run_agent, run_report_chain, run_agent_stream
 from rag.document_loader import load_document, load_document_async
+from rag.path_security import resolve_rag_file
+from rag.url_security import validate_public_http_url
 from rag.text_splitter import split_text
 from rag.embedding import get_embeddings_batch
 from rag.retriever import search_knowledge
@@ -150,18 +151,19 @@ def _update_kb_status(kb_id: int, status: str, chunk_count: int = 0, error_msg: 
 @app.post("/kb/process")
 async def kb_process(req: KbProcessRequest):
     """处理上传的文件：解析 → 分块 → 向量化 → 存储"""
-    if not os.path.exists(req.file_path):
-        raise HTTPException(400, f"文件不存在: {req.file_path}")
+    try:
+        file_path, file_type = resolve_rag_file(req.file_path)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
 
     # 1. 创建知识库记录（保存原文件路径用于删除时清理）
     from db import get_conn, put_conn
     conn = get_conn()
     try:
         with conn.cursor() as cur:
-            store_path = req.store_path or req.file_path
             cur.execute(
                 "INSERT INTO knowledge_base (title, file_type, file_path, status) VALUES (%s, %s, %s, 'parsing') RETURNING id",
-                (req.title, req.file_type, store_path),
+                (req.title, file_type, str(file_path)),
             )
             kb_id = cur.fetchone()[0]
         conn.commit()
@@ -170,7 +172,7 @@ async def kb_process(req: KbProcessRequest):
 
     try:
         # 2. 解析文档
-        pages = load_document(req.file_path, req.file_type)
+        pages = load_document(str(file_path), file_type)
         full_text = "\n".join(pages)
 
         # 3. 分块
@@ -202,7 +204,12 @@ async def kb_process(req: KbProcessRequest):
 @app.post("/kb/process-url")
 async def kb_process_url(req: KbProcessUrlRequest):
     """处理网页链接：抓取 → 分块 → 向量化 → 存储"""
-    title = req.title or req.url
+    try:
+        validated_url = validate_public_http_url(req.url)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc
+
+    title = req.title or validated_url
 
     from db import get_conn, put_conn
     conn = get_conn()
@@ -210,7 +217,7 @@ async def kb_process_url(req: KbProcessUrlRequest):
         with conn.cursor() as cur:
             cur.execute(
                 "INSERT INTO knowledge_base (title, file_type, source, url, status) VALUES (%s, 'html', 'web_link', %s, 'parsing') RETURNING id",
-                (title, req.url),
+                (title, validated_url),
             )
             kb_id = cur.fetchone()[0]
         conn.commit()
@@ -219,7 +226,7 @@ async def kb_process_url(req: KbProcessUrlRequest):
 
     try:
         # 1. 抓取网页（Playwright 渲染）
-        pages = await load_document_async(req.url, "html")
+        pages = await load_document_async(validated_url, "html")
         full_text = "\n".join(pages)
 
         # 2. 分块
@@ -227,7 +234,7 @@ async def kb_process_url(req: KbProcessUrlRequest):
         if not chunks:
             raise ValueError("网页内容为空")
 
-        metadata_list = [{"source_title": title, "url": req.url, "chunk": i} for i in range(len(chunks))]
+        metadata_list = [{"source_title": title, "url": validated_url, "chunk": i} for i in range(len(chunks))]
 
         # 3. 保存
         _save_embedding(kb_id, chunks, metadata_list)
@@ -236,7 +243,7 @@ async def kb_process_url(req: KbProcessUrlRequest):
         return {
             "kb_id": kb_id,
             "title": title,
-            "url": req.url,
+            "url": validated_url,
             "chunk_count": len(chunks),
             "status": "ready",
         }

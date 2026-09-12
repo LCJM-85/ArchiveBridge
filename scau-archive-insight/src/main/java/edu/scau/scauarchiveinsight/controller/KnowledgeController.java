@@ -1,6 +1,7 @@
 package edu.scau.scauarchiveinsight.controller;
 
 import edu.scau.scauarchiveinsight.dto.R;
+import edu.scau.scauarchiveinsight.service.KnowledgeFileStorage;
 import edu.scau.scauarchiveinsight.service.KnowledgeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,9 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,52 +22,59 @@ import java.util.Map;
 @RequestMapping("/api/knowledge")
 public class KnowledgeController {
 
-    private static final Path RAG_STORAGE = Paths.get(System.getProperty("user.dir"), "storage", "rag");
+    private final KnowledgeService knowledgeService;
+    private final KnowledgeFileStorage fileStorage;
 
     @Autowired
-    private KnowledgeService knowledgeService;
+    public KnowledgeController(KnowledgeService knowledgeService, KnowledgeFileStorage fileStorage) {
+        this.knowledgeService = knowledgeService;
+        this.fileStorage = fileStorage;
+    }
 
-    @Operation(summary = "上传文件（仅保存到 storage/rag，返回路径）")
+    @Operation(summary = "上传文件（仅保存到 storage/rag，返回不透明文件标识）")
     @PostMapping("/upload/file")
     public R<List<Map<String, Object>>> uploadFile(@RequestParam("files") List<MultipartFile> files) {
         List<Map<String, Object>> fileList = new ArrayList<>();
         for (MultipartFile file : files) {
             try {
-                Files.createDirectories(RAG_STORAGE);
-                String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-                Path target = RAG_STORAGE.resolve(filename);
-                file.transferTo(target.toFile());
+                KnowledgeFileStorage.StoredFile stored = fileStorage.store(file);
                 Map<String, Object> info = new HashMap<>();
-                info.put("name", file.getOriginalFilename());
-                info.put("path", target.toString());
-                info.put("size", file.getSize());
+                info.put("name", stored.originalName());
+                info.put("fileId", stored.fileId());
+                info.put("size", stored.size());
                 fileList.add(info);
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 // 跳过失败文件
             }
         }
         return R.ok(fileList);
     }
 
-    @Operation(summary = "上传文件到知识库并处理")
+    @Operation(summary = "使用已上传文件标识写入知识库并处理")
     @PostMapping("/upload")
     public R<Map<String, Object>> upload(@RequestBody Map<String, String> body) {
-        String filePath = body.get("filePath");
+        String fileId = body.get("fileId");
         String fileName = body.get("fileName");
-        String fileType = body.get("fileType");
 
-        if (filePath == null || filePath.isBlank()) {
-            return R.error(400, "文件路径不能为空");
+        if (fileId == null || fileId.isBlank()) {
+            return R.error(400, "文件标识不能为空");
         }
+
+        final Path filePath;
+        try {
+            filePath = fileStorage.resolve(fileId);
+        } catch (IllegalArgumentException e) {
+            return R.error(400, e.getMessage());
+        }
+
         if (fileName == null || fileName.isBlank()) {
-            fileName = filePath;
+            fileName = filePath.getFileName().toString();
         }
-        if (fileType == null || fileType.isBlank()) {
-            fileType = filePath.replaceAll(".*\\.", "");
-        }
+        fileName = KnowledgeFileStorage.safeLeafName(fileName);
+        String fileType = KnowledgeFileStorage.extensionOf(filePath.getFileName().toString());
 
         String title = fileName.replaceAll("\\.[^.]*$", "");
-        Map<String, Object> result = knowledgeService.processFile(filePath, title, fileType);
+        Map<String, Object> result = knowledgeService.processFile(filePath.toString(), title, fileType);
 
         if (result.containsKey("error")) {
             return R.error(500, (String) result.get("error"));
@@ -84,12 +91,31 @@ public class KnowledgeController {
         if (url == null || url.isBlank()) {
             return R.error(400, "URL 不能为空");
         }
+        url = url.trim();
+        if (!isValidHttpUrl(url)) {
+            return R.error(400, "URL 仅支持具有主机名且不含用户凭据的 HTTP/HTTPS 地址");
+        }
 
         Map<String, Object> result = knowledgeService.processUrl(url, title);
         if (result.containsKey("error")) {
             return R.error(500, (String) result.get("error"));
         }
         return R.ok(result);
+    }
+
+    private static boolean isValidHttpUrl(String url) {
+        try {
+            URI uri = URI.create(url);
+            String scheme = uri.getScheme();
+            int port = uri.getPort();
+            return ("http".equalsIgnoreCase(scheme) || "https".equalsIgnoreCase(scheme))
+                    && uri.getHost() != null
+                    && !uri.getHost().isBlank()
+                    && uri.getRawUserInfo() == null
+                    && port <= 65535;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     @Operation(summary = "知识库文档列表")

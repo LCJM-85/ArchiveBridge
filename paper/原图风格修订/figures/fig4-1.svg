@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520"><rect width="100%" height="100%" fill="white"/>
+<rect x="30.0" y="108.0" width="1040.0" height="244.0" rx="12" fill="#F8FBFD" stroke="#A8C6D8" stroke-width="2"/>
+<polyline points="550,69 550,89 280,89 280,133" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="280,133 275.0,123.0 285.0,123.0" fill="#14816B"/>
+<polyline points="550,69 550,89 820,89 820,133" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="820,133 815.0,123.0 825.0,123.0" fill="#B95E00"/>
+<polyline points="280,198 280,220" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="280,220 275.0,210.0 285.0,210.0" fill="#14816B"/>
+<polyline points="820,198 820,220" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="820,220 815.0,210.0 825.0,210.0" fill="#B95E00"/>
+<polyline points="280,328 280,372 550,372 550,394" fill="none" stroke="#14816B" stroke-width="2"/>
+<polygon points="550,394 545.0,384.0 555.0,384.0" fill="#14816B"/>
+<polyline points="820,328 820,372 550,372 550,394" fill="none" stroke="#B95E00" stroke-width="2"/>
+<polygon points="550,394 545.0,384.0 555.0,384.0" fill="#B95E00"/>
+<rect x="300.0" y="10.0" width="500.0" height="59.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<text x="550.0" y="39.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24.0" font-weight="700" fill="#1B4F72">一行 OCR 网格：表头与字段值</text>
+<rect x="60.0" y="133.0" width="440.0" height="65.0" rx="12" fill="#E8F8F5" stroke="#0E8A6E" stroke-width="2"/>
+<text x="280.0" y="165.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="25.0" font-weight="700" fill="#14816B">表头适配（后计算）</text>
+<rect x="60.0" y="220.0" width="440.0" height="108.0" rx="12" fill="#FFFFFF" stroke="#0E8A6E" stroke-width="2"/>
+<text x="280.0" y="245.65" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#14816B">精确匹配 → 去普通空格</text>
+<text x="280.0" y="274.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#14816B">→ 包含匹配 → 编辑距离</text>
+<text x="280.0" y="302.35" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#14816B">候选来自元数据字段配置</text>
+<rect x="600.0" y="133.0" width="440.0" height="65.0" rx="12" fill="#FEF9E7" stroke="#C27803" stroke-width="2"/>
+<text x="820.0" y="165.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="25.0" font-weight="700" fill="#B95E00">值特征校正（先计算）</text>
+<rect x="600.0" y="220.0" width="440.0" height="108.0" rx="12" fill="#FFFFFF" stroke="#C27803" stroke-width="2"/>
+<text x="820.0" y="245.65" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">启发式评分 → 选最高正分配对</text>
+<text x="820.0" y="274.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">锁定该值与字段 → 继续选择</text>
+<text x="820.0" y="302.35" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">每个值与字段至多使用一次</text>
+<rect x="215.0" y="394.0" width="670.0" height="63.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<text x="550.0" y="425.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="700" fill="#1B4F72">先放表头映射结果，再以校正结果覆盖同名字段</text>
+<text x="550.0" y="491.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#17354A">两项均在 OCR 链执行；MLLM 路径不重复执行这套 Java 字段适配。</text>
+</svg>

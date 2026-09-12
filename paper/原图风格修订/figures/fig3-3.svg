@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="680" viewBox="0 0 1100 680"><rect width="100%" height="100%" fill="white"/>
+<rect x="20.0" y="10.0" width="1060.0" height="132.0" rx="12" fill="#FEF5E7" stroke="#E67E22" stroke-width="2"/>
+<rect x="20.0" y="185.0" width="1060.0" height="208.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<rect x="40.0" y="232.0" width="290.0" height="142.0" rx="12" fill="#FFFFFF" stroke="#2E86AB" stroke-width="2"/>
+<rect x="405.0" y="232.0" width="290.0" height="142.0" rx="12" fill="#FFFFFF" stroke="#1B4F72" stroke-width="2"/>
+<rect x="770.0" y="232.0" width="290.0" height="142.0" rx="12" fill="#FFFFFF" stroke="#377DAD" stroke-width="2"/>
+<rect x="20.0" y="425.0" width="1060.0" height="70.0" rx="12" fill="#E8F8F5" stroke="#1E8449" stroke-width="2"/>
+<rect x="20.0" y="528.0" width="1060.0" height="112.0" rx="12" fill="#F5EEF8" stroke="#6C3483" stroke-width="2"/>
+<polyline points="220,125 220,160 185,160 185,232" fill="none" stroke="#B95E00" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="185,232 180.0,222.0 190.0,222.0" fill="#B95E00"/>
+<polyline points="535,125 535,160 550,160 550,232" fill="none" stroke="#B95E00" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="550,232 545.0,222.0 555.0,222.0" fill="#B95E00"/>
+<polyline points="885,125 885,160 915,160 915,232" fill="none" stroke="#B95E00" stroke-width="2" stroke-dasharray="7 5"/>
+<polygon points="915,232 910.0,222.0 920.0,222.0" fill="#B95E00"/>
+<polyline points="405,585 660,585" fill="none" stroke="#6C3483" stroke-width="2"/>
+<polygon points="660,585 650.0,590.0 650.0,580.0" fill="#6C3483"/>
+<text x="295.0" y="31.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="24.0" font-weight="700" fill="#B95E00">基础维度与业务支持</text>
+<rect x="40.0" y="60.0" width="650.0" height="65.0" rx="12" fill="#FFFFFF" stroke="#D35400" stroke-width="2"/>
+<text x="365.0" y="79.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#B95E00">college_dim / major_dim / class_dim</text>
+<text x="365.0" y="106.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#B95E00">province_dim / degree_dim / destination_dim</text>
+<rect x="720.0" y="60.0" width="335.0" height="65.0" rx="12" fill="#FDEBD0" stroke="#F5B041" stroke-width="2"/>
+<text x="887.5" y="78.325" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">archive_file_dim</text>
+<text x="887.5" y="106.675" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#B95E00">来源文件</text>
+<text x="380.0" y="206.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="700" fill="#1B4F72">业务事实记录</text>
+<rect x="40.0" y="232.0" width="290.0" height="34.0" rx="0" fill="#2E86AB" stroke="none" stroke-width="2"/>
+<text x="185.0" y="249.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="700" fill="#FFFFFF">admission_fact</text>
+<text x="185.0" y="283.55" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">PK  id</text>
+<text x="185.0" y="307.85" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">student_no / exam_no</text>
+<text x="185.0" y="332.15" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">province_id / major_id</text>
+<text x="185.0" y="356.45" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">degree_id / file_id</text>
+<rect x="405.0" y="232.0" width="290.0" height="34.0" rx="0" fill="#1B4F72" stroke="none" stroke-width="2"/>
+<text x="550.0" y="249.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="700" fill="#FFFFFF">student_fact</text>
+<text x="550.0" y="283.55" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">PK  id</text>
+<text x="550.0" y="307.85" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">student_no / id_card</text>
+<text x="550.0" y="332.15" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">major_id / class_id</text>
+<text x="550.0" y="356.45" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">graduated</text>
+<rect x="770.0" y="232.0" width="290.0" height="34.0" rx="0" fill="#377DAD" stroke="none" stroke-width="2"/>
+<text x="915.0" y="249.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="700" fill="#FFFFFF">graduation_fact</text>
+<text x="915.0" y="283.55" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">PK  id</text>
+<text x="915.0" y="307.85" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">student_no / degree_id</text>
+<text x="915.0" y="332.15" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">dest_id / file_id</text>
+<text x="915.0" y="356.45" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="18.0" font-weight="400" fill="#1B4F72">graduation_date</text>
+<text x="205.0" y="444.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="700" fill="#14816B">metadata_standard</text>
+<text x="205.0" y="471.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="700" fill="#14816B">PK  metadata_id</text>
+<text x="717.5" y="444.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#14816B">field_code / field_name / source_field</text>
+<text x="717.5" y="471.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#14816B">field_type / is_required</text>
+<rect x="40.0" y="548.0" width="365.0" height="72.0" rx="12" fill="#FFFFFF" stroke="#8E44AD" stroke-width="2"/>
+<text x="222.5" y="569.825" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#6C3483">knowledge_base</text>
+<text x="222.5" y="598.175" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#6C3483">PK  id · title · status</text>
+<rect x="660.0" y="548.0" width="395.0" height="72.0" rx="12" fill="#FFFFFF" stroke="#8E44AD" stroke-width="2"/>
+<text x="857.5" y="571.175" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#6C3483">knowledge_chunks</text>
+<text x="857.5" y="596.825" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#6C3483">PK  id · FK  kb_id · vector(1024)</text>
+<text x="532.0" y="562.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#6C3483">1 : N  外键关联</text>
+<text x="550.0" y="661.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="19.0" font-weight="400" fill="#17354A">虚线：服务层维护的逻辑关联；知识库为独立入口。完整表清单见表3-1。</text>
+</svg>

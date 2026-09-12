@@ -18,7 +18,7 @@ public class OpenCVService {
             String python = Path.of("", "src/main/python/.venv/Scripts/python.exe")
                     .toAbsolutePath().normalize().toString();
 
-            String scriptPath = Path.of("", "src/main/python/opencv/opencv.py")
+            String scriptPath = Path.of("", "src/main/python/openCV/opencv.py")
                     .toAbsolutePath().normalize().toString();
 
             ProcessBuilder pb = new ProcessBuilder(

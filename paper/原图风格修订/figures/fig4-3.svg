@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="580" viewBox="0 0 1100 580"><rect width="100%" height="100%" fill="white"/>
+<rect x="20.0" y="87.0" width="210.0" height="405.0" rx="12" fill="#1B4F72" stroke="#1B4F72" stroke-width="2"/>
+<rect x="251.0" y="87.0" width="829.0" height="55.0" rx="12" fill="#F4F7FA" stroke="#A9BCC9" stroke-width="2"/>
+<rect x="251.0" y="159.0" width="829.0" height="333.0" rx="12" fill="#F8FBFD" stroke="#A9BCC9" stroke-width="2"/>
+<rect x="20.0" y="10.0" width="1060.0" height="58.0" rx="12" fill="#EBF5FB" stroke="#1B4F72" stroke-width="2"/>
+<text x="550.0" y="39.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="22.0" font-weight="700" fill="#1B4F72">ArchiveBridge     当前页面 / 业务入口                              用户菜单</text>
+<text x="125.0" y="119.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="25.0" font-weight="700" fill="#FFFFFF">数智档桥</text>
+<rect x="35.0" y="151.0" width="180.0" height="39.0" rx="12" fill="#1B4F72" stroke="none" stroke-width="2"/>
+<text x="125.0" y="170.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#FFFFFF">仪表盘</text>
+<rect x="35.0" y="202.0" width="180.0" height="39.0" rx="12" fill="#EBF5FB" stroke="none" stroke-width="2"/>
+<text x="125.0" y="221.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#1B4F72">档案上传与任务</text>
+<rect x="35.0" y="253.0" width="180.0" height="39.0" rx="12" fill="#1B4F72" stroke="none" stroke-width="2"/>
+<text x="125.0" y="272.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#FFFFFF">数据管理</text>
+<rect x="35.0" y="304.0" width="180.0" height="39.0" rx="12" fill="#1B4F72" stroke="none" stroke-width="2"/>
+<text x="125.0" y="323.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#FFFFFF">图表分析</text>
+<rect x="35.0" y="355.0" width="180.0" height="39.0" rx="12" fill="#1B4F72" stroke="none" stroke-width="2"/>
+<text x="125.0" y="374.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#FFFFFF">AI 助手 / 知识库</text>
+<rect x="35.0" y="406.0" width="180.0" height="39.0" rx="12" fill="#1B4F72" stroke="none" stroke-width="2"/>
+<text x="125.0" y="425.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#FFFFFF">系统管理</text>
+<rect x="264.0" y="96.0" width="165.0" height="36.0" rx="12" fill="#EBF5FB" stroke="#AED6F1" stroke-width="2"/>
+<text x="346.5" y="114.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#1B4F72">仪表盘</text>
+<rect x="444.0" y="96.0" width="175.0" height="36.0" rx="12" fill="#1B4F72" stroke="#1B4F72" stroke-width="2"/>
+<text x="531.5" y="114.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#FFFFFF">档案上传</text>
+<rect x="634.0" y="96.0" width="175.0" height="36.0" rx="12" fill="#EBF5FB" stroke="#AED6F1" stroke-width="2"/>
+<text x="721.5" y="114.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#1B4F72">图表分析</text>
+<rect x="824.0" y="96.0" width="240.0" height="36.0" rx="12" fill="#EBF5FB" stroke="#AED6F1" stroke-width="2"/>
+<text x="944.0" y="114.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="20.0" font-weight="400" fill="#1B4F72">AI 助手</text>
+<text x="665.0" y="229.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="27.0" font-weight="700" fill="#1B4F72">业务内容区：当前激活组件</text>
+<text x="665.0" y="305.975" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="400" fill="#1B4F72">由 tabStore.activeTab 选择动态组件</text>
+<text x="665.0" y="337.025" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="400" fill="#1B4F72">keep-alive 保留组件状态</text>
+<text x="665.0" y="421.0" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="23.0" font-weight="700" fill="#B95E00">界面布局示意，非系统运行截图</text>
+<rect x="30.0" y="518.0" width="1040.0" height="43.0" rx="12" fill="#EBF5FB" stroke="#2E86AB" stroke-width="2"/>
+<text x="550.0" y="539.5" dominant-baseline="central" text-anchor="middle" font-family="Microsoft YaHei, sans-serif" font-size="21.0" font-weight="400" fill="#1B4F72">点击菜单 → 添加或激活内部标签 → 切换业务组件；刷新后返回默认页面</text>
+</svg>
