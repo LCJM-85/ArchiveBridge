@@ -407,7 +407,7 @@ onActivated(() => {
 }
 
 :deep(.el-table .degree-column .cell) {
-  white-space: normal;
+  white-space: nowrap;
   text-overflow: clip;
 }
 
@@ -559,8 +559,7 @@ onActivated(() => {
 .degree-pill {
   box-sizing: border-box;
   max-width: 100%;
-  white-space: normal;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
   vertical-align: middle;
   display: inline-block;
   padding: 2px 10px;

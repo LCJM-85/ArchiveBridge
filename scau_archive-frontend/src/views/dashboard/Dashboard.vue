@@ -345,7 +345,7 @@ onBeforeUnmount(() => {
 <style scoped>
 .page-wrapper { max-width: 1560px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; padding: 8px 0 16px; }
 .workspace-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 6px 0 20px; border-bottom: 1px solid var(--border-color); }
-.eyebrow { color: var(--color-primary); font-size: 10px; letter-spacing: 2px; margin-bottom: 12px; }
+.eyebrow { color: var(--color-gold); font-size: 10px; letter-spacing: 2px; margin-bottom: 12px; }
 .workspace-heading h1 { font-size: 28px; letter-spacing: 1px; font-weight: 600; margin: 0; }
 .workspace-heading p { color: var(--text-secondary); font-size: 13px; margin: 10px 0 0; }
 .heading-actions { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
