@@ -164,15 +164,15 @@ const handleSelect = (menuKey) => {
 }
 
 .logo-icon {
-  color: #e6cd95;
+  color: #d7c39b;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 34px;
   height: 34px;
   background: transparent;
-  border: 1px solid #ffffff26;
-  border-radius: 10px;
+  border: none;
+  border-radius: 4px;
   box-shadow: none;
   flex-shrink: 0;
 }
@@ -183,6 +183,7 @@ const handleSelect = (menuKey) => {
   font-weight: 600;
   letter-spacing: 3px;
   white-space: nowrap;
+  color: #fffaf0;
 }
 
 .sidebar .menu {

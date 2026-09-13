@@ -28,7 +28,7 @@ export function getChartTheme() {
 
   // 品牌绿系渐进色板 + 琥珀金点缀（替代通用彩虹板）。
   // 末位紫罗兰用于"女"等需要与绿强区分的对比项，对红绿色盲友好。
-  const palette = [primary, '#2fb984', '#57c493', '#8fd3b0', gold, '#b37feb']
+  const palette = [primary, '#708b71', '#9ba88b', '#71959b', gold, '#95809d']
 
   return {
     surface: cssVar('--card-bg', '#ffffff'),
@@ -44,7 +44,7 @@ export function getChartTheme() {
     axisLine: borderColor,     // 坐标轴线
     palette,
     maleColor: primary,
-    femaleColor: '#b37feb',
+    femaleColor: '#95809d',
   }
 }
 
@@ -60,7 +60,7 @@ export function generatePalette(n) {
     const ratio = n === 1 ? 0 : i / (n - 1)
     const hue = 150 + ratio * 45        // 150°-195°：绿 → 青绿
     const lightness = 46 + ratio * 16   // 46%-62%：深 → 浅（整体明亮）
-    colors.push(`hsl(${Math.round(hue)}, 60%, ${Math.round(lightness)}%)`)
+    colors.push(`hsl(${Math.round(hue)}, 28%, ${Math.round(lightness)}%)`)
   }
   return colors
 }

@@ -19,35 +19,35 @@ button, a, .el-input__wrapper, .el-select__wrapper {
 /* ===================== LIGHT THEME (Default) ===================== */
 :root {
   /* ---- Background Colors ---- */
-  --bg-primary: #f5f4f0;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f0f1ed;
-  --bg-elevated: #ffffff;
+  --bg-primary: #f3ecdf;
+  --bg-secondary: #fffbf3;
+  --bg-tertiary: #eee5d5;
+  --bg-elevated: #fffbf3;
 
   /* ---- Text Colors ---- */
-  --text-primary: #26352f;
-  --text-secondary: #5c6861;
-  --text-tertiary: #747e77;
-  --text-placeholder: #858d87;
+  --text-primary: #243d32;
+  --text-secondary: #536358;
+  --text-tertiary: #687267;
+  --text-placeholder: #7b8074;
 
   /* ---- Border Colors ---- */
-  --border-color: #dde2da;
-  --border-light: #eaede7;
+  --border-color: #dcd3c2;
+  --border-light: #e9e0d1;
 
   /* ---- Brand / Accent Colors ---- */
-  --color-primary: #27634e;
-  --color-primary-light: #eaf1eb;
-  --color-primary-dark: #1b4939;
-  --color-accent: #245640;
+  --color-primary: #385e4b;
+  --color-primary-light: #e8ecdf;
+  --color-primary-dark: #284635;
+  --color-accent: #80663c;
   --color-warning: #e6a23c;
   --color-danger: #f56c6c;
   --color-success: #67c23a;
   --color-info: #909399;
 
   /* ---- 琥珀金（品牌点缀色） ---- */
-  --color-gold: #c9a45c;
-  --color-gold-light: #d9b877;
-  --color-gold-dark: #9a7a3c;
+  --color-gold: #80663c;
+  --color-gold-light: #d7c39b;
+  --color-gold-dark: #69522f;
 
   /* ---- 展示字体（标题/品牌，衬线） ---- */
   --font-body: 'Segoe UI', 'Microsoft YaHei', 'PingFang SC', sans-serif;
@@ -60,49 +60,49 @@ button, a, .el-input__wrapper, .el-select__wrapper {
   --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.1);
 
   /* ---- Radius Scale ---- */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
 
   /* ---- Layout Specific ---- */
-  --sidebar-bg: #19382e;
-  --sidebar-text: #b8c5bc;
-  --sidebar-active-text: #ffffff;
-  --sidebar-active-bg: rgba(255, 255, 255, 0.1);
-  --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-logo-border: rgba(255, 255, 255, 0.1);
+  --sidebar-bg: #213d31;
+  --sidebar-text: #c8d1c7;
+  --sidebar-active-text: #fffaf0;
+  --sidebar-active-bg: #ffffff12;
+  --sidebar-hover-bg: #ffffff0b;
+  --sidebar-border: #ffffff14;
+  --sidebar-logo-border: #ffffff18;
 
-  --header-bg: #ffffff;
-  --header-border: #dde2da;
-  --header-text: #26352f;
+  --header-bg: #f8f1e5;
+  --header-border: #dcd3c2;
+  --header-text: #243d32;
   --header-shadow: none;
 
-  --content-bg: #f5f4f0;
-  --app-bg: #f5f4f0;
+  --content-bg: #f3ecdf;
+  --app-bg: #f3ecdf;
 
   /* ---- Card ---- */
-  --card-bg: #ffffff;
-  --card-border: #dde2da;
-  --card-header-bg: #ffffff;
-  --card-header-border: #eaede7;
+  --card-bg: #fffbf3;
+  --card-border: #dcd3c2;
+  --card-header-bg: #fffbf3;
+  --card-header-border: #e9e0d1;
 
   /* ---- Table ---- */
-  --table-bg: #ffffff;
-  --table-tr-bg: #ffffff;
-  --table-header-bg: #f5f4f0;
-  --table-row-hover-bg: #f0f1ed;
-  --table-border-color: #dde2da;
+  --table-bg: #fffbf3;
+  --table-tr-bg: #fffbf3;
+  --table-header-bg: #f0e7d8;
+  --table-row-hover-bg: #f4eedf;
+  --table-border-color: #e2d9c9;
 
   /* ---- Input / Form ---- */
-  --input-bg: #ffffff;
-  --input-border: #d0d2da;
+  --input-bg: #fffcf6;
+  --input-border: #cfc6b5;
   --input-focus-border: var(--color-primary);
   --input-text-color: var(--text-primary);
   --input-placeholder-color: var(--text-placeholder);
 
   /* ---- Dialog / Overlay ---- */
-  --dialog-bg: #ffffff;
+  --dialog-bg: #fffbf3;
   --dialog-overlay: rgba(0, 0, 0, 0.35);
 
   /* ---- Scrollbar ---- */
@@ -120,21 +120,21 @@ button, a, .el-input__wrapper, .el-select__wrapper {
   --el-border-color: var(--border-color);
   --el-border-color-light: var(--border-light);
   --el-border-color-lighter: var(--border-light);
-  --el-border-color-extra-light: #f2f4f8;
+  --el-border-color-extra-light: #eee7da;
   --el-color-primary: var(--color-primary);
-  --el-color-primary-light-3: #2fb984;
-  --el-color-primary-light-5: #57c493;
-  --el-color-primary-light-7: #8fd3b0;
-  --el-color-primary-light-8: #b5e2cc;
-  --el-color-primary-light-9: #eaf1eb;
-  --el-color-primary-dark-2: #245640;
+  --el-color-primary-light-3: #708b71;
+  --el-color-primary-light-5: #9cae95;
+  --el-color-primary-light-7: #c6d0b9;
+  --el-color-primary-light-8: #dae1cc;
+  --el-color-primary-light-9: #e8ecdf;
+  --el-color-primary-dark-2: #284635;
   --el-color-success: var(--color-success);
   --el-color-warning: var(--color-warning);
   --el-color-danger: var(--color-danger);
   --el-color-info: var(--color-info);
   --el-fill-color: var(--bg-tertiary);
-  --el-fill-color-light: #f5f7fa;
-  --el-fill-color-lighter: #fafafa;
+  --el-fill-color-light: #f4edde;
+  --el-fill-color-lighter: #faf5eb;
   --el-mask-color: rgba(255, 255, 255, 0.8);
   --el-card-bg-color: var(--card-bg);
   --el-dialog-bg-color: var(--dialog-bg);
@@ -161,26 +161,26 @@ button, a, .el-input__wrapper, .el-select__wrapper {
 /* ===================== DARK THEME ===================== */
 .dark {
   /* ---- Background Colors ---- */
-  --bg-primary: #101713;
-  --bg-secondary: #17211c;
-  --bg-tertiary: #1f2a24;
-  --bg-elevated: #1f2a24;
+  --bg-primary: #19231e;
+  --bg-secondary: #202c25;
+  --bg-tertiary: #2a372e;
+  --bg-elevated: #2a372e;
 
   /* ---- Text Colors ---- */
-  --text-primary: #e4e7ed;
-  --text-secondary: #9ca0aa;
-  --text-tertiary: #a2aba4;
+  --text-primary: #efe8d8;
+  --text-secondary: #c2c6b8;
+  --text-tertiary: #a6af9f;
   --text-placeholder: #87958d;
 
   /* ---- Border Colors ---- */
-  --border-color: #2d3138;
-  --border-light: #25292f;
+  --border-color: #414a3d;
+  --border-light: #333f33;
 
   /* ---- Brand / Accent Colors ---- */
-  --color-primary: #2fae7c;
-  --color-primary-light: #132b20;
-  --color-primary-dark: #14a06f;
-  --color-accent: #3fb57f;
+  --color-primary: #a2bc99;
+  --color-primary-light: #2e4031;
+  --color-primary-dark: #bdd0ae;
+  --color-accent: #d7c39b;
   --color-warning: #e6a23c;
   --color-danger: #f56c6c;
   --color-success: #67c23a;
@@ -198,44 +198,44 @@ button, a, .el-input__wrapper, .el-select__wrapper {
   --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.4);
 
   /* ---- Layout Specific ---- */
-  --sidebar-bg: #0a1f17;
-  --sidebar-text: #8b8f99;
-  --sidebar-active-text: #ffffff;
-  --sidebar-active-bg: rgba(45, 157, 110, 0.25);
+  --sidebar-bg: #17241c;
+  --sidebar-text: #c2c6b8;
+  --sidebar-active-text: #f3eddf;
+  --sidebar-active-bg: #354734;
   --sidebar-hover-bg: rgba(255, 255, 255, 0.05);
   --sidebar-border: rgba(255, 255, 255, 0.06);
   --sidebar-logo-border: rgba(255, 255, 255, 0.08);
 
-  --header-bg: #1a1d21;
-  --header-border: #2d3138;
-  --header-text: #e4e7ed;
+  --header-bg: #202c25;
+  --header-border: #414a3d;
+  --header-text: #efe8d8;
   --header-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 
-  --content-bg: #111316;
-  --app-bg: #111316;
+  --content-bg: #19231e;
+  --app-bg: #19231e;
 
   /* ---- Card ---- */
-  --card-bg: #1a1d21;
-  --card-border: #2d3138;
-  --card-header-bg: #1a1d21;
-  --card-header-border: #25292f;
+  --card-bg: #202c25;
+  --card-border: #414a3d;
+  --card-header-bg: #202c25;
+  --card-header-border: #333f33;
 
   /* ---- Table ---- */
-  --table-bg: #1a1d21;
-  --table-tr-bg: #1a1d21;
-  --table-header-bg: #23262b;
-  --table-row-hover-bg: #23262b;
-  --table-border-color: #2d3138;
+  --table-bg: #202c25;
+  --table-tr-bg: #202c25;
+  --table-header-bg: #2a372e;
+  --table-row-hover-bg: #303e32;
+  --table-border-color: #414a3d;
 
   /* ---- Input / Form ---- */
-  --input-bg: #23262b;
-  --input-border: #3a3e46;
+  --input-bg: #26332a;
+  --input-border: #53614f;
   --input-focus-border: var(--color-primary);
   --input-text-color: var(--text-primary);
   --input-placeholder-color: var(--text-placeholder);
 
   /* ---- Dialog / Overlay ---- */
-  --dialog-bg: #1a1d21;
+  --dialog-bg: #202c25;
   --dialog-overlay: rgba(0, 0, 0, 0.6);
 
   /* ---- Scrollbar ---- */
@@ -266,8 +266,8 @@ button, a, .el-input__wrapper, .el-select__wrapper {
   --el-color-danger: var(--color-danger);
   --el-color-info: var(--color-info);
   --el-fill-color: var(--bg-tertiary);
-  --el-fill-color-light: #1e2126;
-  --el-fill-color-lighter: #191b20;
+  --el-fill-color-light: #2a372e;
+  --el-fill-color-lighter: #26332a;
   --el-mask-color: rgba(0, 0, 0, 0.6);
   --el-card-bg-color: var(--card-bg);
   --el-dialog-bg-color: var(--dialog-bg);
@@ -407,7 +407,7 @@ body {
 }
 
 .sidebar .el-menu-item.is-active {
-  background: #ffffff13 !important;
+  background: var(--sidebar-active-bg) !important;
   color: var(--sidebar-active-text) !important;
   font-weight: 500;
 }
@@ -421,7 +421,7 @@ body {
   bottom: 22%;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: #b7cdbd;
+  background: var(--color-gold);
 }
 
 .sidebar .el-sub-menu__title {
@@ -459,7 +459,7 @@ body {
   bottom: 22%;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: #b7cdbd;
+  background: var(--color-gold);
 }
 
 .sidebar .el-sub-menu .el-sub-menu__title .el-sub-menu__icon-arrow {
@@ -617,8 +617,8 @@ body {
 /* ===================== SIDEBAR POPUP MENU STYLES ===================== */
 
 .dark .el-popper {
-  background: #1a1d21 !important;
-  border: 1px solid #2d3138 !important;
+  background: var(--bg-elevated) !important;
+  border: 1px solid var(--border-color) !important;
 }
 
 .dark .el-popper .el-menu--popup {
@@ -627,7 +627,7 @@ body {
 
 .dark .el-popper .el-menu-item {
   background: transparent !important;
-  color: #9ca0aa !important;
+  color: var(--text-secondary) !important;
 }
 
 .dark .el-popper .el-menu-item:hover {
@@ -670,8 +670,8 @@ body {
   padding: 8px 0 24px !important; animation: none !important;
 }
 .content .page-hero::after, .content .ph-art, .content .ph-rule { display: none; }
-.content .ph-kicker { color: var(--color-primary); font-size: 10px; letter-spacing: 1.5px; }
-.content .ph-left h2 { font-family: var(--font-body); font-size: 26px; font-weight: 600; letter-spacing: .5px; }
+.content .ph-kicker { color: var(--color-gold); font-size: 10px; letter-spacing: 1.5px; }
+.content .ph-left h2 { font-family: var(--font-display); font-size: 28px; font-weight: 400; letter-spacing: 1px; }
 .content .ph-count-num { color: var(--text-primary); font-size: 28px; text-shadow: none; }
 .content .ph-count-label { color: var(--text-secondary); }
 .content .filter-bar {
@@ -682,10 +682,10 @@ body {
 .app-layout .content .el-card { border-radius: var(--radius-md) !important; }
 .content .table-card .el-table th.el-table__cell { background: var(--table-header-bg) !important; }
 .content .btn-gold, .el-dialog .btn-gold {
-  background: var(--el-color-primary) !important; color: #fff !important;
+  background: var(--color-gold-light) !important; color: #243d32 !important;
   border-radius: 6px !important; box-shadow: none !important; filter: none;
 }
-.content .btn-gold:hover, .el-dialog .btn-gold:hover { background: var(--el-color-primary-dark-2) !important; }
+.content .btn-gold:hover, .el-dialog .btn-gold:hover { background: #cbb487 !important; }
 .content .drop-zone { background: var(--bg-primary) !important; border-radius: 8px !important; box-shadow: none !important; }
 .content .drop-zone-icon, .content .drop-icon { animation: none !important; }
 .content .degree-pill { color: var(--text-secondary); background: var(--bg-tertiary); border-color: var(--border-color); }
@@ -736,6 +736,27 @@ button, input, textarea, select { font-family: var(--font-body); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* Paper-toned workspace with distinct navigation, content and accent layers. */
+.app-layout .el-button--primary, .el-dialog .el-button--primary {
+  --el-button-bg-color: var(--color-primary);
+  --el-button-border-color: var(--color-primary);
+  --el-button-text-color: #fffaf0;
+  --el-button-hover-bg-color: var(--color-primary-dark);
+  --el-button-hover-border-color: var(--color-primary-dark);
+  --el-button-hover-text-color: #fffaf0;
+  --el-button-active-bg-color: #1f3d30;
+  --el-button-active-border-color: #1f3d30;
+  --el-button-active-text-color: #fffaf0;
+  --el-button-disabled-bg-color: var(--bg-tertiary);
+  --el-button-disabled-border-color: var(--border-color);
+  --el-button-disabled-text-color: var(--text-tertiary);
+}
+.content .workspace-heading h1 { font-family: var(--font-display); font-weight: 400; letter-spacing: 1px; }
+.content .section-heading h2, .el-dialog__title { font-family: var(--font-display); }
+.content .filter-bar { border: 1px solid var(--border-color); }
+.content .page-hero .ph-left h2 { color: var(--text-primary); }
+.content .welcome-kicker { color: var(--color-gold); }
 
 /* ===================== RESPONSIVE / MOBILE ===================== */
 

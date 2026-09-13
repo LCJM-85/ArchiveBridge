@@ -563,13 +563,19 @@ onActivated(() => {
 }
 
 .gender-tag {
-  display: inline-block;
-  min-width: 40px;
-  padding: 2px 10px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 24px;
+  padding: 0;
   border-radius: 999px;
   font-size: 12px;
+  line-height: 1;
   font-weight: 500;
   text-align: center;
+  vertical-align: middle;
 }
 .gender-male { color: #0e8a5f; background: var(--color-primary-light); }
 .gender-female { color: #d6458d; background: rgba(214, 69, 141, 0.1); }
