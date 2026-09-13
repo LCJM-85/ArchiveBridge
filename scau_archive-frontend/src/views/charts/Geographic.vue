@@ -261,7 +261,7 @@ onBeforeUnmount(() => {
   line-height: 1.1;
   text-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
 }
-.ph-count-label { font-size: 11.5px; color: rgba(255, 255, 255, 0.6); letter-spacing: 1px; }
+.ph-count-label { font-size: 11.5px; color: var(--text-secondary); letter-spacing: 1px; }
 .ph-art { width: 200px; height: 66px; flex-shrink: 0; }
 @media (max-width: 900px) {
   .ph-art { display: none; }
