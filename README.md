@@ -92,7 +92,7 @@ cp .env.example .env
 docker compose up -d
 
 # 4. 打开 http://localhost
-# 登录：admin / 123456
+# 登录：admin / 12345678
 ```
 
 > 首次启动时，数据库会自动初始化表结构、维度数据及演示业务数据（280 条录取、215 条毕业、280 条学籍），无需手动导入。
