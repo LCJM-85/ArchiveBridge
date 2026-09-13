@@ -427,6 +427,7 @@ onActivated(() => {
 }
 
 .role-pill {
+  box-sizing: border-box;
   display: inline-block;
   min-width: 56px;
   padding: 2px 10px;
@@ -439,6 +440,7 @@ onActivated(() => {
 .role-user { color: var(--color-gold-dark); background: rgba(201, 164, 92, 0.12); border: 1px solid rgba(201, 164, 92, 0.35); }
 
 .status-pill {
+  box-sizing: border-box;
   display: inline-block;
   min-width: 46px;
   padding: 2px 10px;

@@ -78,7 +78,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="idCard" label="身份证号" width="200" />
-        <el-table-column prop="degreeName" label="学历" width="130" align="center">
+        <el-table-column prop="degreeName" label="学历" min-width="180" align="center" class-name="degree-column">
           <template #default="{ row }">
             <span class="degree-pill">{{ row.degreeName || '-' }}</span>
           </template>
@@ -406,6 +406,11 @@ onActivated(() => {
   white-space: nowrap;
 }
 
+:deep(.el-table .degree-column .cell) {
+  white-space: normal;
+  text-overflow: clip;
+}
+
 .page-wrapper {
   display: flex;
   flex-direction: column;
@@ -552,6 +557,11 @@ onActivated(() => {
 .gender-female { color: #d6458d; background: rgba(214, 69, 141, 0.1); }
 
 .degree-pill {
+  box-sizing: border-box;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
   display: inline-block;
   padding: 2px 10px;
   border-radius: 6px;
