@@ -31,6 +31,8 @@ export function getChartTheme() {
   const palette = [primary, '#2fb984', '#57c493', '#8fd3b0', gold, '#b37feb']
 
   return {
+    surface: cssVar('--card-bg', '#ffffff'),
+    textPrimary: cssVar('--text-primary', '#26352f'),
     primary,
     accent,
     gold,

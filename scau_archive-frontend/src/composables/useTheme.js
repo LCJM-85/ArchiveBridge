@@ -1,9 +1,12 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
-export function useTheme() {
-  const isDark = ref(localStorage.getItem('theme') === 'dark')
+// Shared state keeps charts and navigation in sync when the theme changes.
+const isDark = ref(localStorage.getItem('theme') === 'dark')
 
+export function useTheme() {
+  // main.js applies the saved/system preference before mounting components.
+  isDark.value = document.documentElement.classList.contains('dark')
   function toggleTheme() {
     isDark.value = !isDark.value
     if (isDark.value) {

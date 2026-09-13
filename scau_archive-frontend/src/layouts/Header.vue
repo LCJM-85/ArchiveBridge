@@ -1,7 +1,7 @@
 <template>
   <el-header class="header">
     <div class="left">
-      <el-button text class="hamburger" @click="$emit('toggle-sidebar')">
+      <el-button text class="hamburger" aria-label="打开导航菜单" @click="$emit('toggle-sidebar')">
         <el-icon size="20"><Operation /></el-icon>
       </el-button>
       <div class="logo">
@@ -17,11 +17,11 @@
     </div>
 
     <div class="right">
-      <el-button text class="desktop-only" @click="toggleFullScreen">
+      <el-button text class="desktop-only" aria-label="切换全屏" @click="toggleFullScreen">
         <el-icon size="18"><FullScreen /></el-icon>
       </el-button>
 
-      <el-button text @click="toggleTheme">
+      <el-button text :aria-label="isDark ? '切换浅色模式' : '切换深色模式'" @click="toggleTheme">
         <el-icon size="18">
           <Sunny v-if="isDark" />
           <Moon v-else />
@@ -210,9 +210,9 @@ function logout() {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  background: linear-gradient(140deg, #14a06f, #0b5c40);
-  border: 1px solid rgba(201, 164, 92, 0.5);
-  color: #fff;
+  background: var(--color-primary-light);
+  border: 1px solid var(--border-color);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -30,7 +30,8 @@ function handleClick(tab) {
 
 <style scoped>
 .tab-bar {
-  background: var(--content-bg);
+  background: var(--card-bg);
+  padding: 0 16px;
   border-bottom: 1px solid var(--el-border-color-light);
 }
 
@@ -44,8 +45,8 @@ function handleClick(tab) {
 }
 
 .tab-bar :deep(.el-tabs__item) {
-  height: 36px;
-  line-height: 36px;
+  height: 42px;
+  line-height: 42px;
   font-size: 13px;
   padding: 0 14px;
   border: none !important;
@@ -55,25 +56,25 @@ function handleClick(tab) {
 }
 
 .tab-bar :deep(.el-tabs__item.is-active) {
-  background: var(--el-color-primary-light-9);
+  background: transparent;
   color: var(--color-primary);
 }
 
-/* 激活标签：顶部金色指示条 */
+/* 当前页以底部细线定位 */
 .tab-bar :deep(.el-tabs__item.is-active::before) {
   content: '';
   position: absolute;
-  top: 0;
+  bottom: 0;
   left: 8px;
   right: 8px;
-  height: 2.5px;
+  height: 2px;
   border-radius: 0 0 3px 3px;
-  background: linear-gradient(90deg, var(--color-gold-light), var(--color-gold));
+  background: var(--color-primary);
 }
 
-/* 深色模式下亮绿底+绿字对比度不足（≈2.5:1），改用深绿底 + 亮绿字 */
+/* 深色模式使用低亮度底色 */
 .dark .tab-bar :deep(.el-tabs__item.is-active) {
-  background: var(--el-color-primary-light-7);
+  background: var(--color-primary-light);
   color: var(--color-primary);
 }
 
@@ -100,7 +101,7 @@ function handleClick(tab) {
 
 .tab-bar :deep(.el-tabs__nav-next),
 .tab-bar :deep(.el-tabs__nav-prev) {
-  height: 36px;
-  line-height: 36px;
+  height: 42px;
+  line-height: 42px;
 }
 </style>
