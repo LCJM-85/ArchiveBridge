@@ -1,53 +1,18 @@
 <template>
   <div class="page-wrapper">
-    <!-- 欢迎横幅 -->
-    <div class="hero">
-      <div class="h-left">
-        <div class="h-hi">SCAU ARCHIVE BRIDGE · 数据总览</div>
-        <h2 class="font-display">{{ greeting }}，管理员</h2>
-        <div class="h-date">
-          <span>{{ currentDate }}</span>
-          <span class="clock">{{ clockText }}</span>
-        </div>
-        <button class="h-quick" @click="refresh">
-          <el-icon><Refresh /></el-icon>
-          刷新数据
-        </button>
+    <header class="workspace-heading">
+      <div>
+        <div class="eyebrow">ARCHIVE BRIDGE / OVERVIEW</div>
+        <h1>档案工作台</h1>
+        <p>招生、学籍与毕业，让每一段成长有迹可循。</p>
       </div>
-      <div class="h-art">
-        <div class="ring r1"></div>
-        <div class="ring r2"></div>
-        <svg viewBox="0 0 360 190" preserveAspectRatio="xMidYMax meet">
-          <!-- 档案盒堆 -->
-          <g transform="translate(16 96)">
-            <rect x="0" y="34" width="76" height="52" rx="7" fill="#0a2e21" stroke="rgba(230,205,149,.35)" stroke-width="1.4"/>
-            <rect x="10" y="44" width="56" height="4" rx="2" fill="#c9a45c" opacity=".8"/>
-            <rect x="10" y="54" width="38" height="4" rx="2" fill="rgba(230,205,149,.4)"/>
-            <rect x="14" y="66" width="34" height="13" rx="3" fill="rgba(14,138,95,.5)"/>
-            <rect x="-6" y="18" width="72" height="50" rx="7" fill="#123d2c" stroke="rgba(230,205,149,.28)" stroke-width="1.4"/>
-            <rect x="4" y="28" width="52" height="4" rx="2" fill="#d9b877" opacity=".7"/>
-            <rect x="4" y="38" width="36" height="4" rx="2" fill="rgba(230,205,149,.35)"/>
-          </g>
-          <!-- 上升折线 -->
-          <path id="heroLine" d="M96 148 C 140 138, 168 122, 206 108 S 272 78, 316 52" fill="none" stroke="#d9b877" stroke-width="2.6" stroke-linecap="round"/>
-          <circle cx="316" cy="52" r="4.5" fill="#d9b877"/>
-          <circle cx="316" cy="52" r="9" fill="none" stroke="#d9b877" opacity=".4"/>
-          <g fill="#2fb984">
-            <circle cx="140" cy="136" r="3.4"/><circle cx="206" cy="108" r="3.4"/><circle cx="272" cy="78" r="3.4"/>
-          </g>
-          <!-- 嫩芽 -->
-          <g transform="translate(322 150)">
-            <path d="M3 24 V6" stroke="#2fb984" stroke-width="2" stroke-linecap="round"/>
-            <path d="M3 12 C 3 4, 12 4, 15 8 C 12 9, 9 10, 6 12" fill="#3cc78f"/>
-            <path d="M3 17 C 3 10, 11 9, 13 13 C 10 14, 7 15, 5 17" fill="#2fb984"/>
-          </g>
-          <circle cx="96" cy="40" r="2.5" fill="rgba(230,205,149,.5)"/>
-          <circle cx="252" cy="150" r="2.2" fill="rgba(47,185,132,.55)"/>
-          <circle cx="176" cy="30" r="1.8" fill="rgba(255,255,255,.3)"/>
-        </svg>
+      <div class="heading-actions">
+        <span>{{ currentDate }}</span>
+        <el-button :loading="loading" @click="refresh"><el-icon><Refresh /></el-icon>刷新数据</el-button>
       </div>
-    </div>
-
+    </header>
+    <div v-if="loadError" class="data-notice" role="alert">{{ loadError }}</div>
+    <div class="overview-label"><span>馆藏数据概览</span><span>{{ updatedAt ? '本次获取于 ' + updatedAt : '等待获取数据' }}</span></div>
     <!-- 指标卡片 -->
     <div class="stats-grid">
       <div class="stat-card" v-for="s in stats" :key="s.key" :class="s.cls">
@@ -56,7 +21,7 @@
             <el-icon :size="20"><component :is="s.icon" /></el-icon>
           </div>
           <div class="s-num">
-            <span class="count" :data-to="s.value">{{ s.display }}</span>
+            <span class="count">{{ formatMetric(s.display) }}</span>
             <small v-if="s.unit">{{ s.unit }}</small>
           </div>
         </div>
@@ -65,25 +30,26 @@
       </div>
     </div>
 
+    <div class="section-heading"><h2>数据观察</h2><span>从历年招生到专业结构</span></div>
     <!-- 图表区 -->
     <div class="chart-grid">
       <el-card shadow="never">
         <template #header>
           <span>招生趋势 <span class="scope-note">含硕博</span></span>
         </template>
-        <div ref="trendChartRef" class="chart-body"></div>
+        <div class="chart-frame"><div ref="trendChartRef" class="chart-body"></div><div v-if="!dashboardData?.trend?.length" class="chart-empty">{{ loading ? '正在读取数据…' : '暂无招生趋势数据' }}</div></div>
       </el-card>
       <el-card shadow="never">
         <template #header>
-          <span>专业分布 <span class="scope-note">含硕博</span></span>
+          <span>专业招生规模 <span class="scope-note">人数前 8 · 含硕博</span></span>
         </template>
-        <div ref="majorChartRef" class="chart-body"></div>
+        <div class="chart-frame"><div ref="majorChartRef" class="chart-body"></div><div v-if="!dashboardData?.majorDistribution?.length" class="chart-empty">{{ loading ? '正在读取数据…' : '暂无专业分布数据' }}</div></div>
       </el-card>
       <el-card shadow="never">
         <template #header>
           <span>各层次招生分布</span>
         </template>
-        <div ref="degreeChartRef" class="chart-body"></div>
+        <div class="chart-frame"><div ref="degreeChartRef" class="chart-body"></div><div v-if="!dashboardData?.degreeDistribution?.length" class="chart-empty">{{ loading ? '正在读取数据…' : '暂无招生层次数据' }}</div></div>
       </el-card>
       <el-card shadow="never">
         <template #header>
@@ -112,7 +78,7 @@
           </div>
           <div class="info-item">
             <span class="info-key">今日上传</span>
-            <span class="info-val">{{ dashboardData?.todayUploads ?? 0 }} 份</span>
+            <span class="info-val">{{ dashboardData?.todayUploads ?? '—' }} 份</span>
           </div>
           <div class="info-item">
             <span class="info-key">OCR 识别任务</span>
@@ -140,15 +106,16 @@ import { ref, nextTick, onMounted, onActivated, onBeforeUnmount, computed, watch
 import {
   Refresh, Document, DataAnalysis, TrendCharts, Upload, DataBoard, UserFilled, School, Files, Cpu
 } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 import * as echarts from 'echarts'
 import { fetchDashboardStats } from '@/api/modules/admission'
 import { getChartTheme, generatePalette } from '@/utils/chartTheme'
 import { useMenuStore } from '@/store/menu'
 import { useTabStore } from '@/store/tab'
+import { useTheme } from '@/composables/useTheme'
 
 const menuStore = useMenuStore()
 const tabStore = useTabStore()
+const { isDark } = useTheme()
 const dashboardData = ref(null)
 const trendChartRef = ref(null)
 const majorChartRef = ref(null)
@@ -157,16 +124,14 @@ let trendChart = null
 let majorChart = null
 let degreeChart = null
 
-/* ---- 问候 / 时钟 ---- */
-const now = new Date()
-const currentDate = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
-const hour = now.getHours()
-const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好'
-const clockText = ref('')
-function tickClock() {
-  const d = new Date()
-  const pad = (n) => String(n).padStart(2, '0')
-  clockText.value = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+const loading = ref(false)
+const loadError = ref('')
+const updatedAt = ref('')
+const currentDate = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
+function formatMetric(value) {
+  if (value == null || value === '—') return '—'
+  const number = Number(value)
+  return Number.isFinite(number) ? number.toLocaleString('zh-CN', { maximumFractionDigits: 2 }) : value
 }
 
 /* ---- 统计卡 ---- */
@@ -200,25 +165,6 @@ const stats = computed(() => {
       value: d.avgScore, display: d.avgScore ?? '—',
     },
   ]
-})
-
-/* ---- 数字滚动 ---- */
-function animateCount(el) {
-  const to = Number(el.dataset.to)
-  if (!to || Number.isNaN(to)) return
-  const dur = 1300
-  const start = performance.now()
-  function tick(t) {
-    const p = Math.min((t - start) / dur, 1)
-    const eased = 1 - Math.pow(1 - p, 3)
-    el.textContent = Math.round(to * eased).toLocaleString('zh-CN')
-    if (p < 1) requestAnimationFrame(tick)
-  }
-  requestAnimationFrame(tick)
-}
-watch(dashboardData, async () => {
-  await nextTick()
-  document.querySelectorAll('.stat-card .count').forEach(animateCount)
 })
 
 /* ---- 数据质量 ---- */
@@ -267,9 +213,9 @@ function renderCharts(data) {
     trendChart.setOption({
       tooltip: {
         trigger: 'axis',
-        backgroundColor: 'var(--bg-elevated)',
-        borderColor: 'var(--border-color)',
-        textStyle: { color: 'var(--text-primary)' },
+        backgroundColor: t.surface,
+        borderColor: t.borderColor,
+        textStyle: { color: t.textPrimary },
       },
       grid: { left: 52, right: 24, bottom: 30, top: 14 },
       xAxis: {
@@ -284,47 +230,38 @@ function renderCharts(data) {
         axisLabel: { color: t.textTertiary },
       },
       series: [{
-        type: 'line', smooth: true, data: trend.map((d) => d.count),
-        areaStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(14,138,95,0.32)' },
-            { offset: 1, color: 'rgba(14,138,95,0.02)' },
-          ]),
-        },
+        type: 'line', smooth: false, data: trend.map((d) => d.count),
+        areaStyle: { color: t.primary, opacity: 0.06 },
         lineStyle: { color: t.primary, width: 2.5 },
         itemStyle: { color: t.primary },
         symbol: 'circle', symbolSize: 6,
-        animationDuration: 1200,
+        animationDuration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 300,
         animationEasing: 'cubicOut',
       }],
     })
   }
 
-  const majors = data.majorDistribution || []
+  const majors = [...(data.majorDistribution || [])].sort((a, b) => b.count - a.count).slice(0, 8)
   if (majors.length) {
     if (!majorChart) majorChart = echarts.init(majorChartRef.value)
     majorChart.resize()
     majorChart.setOption({
-      tooltip: {
-        trigger: 'item', formatter: '{b}: {c}人',
-        backgroundColor: 'var(--bg-elevated)',
-        borderColor: 'var(--border-color)',
-        textStyle: { color: 'var(--text-primary)' },
-      },
-      legend: {
-        type: 'scroll', bottom: 0, icon: 'circle',
-        textStyle: { color: t.textSecondary, fontSize: 11 },
-        itemWidth: 9, itemHeight: 9,
+      animation: !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+      tooltip: { trigger: 'axis', backgroundColor: t.surface, borderColor: t.borderColor, textStyle: { color: t.textPrimary } },
+      grid: { left: 8, right: 46, top: 10, bottom: 8, containLabel: true },
+      xAxis: { type: 'value', show: false },
+      yAxis: {
+        type: 'category', inverse: true, data: majors.map(m => m.name),
+        axisLine: { show: false }, axisTick: { show: false },
+        axisLabel: { color: t.textSecondary, width: 108, overflow: 'truncate', fontSize: 12 },
       },
       series: [{
-        type: 'pie', radius: ['36%', '58%'], center: ['50%', '44%'],
-        label: { fontSize: 11, color: t.textSecondary },
-        itemStyle: { borderRadius: 6, borderColor: 'var(--card-bg)', borderWidth: 2 },
-        data: majors.map((m) => ({ name: m.name, value: m.count })),
-        color: generatePalette(majors.length),
+        type: 'bar', barMaxWidth: 12, data: majors.map(m => m.count),
+        itemStyle: { color: t.primary, borderRadius: [0, 2, 2, 0] },
+        label: { show: true, position: 'right', color: t.textSecondary, fontSize: 11 },
       }],
     })
-  }
+  } else { majorChart?.clear() }
 
   const degreeDist = data.degreeDistribution || []
   if (degreeDist.length) {
@@ -333,9 +270,9 @@ function renderCharts(data) {
     degreeChart.setOption({
       tooltip: {
         trigger: 'item', formatter: '{b}: {c}人 ({d}%)',
-        backgroundColor: 'var(--bg-elevated)',
-        borderColor: 'var(--border-color)',
-        textStyle: { color: 'var(--text-primary)' },
+        backgroundColor: t.surface,
+        borderColor: t.borderColor,
+        textStyle: { color: t.textPrimary },
       },
       legend: {
         bottom: 0, icon: 'circle',
@@ -345,7 +282,7 @@ function renderCharts(data) {
       series: [{
         type: 'pie', radius: ['36%', '58%'], center: ['50%', '44%'],
         label: { fontSize: 11, color: t.textSecondary },
-        itemStyle: { borderRadius: 6, borderColor: 'var(--card-bg)', borderWidth: 2 },
+        itemStyle: { borderRadius: 6, borderColor: t.surface, borderWidth: 2 },
         data: degreeDist.map((m) => ({ name: m.name, value: m.count })),
         color: generatePalette(degreeDist.length),
       }],
@@ -355,14 +292,21 @@ function renderCharts(data) {
 
 /* ---- 数据加载 ---- */
 async function refresh() {
+  if (loading.value) return
+  loading.value = true
+  loadError.value = ''
   try {
     const res = await fetchDashboardStats()
     dashboardData.value = res.data?.data || {}
+    updatedAt.value = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
     await nextTick()
+    trendChart?.clear()
+    degreeChart?.clear()
     renderCharts(dashboardData.value)
   } catch (e) {
-    console.error('获取仪表盘数据失败:', e)
-    ElMessage.error('获取仪表盘数据失败，请检查后端服务是否正常')
+    loadError.value = dashboardData.value ? '数据更新失败，当前显示上次获取的结果。请稍后重试。' : '暂时无法获取数据，请检查服务连接后重试。'
+  } finally {
+    loading.value = false
   }
 }
 
@@ -379,13 +323,15 @@ function handleResize() {
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
-  tickClock()
-  setInterval(tickClock, 1000)
-  refresh()
 })
 
 onActivated(() => {
   refresh()
+})
+
+watch(isDark, async () => {
+  await nextTick()
+  if (dashboardData.value) renderCharts(dashboardData.value)
 })
 
 onBeforeUnmount(() => {
@@ -397,220 +343,87 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.page-wrapper { display: flex; flex-direction: column; gap: 18px; }
-
-/* ===== 欢迎横幅 ===== */
-.hero {
-  position: relative;
-  border-radius: 22px;
-  overflow: hidden;
-  color: #fff;
-  background:
-    radial-gradient(600px 260px at 82% -40px, rgba(47, 185, 132, 0.32), transparent 62%),
-    radial-gradient(480px 220px at 100% 130%, rgba(201, 164, 92, 0.2), transparent 60%),
-    linear-gradient(120deg, #07271c 0%, #0b5c40 52%, #0e8a5f 100%);
-  box-shadow: 0 26px 60px rgba(7, 39, 28, 0.28);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 34px;
-  min-height: 150px;
-  animation: rise-up 0.7s cubic-bezier(0.2, 0.75, 0.3, 1) both;
+.page-wrapper { max-width: 1560px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; padding: 8px 0 16px; }
+.workspace-heading {
+  position: relative; isolation: isolate; overflow: hidden;
+  display: flex; justify-content: space-between; align-items: center; gap: 24px;
+  min-height: 152px; padding: 26px 30px; box-sizing: border-box;
+  border: 1px solid #385647; border-radius: 8px; background: #284635;
 }
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  opacity: 0.05;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+.workspace-heading::before {
+  content: ''; position: absolute; z-index: -2; inset: 0 0 0 46%;
+  background: url('/login-zine-left.png') left 44% / cover no-repeat;
+  filter: saturate(.82) contrast(.94);
 }
-.h-left { position: relative; z-index: 2; }
-.h-hi { font-size: 11.5px; letter-spacing: 3px; color: var(--color-gold-light); margin-bottom: 8px; }
-.hero h2 { font-size: 23px; font-weight: 700; letter-spacing: 2px; margin: 0; }
-.h-date { font-size: 12.5px; color: rgba(255, 255, 255, 0.6); margin-top: 10px; display: flex; align-items: center; gap: 12px; }
-.h-date .clock { color: var(--color-gold-light); font-variant-numeric: tabular-nums; }
-.h-quick {
-  margin-top: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.85);
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(230, 205, 149, 0.4);
-  background: rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-  transition: all 0.25s ease;
+.workspace-heading::after {
+  content: ''; position: absolute; z-index: -1; inset: 0;
+  background: linear-gradient(90deg, #284635 0%, #284635 42%, rgba(40,70,53,.9) 51%, rgba(40,70,53,.2) 72%, rgba(40,70,53,.08));
 }
-.h-quick:hover { background: rgba(201, 164, 92, 0.16); color: #fff; transform: translateY(-1px); }
-
-.h-art { position: relative; z-index: 2; width: 300px; height: 140px; flex-shrink: 0; }
-.h-art .ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px dashed rgba(230, 205, 149, 0.3);
-  animation: spin 40s linear infinite;
-}
-.h-art .ring.r1 { width: 130px; height: 130px; right: 20px; top: -2px; }
-.h-art .ring.r2 { width: 180px; height: 180px; right: -14px; top: -26px; animation-direction: reverse; animation-duration: 60s; border-color: rgba(255, 255, 255, 0.14); }
-@keyframes spin { to { transform: rotate(360deg); } }
-.h-art svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-@media (max-width: 1100px) { .h-art { display: none; } }
-
-/* ===== 统计卡 ===== */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
-  animation: rise-up 0.7s 0.1s cubic-bezier(0.2, 0.75, 0.3, 1) both;
-}
-.stat-card {
-  background: var(--card-bg);
-  border-radius: 18px;
-  padding: 22px 22px 18px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid var(--card-border);
-  box-shadow: 0 6px 20px rgba(7, 39, 28, 0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.stat-card:hover { transform: translateY(-5px); box-shadow: 0 18px 40px rgba(7, 39, 28, 0.12); }
-.stat-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 22px;
-  right: 22px;
-  height: 3px;
-  border-radius: 0 0 3px 3px;
-  background: linear-gradient(90deg, var(--sc1), var(--sc2));
-}
-.s-top { display: flex; align-items: center; gap: 14px; }
-.s-ic {
-  width: 46px;
-  height: 46px;
-  border-radius: 14px;
-  flex-shrink: 0;
-  background: linear-gradient(135deg, var(--sc1), var(--sc2));
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 18px var(--sc-sd);
-}
-.s-num { font-size: 27px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); line-height: 1.05; }
-.s-num small { font-size: 12.5px; font-weight: 500; color: var(--text-tertiary); margin-left: 3px; }
-.s-label { font-size: 13px; color: var(--text-secondary); margin-top: 9px; }
-.s-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; }
-.stat-card.c1 { --sc1: #14a06f; --sc2: #0b5c40; --sc-sd: rgba(20, 160, 111, 0.32); }
-.stat-card.c2 { --sc1: #c9a45c; --sc2: #9a7a3c; --sc-sd: rgba(201, 164, 92, 0.32); }
-.stat-card.c3 { --sc1: #2fb984; --sc2: #0e8a5f; --sc-sd: rgba(47, 185, 132, 0.32); }
-.stat-card.c4 { --sc1: #5b8def; --sc2: #3a63c4; --sc-sd: rgba(91, 141, 239, 0.32); }
-
-/* ===== 图表区 ===== */
-.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.chart-grid :deep(.el-card) { animation: rise-up 0.7s 0.2s cubic-bezier(0.2, 0.75, 0.3, 1) both; }
-.chart-grid :deep(.el-card:nth-child(2)) { animation-delay: 0.28s; }
-.chart-grid :deep(.el-card:nth-child(3)) { animation-delay: 0.36s; }
-.chart-grid :deep(.el-card:nth-child(4)) { animation-delay: 0.44s; }
-.chart-body { width: 100%; height: 280px; overflow: hidden; }
-.scope-note {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-weight: 400;
-  margin-left: 6px;
-  background: var(--bg-tertiary);
-  padding: 1px 8px;
-  border-radius: 999px;
-  vertical-align: 2px;
-}
-
-/* ===== 快捷入口 ===== */
-.quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; padding: 2px 0; }
-.quick-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 18px 6px 14px;
-  border-radius: 14px;
-  border: 1px solid var(--border-light);
-  background: var(--bg-tertiary);
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-.quick-item .q-ic {
-  width: 44px;
-  height: 44px;
-  border-radius: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--card-bg);
-  color: var(--color-primary);
-  box-shadow: 0 6px 16px rgba(7, 39, 28, 0.08);
-  transition: transform 0.3s cubic-bezier(0.3, 1.4, 0.5, 1), box-shadow 0.25s;
-}
-.quick-item:hover {
-  transform: translateY(-4px);
-  border-color: rgba(14, 138, 95, 0.35);
-  box-shadow: 0 14px 30px rgba(7, 39, 28, 0.1);
-  background: var(--card-bg);
-}
-.quick-item:hover .q-ic { transform: translateY(-3px) scale(1.08); box-shadow: 0 10px 22px rgba(7, 39, 28, 0.14); }
-.q-name { font-size: 12.5px; color: var(--text-primary); font-weight: 500; }
-
-/* ===== 系统概览 ===== */
-.bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-.bottom-grid :deep(.el-card) { animation: rise-up 0.7s 0.5s cubic-bezier(0.2, 0.75, 0.3, 1) both; }
-.bottom-grid :deep(.el-card:nth-child(2)) { animation-delay: 0.58s; }
-.info-list { display: flex; flex-direction: column; gap: 16px; padding: 6px 0; }
-.info-item { display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
-.info-key { color: var(--text-secondary); }
-.info-val { font-weight: 600; }
-.quality-wrap { padding: 6px 0 2px; }
-.quality-head { display: flex; justify-content: space-between; align-items: center; font-size: 14px; margin-bottom: 12px; }
-.progress { height: 8px; border-radius: 99px; background: var(--bg-tertiary); overflow: hidden; }
-.progress i {
-  display: block;
-  height: 100%;
-  border-radius: 99px;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
-  width: 100%;
-  transform-origin: left;
-  animation: grow-bar 1.4s 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both;
-}
-.quality-sub { margin-top: 10px; font-size: 12px; color: var(--text-tertiary); }
-.quality-tag { font-size: 12px; padding: 2px 12px; border-radius: 999px; font-weight: 600; }
-.tag-good { color: #0e8a5f; background: var(--color-primary-light); }
-.tag-ok { color: #238a5f; background: var(--color-primary-light); }
-.tag-medium { color: #e6a23c; background: rgba(230, 162, 60, 0.12); }
-.tag-bad { color: #f56c6c; background: rgba(245, 108, 108, 0.12); }
-
-/* ===== 入场动画 ===== */
-@keyframes rise-up {
-  from { transform: translateY(26px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-@keyframes grow-bar { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-
-@media (prefers-reduced-motion: reduce) {
-  .hero, .stats-grid, .chart-grid :deep(.el-card), .bottom-grid :deep(.el-card) { animation: none !important; }
-  .hero::after, .h-art .ring { animation: none !important; }
-  .stat-card, .quick-item { transition: none !important; }
-  .quick-item:hover { transform: none; box-shadow: none; }
-}
-
+.workspace-heading > * { position: relative; z-index: 1; }
+.eyebrow { color: #d7c39b; font-size: 10px; letter-spacing: 2px; margin-bottom: 12px; }
+.workspace-heading h1 { color: #fffaf0; font-size: 30px; letter-spacing: 1.5px; font-weight: 400; margin: 0; }
+.workspace-heading p { color: #dbe4da; font-size: 13px; margin: 10px 0 0; }
+.heading-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; padding: 8px; border-radius: 5px; background: rgba(255,250,240,.86); backdrop-filter: blur(4px); }
+.heading-actions > span { font-size: 12px; color: #385046; }
+.heading-actions .el-icon { margin-right: 6px; }
+.overview-label { display: flex; justify-content: space-between; color: var(--text-secondary); font-size: 12px; gap: 12px; }
+.overview-label > span:first-child { font-weight: 600; color: var(--text-primary); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--card-border); border-radius: 8px; background: var(--card-bg); }
+.stat-card { padding: 24px; min-width: 0; border-right: 1px solid var(--border-light); display: flex; flex-direction: column; }
+.stat-card:last-child { border-right: none; }
+.s-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; order: 1; margin: 16px 0 8px; }
+.s-ic { order: 2; color: var(--text-tertiary); }
+.s-num { font-size: clamp(22px, 2.2vw, 32px); font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; letter-spacing: -.8px; }
+.s-num small { font-size: 12px; color: var(--text-tertiary); font-weight: 400; margin-left: 6px; letter-spacing: 0; }
+.s-label { font-size: 13px; color: var(--text-secondary); }
+.s-sub { order: 2; color: var(--text-tertiary); font-size: 11px; }
+.section-heading { display: flex; align-items: baseline; gap: 16px; margin-top: 8px; }
+.section-heading h2 { font-size: 16px; margin: 0; font-weight: 600; }
+.section-heading > span { font-size: 12px; color: var(--text-tertiary); }
+.chart-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; }
+.chart-grid > *, .bottom-grid > * { min-width: 0; }
+.chart-frame { position: relative; }
+.chart-body { width: 100%; height: 260px; }
+.chart-empty { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-tertiary); font-size: 13px; background: var(--card-bg); }
+.scope-note { color: var(--text-tertiary); font-size: 11px; font-weight: 400; margin-left: 10px; }
+.quick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 22px; }
+.quick-item { display: flex; align-items: center; gap: 12px; padding: 17px 4px; cursor: pointer; border-bottom: 1px solid var(--border-light); color: var(--text-secondary); }
+.quick-item::after { content: '↗'; margin-left: auto; color: var(--text-tertiary); }
+.quick-item:hover { color: var(--color-primary); background: var(--color-primary-light); }
+.q-ic { display: flex; }
+.q-name { font-size: 13px; }
+.bottom-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; }
+.info-list { display: grid; gap: 16px; }
+.info-item, .quality-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.info-key { font-size: 13px; color: var(--text-secondary); }
+.info-val { font-size: 14px; font-variant-numeric: tabular-nums; }
+.quality-tag { font-size: 12px; padding: 3px 9px; border-radius: 4px; background: var(--bg-tertiary); color: var(--text-secondary); }
+.tag-good { color: var(--color-primary); background: var(--color-primary-light); }
+.tag-ok, .tag-medium { color: var(--text-primary); }
+.tag-bad { color: var(--color-danger); }
+.progress { height: 6px; background: var(--bg-tertiary); border-radius: 3px; margin-top: 24px; overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--color-primary); }
+.quality-sub { color: var(--text-tertiary); font-size: 12px; margin-top: 12px; }
+.data-notice { padding: 12px 16px; border-left: 3px solid var(--color-warning); background: var(--card-bg); color: var(--text-secondary); font-size: 13px; }
 @media (max-width: 1100px) {
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .chart-grid, .bottom-grid { grid-template-columns: 1fr; }
-  .quick-grid { grid-template-columns: repeat(4, 1fr); }
+  .heading-actions { flex-direction: column; align-items: flex-end; gap: 10px; }
+  .stat-card { padding: 20px 16px; }
 }
-@media (max-width: 640px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .quick-grid { grid-template-columns: repeat(2, 1fr); }
-  .hero { padding: 20px; }
+@media (max-width: 768px) {
+  .workspace-heading { align-items: flex-start; min-height: 144px; padding: 22px; }
+  .workspace-heading::before { left: 34%; opacity: .7; }
+  .workspace-heading::after { background: linear-gradient(90deg, #284635 0%, #284635 52%, rgba(40,70,53,.74) 76%, rgba(40,70,53,.3)); }
+  .workspace-heading h1 { font-size: 24px; }
+  .heading-actions > span { display: none; }
+  .chart-grid, .bottom-grid { grid-template-columns: minmax(0, 1fr); }
+  .stat-card { border-bottom: 1px solid var(--border-light); }
+  .stat-card:nth-child(2n) { border-right: none; }
+  .stat-card:nth-last-child(-n+2) { border-bottom: none; }
+  .overview-label { font-size: 11px; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .section-heading > span { display: none; }
+  .workspace-heading p { max-width: 215px; line-height: 1.8; }
 }
 </style>

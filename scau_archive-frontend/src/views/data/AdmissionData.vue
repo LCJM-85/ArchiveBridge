@@ -8,9 +8,10 @@
         <div class="ph-rule"></div>
       </div>
       <div class="ph-right">
-        <div class="ph-count">
+        <div class="ph-count" title="当前筛选条件下的记录总数">
+          <span class="ph-count-label">记录总数</span>
           <span class="ph-count-num">{{ total }}</span>
-          <span class="ph-count-label">条记录</span>
+          <span class="ph-count-unit">条</span>
         </div>
         <svg class="ph-art" viewBox="0 0 220 90" preserveAspectRatio="xMidYMax meet">
           <path d="M6 66 C 40 58, 66 44, 100 40 S 160 22, 214 12" fill="none" stroke="#d9b877" stroke-width="2.4" stroke-linecap="round"/>
@@ -492,17 +493,34 @@ onActivated(() => {
   align-items: center;
   gap: 26px;
 }
-.ph-count { text-align: right; }
+.ph-count {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 0 4px;
+  text-align: right;
+}
+.ph-count-label {
+  width: 100%;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  letter-spacing: 1.5px;
+  line-height: 1.4;
+}
 .ph-count-num {
-  display: block;
-  font-size: 34px;
+  display: inline-block;
+  font-size: 32px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--color-gold-light);
   line-height: 1.1;
-  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
 }
-.ph-count-label { font-size: 12px; color: rgba(255, 255, 255, 0.6); letter-spacing: 1px; }
+.ph-count-unit {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-secondary);
+}
 .ph-art { width: 210px; height: 84px; flex-shrink: 0; }
 @media (max-width: 900px) {
   .ph-art { display: none; }
@@ -568,13 +586,19 @@ onActivated(() => {
 }
 
 .gender-tag {
-  display: inline-block;
-  min-width: 40px;
-  padding: 2px 10px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 24px;
+  padding: 0;
   border-radius: 999px;
   font-size: 12px;
+  line-height: 1;
   font-weight: 500;
   text-align: center;
+  vertical-align: middle;
 }
 .gender-male { color: #0e8a5f; background: var(--color-primary-light); }
 .gender-female { color: #d6458d; background: rgba(214, 69, 141, 0.1); }

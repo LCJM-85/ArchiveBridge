@@ -607,6 +607,7 @@ async function handleUpload() {
 }
 
 .type-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -143,7 +143,7 @@ const handleSelect = (menuKey) => {
 
 <style scoped>
 .sidebar {
-  background: linear-gradient(180deg, #0b2a1e 0%, #09251a 55%, #07271c 100%) !important;
+  background: var(--sidebar-bg) !important;
   color: var(--sidebar-active-text);
   border-right: 1px solid var(--sidebar-border);
   display: flex;
@@ -160,20 +160,20 @@ const handleSelect = (menuKey) => {
   padding: 0 16px;
   border-bottom: 1px solid var(--sidebar-logo-border);
   flex-shrink: 0;
-  background: linear-gradient(180deg, rgba(14, 138, 95, 0.14), transparent);
+  background: transparent;
 }
 
 .logo-icon {
-  color: #e6cd95;
+  color: #d7c39b;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 34px;
   height: 34px;
-  background: linear-gradient(140deg, #14a06f, #0b5c40);
-  border: 1px solid rgba(201, 164, 92, 0.5);
-  border-radius: 10px;
-  box-shadow: 0 4px 14px rgba(6, 40, 28, 0.5);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  box-shadow: none;
   flex-shrink: 0;
 }
 
@@ -183,12 +183,13 @@ const handleSelect = (menuKey) => {
   font-weight: 600;
   letter-spacing: 3px;
   white-space: nowrap;
+  color: #fffaf0;
 }
 
 .sidebar .menu {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: 18px 0;
   border-right: none;
 }
 
@@ -206,20 +207,10 @@ const handleSelect = (menuKey) => {
 .version {
   font-size: 11px;
   color: var(--sidebar-text);
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
-.sidebar-footer::before {
-  content: '';
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--color-gold);
-  margin-right: 7px;
-  vertical-align: 1px;
-  box-shadow: 0 0 8px rgba(201, 164, 92, 0.8);
-}
+
 
 /* ===== Mobile responsive ===== */
 @media (max-width: 768px) {
