@@ -386,7 +386,7 @@ onBeforeUnmount(() => {
 }
 
 .btn-gold {
-  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark)) !important;
+  background: #c9a45c !important;
   border: none !important;
   color: #1d1608 !important;
   font-weight: 600;

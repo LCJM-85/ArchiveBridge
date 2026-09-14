@@ -88,9 +88,10 @@ button, a, .el-input__wrapper, .el-select__wrapper {
   --card-header-border: #e9e0d1;
 
   /* ---- Table ---- */
-  --table-bg: #fffbf3;
-  --table-tr-bg: #fffbf3;
+  --table-bg: #ffffff;
+  --table-tr-bg: #ffffff;
   --table-header-bg: #f0e7d8;
+  --table-row-striped-bg: #faf7f0;
   --table-row-hover-bg: #f4eedf;
   --table-border-color: #e2d9c9;
 
@@ -224,6 +225,7 @@ button, a, .el-input__wrapper, .el-select__wrapper {
   --table-bg: #202c25;
   --table-tr-bg: #202c25;
   --table-header-bg: #2a372e;
+  --table-row-striped-bg: #26332a;
   --table-row-hover-bg: #303e32;
   --table-border-color: #414a3d;
 
@@ -499,6 +501,16 @@ body {
 
 .el-table {
   --el-table-header-text-color: var(--text-secondary);
+  /* EP 在 .el-table 元素级重新声明了下面两个变量，元素级声明优先于 :root 继承值，
+     会让 :root 里的 --table-bg / --table-tr-bg 失效。这里在元素级补回，
+     使这两个 token 真正生效（当前取值 = 纯白）。 */
+  --el-table-bg-color: var(--table-bg);
+  --el-table-tr-bg-color: var(--table-tr-bg);
+}
+
+/* 斑马纹：全站唯一入口。各页面不再重复定义，避免多处取值漂移。 */
+.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell {
+  background: var(--table-row-striped-bg);
 }
 
 .el-table th.el-table__cell {
@@ -682,10 +694,12 @@ body {
 .app-layout .content .el-card { border-radius: var(--radius-md) !important; }
 .content .table-card .el-table th.el-table__cell { background: var(--table-header-bg) !important; }
 .content .btn-gold, .el-dialog .btn-gold {
-  background: var(--color-gold-light) !important; color: #243d32 !important;
+  /* 浅金按钮：与各页面 <style scoped> 中的 .btn-gold 保持同一取值，
+     避免开发态 / 构建态因 CSS 顺序不同而出现两种金色。 */
+  background: #c9a45c !important; color: #1d1608 !important;
   border-radius: 6px !important; box-shadow: none !important; filter: none;
 }
-.content .btn-gold:hover, .el-dialog .btn-gold:hover { background: #cbb487 !important; }
+.content .btn-gold:hover, .el-dialog .btn-gold:hover { background: #d3b77e !important; }
 .content .drop-zone { background: var(--bg-primary) !important; border-radius: 8px !important; box-shadow: none !important; }
 .content .drop-zone-icon, .content .drop-icon { animation: none !important; }
 .content .degree-pill { color: var(--text-secondary); background: var(--bg-tertiary); border-color: var(--border-color); }

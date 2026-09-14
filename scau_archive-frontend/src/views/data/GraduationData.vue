@@ -84,7 +84,7 @@
             <span class="degree-pill">{{ row.degreeName || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="destName" label="毕业去向" width="140">
+        <el-table-column prop="destName" label="毕业去向" width="140" align="center">
           <template #default="{ row }">
             <span class="dest-pill">{{ row.destName || '-' }}</span>
           </template>
@@ -531,7 +531,8 @@ onActivated(() => {
   border-radius: 9px !important;
 }
 .btn-gold {
-  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-dark)) !important;
+  /* 浅金：比原来的深金渐变轻，在暖白底上不再过重 */
+  background: #c9a45c !important;
   border: none !important;
   color: #1d1608 !important;
   font-weight: 600;
@@ -557,9 +558,6 @@ onActivated(() => {
 }
 .table-card :deep(.el-table__row:hover > td.el-table__cell) {
   background: var(--color-primary-light) !important;
-}
-.table-card :deep(.el-table--striped .el-table__body tr.el-table__row--striped td.el-table__cell) {
-  background: var(--bg-tertiary);
 }
 
 .gender-tag {
