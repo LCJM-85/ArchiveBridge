@@ -95,7 +95,9 @@ docker compose up -d
 # 登录：admin / 12345678
 ```
 
-> 首次启动时，数据库会自动初始化表结构、维度数据及演示业务数据（280 条录取、215 条毕业、280 条学籍），无需手动导入。
+> Windows PowerShell 用户将 `cp .env.example .env` 改为 `Copy-Item .env.example .env`，其余 Docker 命令不变。
+
+> 首次启动时，数据库会自动初始化表结构、维度数据及演示业务数据（280 条录取、190 条毕业、280 条学籍），无需手动导入。
 
 > Compose 中的 Redis 和后端 `8080` 均不映射宿主机端口：Redis 仅供后端访问，后端 API 仅通过前端 Nginx 的 `http://localhost` 入口访问。`REDIS_PASSWORD` 会在容器每次启动时应用，并非只在首次初始化时设置。本地 Maven 开发仍可直接使用 `localhost:8080`。
 
@@ -105,6 +107,13 @@ docker compose up -d
 ```bash
 # 需要 PostgreSQL 15+ + PostGIS + pgvector(相关编译包已放在后端sql文件夹中)
 PGPASSWORD=123456 psql -h localhost -U postgres -f scau-archive-insight/sql/init.sql
+```
+
+PowerShell 写法：
+
+```powershell
+$env:PGPASSWORD = "123456"
+psql -h localhost -U postgres -f scau-archive-insight/sql/init.sql
 ```
 
 > 数据库初始化 SQL 文件位于 `sql/` 目录，`init.sql` 为主入口，通过 `\ir` 依次加载 `parts/` 下的表结构、维度数据、地理数据和演示业务数据。
@@ -133,6 +142,8 @@ cd scau-archive-insight
 # API 文档: http://localhost:8080/swagger-ui.html
 ```
 
+Windows PowerShell 使用 `.\mvnw.cmd spring-boot:run`。
+
 **4. 前端**（端口 5173，新终端）
 ```bash
 cd scau_archive-frontend
@@ -144,6 +155,13 @@ npm run dev
 **5. AI 助手**（端口 8765，可选，需要 AI 对话 & 知识库时启动）
 ```
 # 后端启动会自动拉起AI助手服务
+```
+
+本地首次安装 Python 依赖后，还需在同一虚拟环境安装 Chromium：
+
+```powershell
+cd scau-archive-insight
+.\src\main\python\.venv\Scripts\python.exe -m playwright install chromium
 ```
 
 > 开发环境前端通过 Vite proxy 将 `/api` 请求转发至 `localhost:8080`，无需额外配置。
@@ -172,7 +190,7 @@ npm run dev
 | **毕业数据管理** | 毕业生信息、学位、去向管理，自动标记毕业状态 |
 | **可视化分析大屏** | 招生趋势、地理热力、学科培养桑基图、AI 招生预测（ARIMA + XGBoost） |
 | **智能报告生成** | 一键生成年度招生质量报告（Word + A3 海报），含 AI 智能分析 |
-| **AI 助手** | SSE 流式对话，自动检索知识库，支持联网搜索 + 19 种数据库查询 |
+| **AI 助手** | SSE 流式对话，自动检索知识库，支持联网搜索 + 20 种数据库查询 |
 | **知识库 (RAG)** | 上传文件（PDF/DOCX/XLSX/TXT）或网页链接，自动分块向量化，增强 AI 回答 |
 | **元数据管理** | 自定义字段编码与映射规则 |
 | **学院/专业/班级管理** | 系统管理下维护「学院→专业→班级」三级维度挂载，专业可选培养层次，删除带引用保护 |
@@ -188,8 +206,8 @@ npm run dev
 |----|------|
 | 后端 | Spring Boot 3.5.13, MyBatis-Plus 3.5.13, Druid, Spring Data Redis（Lettuce） |
 | 数据 | PostgreSQL 15 + pgvector + PostGIS, Redis 7（临时状态与 Cache-Aside 查询缓存） |
-| 前端 | Vue 3, Vite 8, Element Plus, ECharts 5, Pinia, Axios |
-| Python | FastAPI, LangChain, PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.2.2 (CPU), PyMuPDF, OpenCV, Playwright |
+| 前端 | Vue 3, Vite 8, Element Plus, ECharts 6, Pinia, Axios |
+| Python | FastAPI, LangChain, PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.0.0 (CPU), PyMuPDF, OpenCV, Playwright 1.63 |
 | LLM | 智谱 GLM-4-Plus (聊天) / GLM-4V-Plus-0111 (视觉) / embedding-3 (向量), 通义千问 Qwen-VL-Plus |
 | AI | SSE 流式对话、RAG 知识库（pgvector 向量检索）、Bing 联网搜索 + Playwright 网页抓取 |
 | 预测 | ARIMA + XGBoost 集成预测 |
@@ -222,9 +240,11 @@ npm run dev
 ```
 用户提问 → 检索知识库（pgvector 余弦相似度）→ 拼入上下文 → LLM 生成
   ├─ SSE 流式：Python agent.astream_events() → Java SseEmitter → 前端 ReadableStream
-  ├─ 工具调用：19 种数据库查询 + Bing 搜索 + Playwright 抓取
+  ├─ 工具调用：20 种数据库查询 + Bing 搜索 + Playwright 抓取
   └─ 知识库：上传文件/URL → 解析 → 分块 → 向量化 → 存入 pgvector
 ```
+
+知识库文件上传分为两步：`POST /api/knowledge/upload/file` 返回不透明的 `fileId`，随后调用 `POST /api/knowledge/upload` 时提交 `fileId` 和 `fileName`。旧版的 `filePath` / `fileType` 请求格式不再适用于对外接口。
 
 ### 字段匹配
 
@@ -268,7 +288,7 @@ OCR 管道：精确 → 去空白 → 包含 → Levenshtein 距离（≤3 字�
 |------|------|
 | `DB_PASSWORD` | Docker 部署专用数据库密码（必填，取自根目录 `.env`） |
 | `DB_PASS` / `DB_HOST` / `DB_PORT` / `DB_NAME` / `DB_USER` | 本地开发数据库连接（`application.yaml` 读取，`DB_PASS` 无默认值） |
-| `JWT_SECRET` | JWT 签名密钥，32 位以上（必填，无默认值） |
+| `JWT_SECRET` | JWT 签名密钥，32 位以上；应用本身无默认值，`.env.example` 仅提供演示值，生产部署必须替换 |
 | `TRUSTED_PROXY_CIDRS` | 可信反向代理的 IP/CIDR；本地直启应留空，Compose 留空时使用内部私网范围 |
 
 ### Redis
@@ -309,6 +329,8 @@ RUN_REDIS_INTEGRATION=true ./mvnw -Dtest=RedisLiveIntegrationTest test
 ./mvnw clean package
 ```
 
+> Windows PowerShell 中将 `./mvnw` 改为 `.\mvnw.cmd`；真实 Redis 测试先执行 `$env:RUN_REDIS_INTEGRATION = "true"`，再运行 `.\mvnw.cmd -Dtest=RedisLiveIntegrationTest test`。
+
 ---
 
 ## 常见问题
@@ -320,9 +342,16 @@ A：首次需下载 PaddlePaddle CPU 依赖（约 1.8GB），属正常现象。
 A：确认 Python AI 助手服务已启动（8765 端口），且 `.env` 中已配置 `GLM_API_KEY`。
 
 **Q：本地启动后端失败，提示 DB_PASS / JWT_SECRET？**
-A：这两个变量无默认值，启动前需导出：
+A：应用本身不为这两个变量提供默认值。本地直启前需设置（Compose 会读取根目录 `.env`）：
 ```bash
 export DB_PASS=123456 JWT_SECRET=your_strong_secret
+```
+
+PowerShell：
+
+```powershell
+$env:DB_PASS = "123456"
+$env:JWT_SECRET = "your_strong_secret"
 ```
 
 **Q：登录页验证码加载失败或登录返回 503？**

@@ -20,6 +20,7 @@ WORKDIR /app
 COPY --from=java-provider /opt/java/openjdk /opt/java/openjdk
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH=$JAVA_HOME/bin:$PATH
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 # 2. 安装字体（验证码需要）—— 使用阿里云国内镜像，并移除 deb822 格式源避免重复配置
 RUN rm -f /etc/apt/sources.list.d/debian.sources && \
@@ -45,7 +46,11 @@ RUN /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirror
     /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ \
     --extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cpu/ \
     paddlepaddle==3.0.0 && \
-    /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ -r /tmp/requirements.txt
+    /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ -r /tmp/requirements.txt && \
+    /app/src/main/python/.venv/bin/python3 -m playwright install --with-deps chromium
+
+# 构建期验证 Playwright 包、浏览器和系统依赖能够共同工作
+RUN /app/src/main/python/.venv/bin/python3 -c "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); browser = p.chromium.launch(headless=True); page = browser.new_page(); page.set_content('<title>ArchiveBridge</title>'); assert page.title() == 'ArchiveBridge'; browser.close(); p.stop()"
 
 # 6. 创建 models 目录（PaddlePaddle 模型缓存）
 RUN mkdir -p models/.paddlex
