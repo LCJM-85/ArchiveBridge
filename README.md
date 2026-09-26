@@ -14,37 +14,37 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/LCJM-85/ArchiveBridge/blob/main/LICENSE)
 
 
- ***AI-powered archive digitization and intelligent analysis platform***
+ ***University roster archive ingestion and assisted analysis platform***
 
-ArchiveBridge 是一套面向高校招生就业部门的 **AI 驱动档案数字化平台**。
+ArchiveBridge 是一套面向高校招生、学籍与毕业名册的 **档案采集和辅助分析平台**。
 
-平台结合 **OCR、LLM、多模态理解与数据治理技术**，将招生名册、学籍卡、毕业生登记表等传统纸质档案（蜡纸扫描件、图片、PDF、Excel、CSV）自动转换为结构化数据，并提供数据管理、可视化分析、智能报告与 AI 助手能力。
+平台支持图片、PDF、Excel、CSV等资料导入。对于图片和PDF，操作者可以选择本地OCR或多模态模型处理；结构化结果经字段适配后进入招生、学籍和毕业数据管理流程。系统同时提供统计图表、网页报告、知识库问答和趋势预测原型。
 
 </div>
 
-让传统档案从：
+系统处理流程包括：
 
-> **人工查阅 → 数字化管理 → 智能分析 → 辅助决策**
+> **资料导入 → 内容提取 → 结构化管理 → 查询与辅助分析**
 
-实现档案数据价值的进一步释放。
+识别结果和模型输出仍需结合原始资料进行核对。
 
 
 ---
 
 ##  项目特色
 
-- **AI 驱动的档案数字化流程**
-- **OCR 与大模型视觉理解双引擎协同**
-- **面向高校业务的数据治理体系**
-- **从档案采集到智能决策的完整闭环**
+- **CSV、Excel、图片和PDF等多类资料导入**
+- **由操作者选择OCR或多模态模型处理路径**
+- **招生、学籍和毕业名册的结构化管理**
+- **任务记录、统计图表、知识问答和网页报告**
 
 ##  项目定位
 
-ArchiveBridge 不只是一个传统档案管理系统，而是一套面向未来高校数字化建设的：
+ArchiveBridge 的项目范围是：
 
-> **智能文档理解与档案知识服务平台**
+> **高校名册档案采集、结构化管理与辅助分析**
 
-让长期沉淀的档案数据真正产生价值。
+系统不覆盖档案鉴定、保管期限审批和馆际移交等完整档案管理业务。
 
 ---
 
@@ -183,14 +183,14 @@ cd scau-archive-insight
 
 | 模块 | 说明 |
 |------|------|
-| **档案智能采集** | 蜡纸/扫描件/PDF/Excel/CSV 五类输入，自动 OCR 表格识别与字段映射，可选 LLM 智能提取 |
-| **OCR 识别监控** | 实时查看处理进度、质量评分与失败原因，失败文件可重处理 |
+| **档案资料采集** | 支持扫描图片、PDF、Excel和CSV；图片与PDF可选择OCR或多模态模型处理 |
+| **处理任务查看** | 通过任务列表定时查看处理阶段、文件级质量参考分和失败原因，失败文件可重新处理 |
 | **招生数据管理** | 录取名单查看、筛选、编辑（按学号/身份证/考生号去重） |
 | **学籍数据管理** | 在校生学籍信息管理，专业/班级支持自由输入自动建维度 |
 | **毕业数据管理** | 毕业生信息、学位、去向管理，自动标记毕业状态 |
-| **可视化分析大屏** | 招生趋势、地理热力、学科培养桑基图、AI 招生预测（ARIMA + XGBoost） |
-| **智能报告生成** | 一键生成年度招生质量报告（Word + A3 海报），含 AI 智能分析 |
-| **AI 助手** | SSE 流式对话，自动检索知识库，支持联网搜索 + 20 种数据库查询 |
+| **可视化分析大屏** | 展示招生趋势、地理分布和培养层次等统计图表，并提供ARIMA与XGBoost固定加权的趋势预测原型 |
+| **网页报告** | 汇总年度招生数据，支持文本模型生成辅助分析，并可通过A3横向打印视图打印或另存为PDF |
+| **AI 助手** | 通过SSE传输检索/工具执行状态及完整回答，支持知识库检索、联网搜索和20种数据库查询 |
 | **知识库 (RAG)** | 上传文件（PDF/DOCX/XLSX/TXT）或网页链接，自动分块向量化，增强 AI 回答 |
 | **元数据管理** | 自定义字段编码与映射规则 |
 | **学院/专业/班级管理** | 系统管理下维护「学院→专业→班级」三级维度挂载，专业可选培养层次，删除带引用保护 |
@@ -208,9 +208,9 @@ cd scau-archive-insight
 | 数据 | PostgreSQL 15 + pgvector + PostGIS, Redis 7（临时状态与 Cache-Aside 查询缓存） |
 | 前端 | Vue 3, Vite 8, Element Plus, ECharts 6, Pinia, Axios |
 | Python | FastAPI, LangChain, PaddleOCR 3.5 (PPStructureV3), PaddlePaddle 3.0.0 (CPU), PyMuPDF, OpenCV, Playwright 1.63 |
-| LLM | 智谱 GLM-4-Plus (聊天) / GLM-4V-Plus-0111 (视觉) / embedding-3 (向量), 通义千问 Qwen-VL-Plus |
-| AI | SSE 流式对话、RAG 知识库（pgvector 向量检索）、Bing 联网搜索 + Playwright 网页抓取 |
-| 预测 | ARIMA + XGBoost 集成预测 |
+| LLM | 默认使用 glm-4-plus（聊天）、glm-4v-plus-0111（视觉）和 embedding-3（向量）；视觉接口可通过环境变量配置兼容服务 |
+| AI | SSE事件式响应、RAG知识库（pgvector向量检索）、Bing联网搜索 + Playwright网页抓取 |
+| 预测 | ARIMA与XGBoost固定加权的趋势预测原型 |
 | 部署 | Docker Compose, Nginx |
 
 ---
@@ -239,7 +239,7 @@ cd scau-archive-insight
 
 ```
 用户提问 → 检索知识库（pgvector 余弦相似度）→ 拼入上下文 → LLM 生成
-  ├─ SSE 流式：Python agent.astream_events() → Java SseEmitter → 前端 ReadableStream
+  ├─ SSE 事件：Python 发送阶段状态和完整回答 → Java SseEmitter → 前端 ReadableStream
   ├─ 工具调用：20 种数据库查询 + Bing 搜索 + Playwright 抓取
   └─ 知识库：上传文件/URL → 解析 → 分块 → 向量化 → 存入 pgvector
 ```
@@ -280,7 +280,7 @@ OCR 管道：精确 → 去空白 → 包含 → Levenshtein 距离（≤3 字�
 | `LLM_BASE_URL` | `https://open.bigmodel.cn/api/paas/v4` | API 地址 |
 | `LLM_MODEL` | `glm-4v-plus-0111` | 模型名称 |
 
-推荐模型：智谱 GLM-4V-Plus-0111（支持 Base64 图片）、通义千问 Qwen-VL-Plus。
+当前默认视觉模型为智谱 GLM-4V-Plus-0111（支持Base64图片）；如更换模型，需要同时确认接口兼容性和图片输入格式。
 
 ### 数据库 / JWT
 
