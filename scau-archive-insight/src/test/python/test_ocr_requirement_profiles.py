@@ -23,7 +23,7 @@ class OcrRequirementProfilesTest(unittest.TestCase):
         cpu_runtime = paddle_requirements(cpu_profile)
         gpu_runtime = paddle_requirements(gpu_profile)
         self.assertEqual(["paddlepaddle==3.0.0"], cpu_runtime)
-        self.assertEqual(["paddlepaddle-gpu==3.0.0"], gpu_runtime)
+        self.assertEqual(["paddlepaddle-gpu==3.2.2"], gpu_runtime)
 
 
 if __name__ == "__main__":

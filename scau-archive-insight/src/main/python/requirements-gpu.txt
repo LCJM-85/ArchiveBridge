@@ -1,2 +1,2 @@
-paddlepaddle-gpu==3.0.0
+paddlepaddle-gpu==3.2.2
 -r requirements-common.txt

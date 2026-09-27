@@ -1,5 +1,15 @@
 # PP-Structure V3 表格识别 + 字段映射
 import sys, json, os, logging, re
+from pathlib import Path
+
+from gpu_runtime import configure_nvidia_dll_directories
+
+configure_nvidia_dll_directories()
+os.environ.setdefault(
+    "PADDLE_PDX_CACHE_HOME",
+    str(Path(__file__).resolve().parents[4] / "models" / ".paddlex"),
+)
+
 import paddle
 from paddleocr import PPStructureV3
 

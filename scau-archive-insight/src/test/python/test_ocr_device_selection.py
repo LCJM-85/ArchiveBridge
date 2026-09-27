@@ -14,6 +14,7 @@ OCR_SCRIPT = (
     / "ppstructure"
     / "ocr_table.py"
 )
+sys.path.insert(0, str(OCR_SCRIPT.parent))
 
 
 class FakePaddle:
@@ -44,7 +45,13 @@ class FakePaddle:
 def load_ocr(device_value, fake_paddle):
     pipeline_configs = []
     fake_paddleocr = types.SimpleNamespace(
-        PPStructureV3=lambda **kwargs: pipeline_configs.append(kwargs) or object()
+        PPStructureV3=lambda **kwargs: pipeline_configs.append(
+            {
+                **kwargs,
+                "_cache_home": os.environ.get("PADDLE_PDX_CACHE_HOME"),
+            }
+        )
+        or object()
     )
     environment = os.environ.copy()
     if device_value is None:
@@ -84,6 +91,14 @@ class OcrDeviceSelectionTest(unittest.TestCase):
 
         self.assertEqual(["cpu"], paddle.selected_devices)
         self.assertEqual("cpu", configs[0].get("device"))
+
+    def test_defaults_paddlex_cache_to_project_models_directory(self):
+        configs = load_ocr("cpu", FakePaddle(cuda_devices=0, gpu_healthy=False))
+
+        self.assertEqual(
+            str(OCR_SCRIPT.parents[4] / "models" / ".paddlex"),
+            configs[0]["_cache_home"],
+        )
 
 
 if __name__ == "__main__":
