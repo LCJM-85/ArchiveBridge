@@ -144,6 +144,18 @@ cd scau-archive-insight
 
 Windows PowerShell 使用 `.\mvnw.cmd spring-boot:run`。
 
+OCR 运行环境二选一安装，禁止在同一虚拟环境混装：
+
+```powershell
+# 通用 CPU 环境
+.\src\main\python\.venv\Scripts\python.exe -m pip install -r src\main\python\requirements.txt
+
+# NVIDIA GPU 环境（需匹配的 CUDA/cuDNN）
+.\src\main\python\.venv\Scripts\python.exe -m pip install -r src\main\python\requirements-gpu.txt
+```
+
+`OCR_DEVICE=auto` 会在运行时检查 GPU、CUDA 和 cuDNN，检查失败则使用 CPU；也可显式设置为 `cpu` 或 `gpu`。该配置不会自动安装或切换 Python 依赖。
+
 **4. 前端**（端口 5173，新终端）
 ```bash
 cd scau_archive-frontend

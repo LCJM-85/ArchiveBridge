@@ -71,6 +71,10 @@ llm:
    base-url: ${LLM_BASE_URL:https://open.bigmodel.cn/api/paas/v4}
    model: ${LLM_MODEL:glm-4v-plus-0111}
 
+# OCR 设备：auto 自动检测 GPU/CUDA/cuDNN，不可用时回退 CPU；也可显式填写 cpu 或 gpu
+ocr:
+  device: ${OCR_DEVICE:auto}
+
 # 未登录被拦截时返回给前端的登录页地址（可与前端路由一致）
 app:
   security:
