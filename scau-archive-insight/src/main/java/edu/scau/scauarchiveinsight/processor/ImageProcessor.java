@@ -98,7 +98,11 @@ public class ImageProcessor {
             String ocrPath = isEnhanceFailed(enhancedPath) ? imagePath : enhancedPath;
 
             try {
+                List<MetaDataStandard> rules = metaDataService.list();
                 String text = ppStructureService.parseTable(ocrPath);
+                if (!isEnhanceFailed(enhancedPath) && !hasMappableHeaders(text, rules)) {
+                    text = ppStructureService.parseTable(imagePath);
+                }
 
                 if (text == null || text.isEmpty()) {
                     item.put("data", Map.of());
@@ -118,7 +122,6 @@ public class ImageProcessor {
                         List<Map<String, String>> dataList = new ArrayList<>();
 
                         if (grids != null) {
-                            List<MetaDataStandard> rules = metaDataService.list();
                             List<String> allProvinces = provinceDimMapper.selectList(null).stream()
                                     .map(ProvinceDim::getProvinceName).collect(Collectors.toList());
 
@@ -234,5 +237,37 @@ public class ImageProcessor {
         }
 
         return results;
+    }
+
+    private boolean hasMappableHeaders(String text, List<MetaDataStandard> rules) {
+        if (text == null || text.isBlank()) return false;
+        try {
+            Map<String, Object> parsed = objectMapper.readValue(text,
+                    new TypeReference<Map<String, Object>>() {});
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> grids = (List<Map<String, Object>>) parsed.get("grids");
+            if (grids == null) return false;
+
+            for (Map<String, Object> grid : grids) {
+                @SuppressWarnings("unchecked")
+                List<String> headers = (List<String>) grid.get("headers");
+                if (headers == null) continue;
+                long nonBlankCount = headers.stream()
+                        .filter(Objects::nonNull)
+                        .filter(header -> !header.isBlank())
+                        .count();
+                if (nonBlankCount == 0) continue;
+
+                long unmatchedCount = metaDataMappingService
+                        .findUnmatchedHeaders(headers, rules).stream()
+                        .filter(Objects::nonNull)
+                        .filter(header -> !header.isBlank())
+                        .count();
+                if (unmatchedCount < nonBlankCount) return true;
+            }
+            return false;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 }
