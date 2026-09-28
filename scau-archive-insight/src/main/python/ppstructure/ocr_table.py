@@ -1,5 +1,15 @@
 # PP-Structure V3 表格识别 + 字段映射
 import sys, json, os, logging, re
+from pathlib import Path
+
+from gpu_runtime import configure_nvidia_dll_directories
+
+configure_nvidia_dll_directories()
+os.environ.setdefault(
+    "PADDLE_PDX_CACHE_HOME",
+    str(Path(__file__).resolve().parents[4] / "models" / ".paddlex"),
+)
+
 import paddle
 from paddleocr import PPStructureV3
 
@@ -21,9 +31,41 @@ def levenshtein(a, b):
     return prev[n]
 
 # ====================== 初始化
-_ = paddle.device.set_device("gpu") if paddle.device.cuda.device_count() > 0 else None
+def gpu_runtime_healthy():
+    if not paddle.device.is_compiled_with_cuda():
+        return False
+    if paddle.device.cuda.device_count() <= 0:
+        return False
+    try:
+        paddle.device.set_device("gpu")
+        image = paddle.ones([1, 1, 3, 3])
+        kernel = paddle.ones([1, 1, 1, 1])
+        paddle.nn.functional.conv2d(image, kernel)
+        paddle.device.cuda.synchronize()
+        return True
+    except Exception as exc:
+        logging.getLogger(__name__).warning("GPU OCR 不可用，回退 CPU: %s", exc)
+        return False
+
+
+requested_device = os.getenv("OCR_DEVICE", "auto").strip().lower()
+if requested_device not in {"auto", "cpu", "gpu"}:
+    raise ValueError("OCR_DEVICE 仅支持 auto、cpu 或 gpu")
+
+if requested_device == "cpu":
+    ocr_device = "cpu"
+    paddle.device.set_device("cpu")
+elif gpu_runtime_healthy():
+    ocr_device = "gpu"
+else:
+    if requested_device == "gpu":
+        raise RuntimeError("OCR_DEVICE=gpu，但 CUDA/cuDNN 健康检查失败")
+    ocr_device = "cpu"
+    paddle.device.set_device("cpu")
+
 table_engine = PPStructureV3(
     lang="ch",
+    device=ocr_device,
     use_table_recognition=True,
     text_detection_model_name="PP-OCRv4_mobile_det",
     text_recognition_model_name="PP-OCRv4_mobile_rec",
@@ -137,22 +179,9 @@ def extract_metadata(grid, rules):
 
     return {"data": data, "errors": errors}
 
-# ====================== 主入口
-if __name__ == "__main__":
-    input_path = sys.argv[1]
-    rule_path = sys.argv[2] if len(sys.argv) >= 3 else None
-
-    rules = []
-    if rule_path and os.path.exists(rule_path):
-        with open(rule_path, "r", encoding="utf-8") as f:
-            rules = json.load(f)
-
+def recognize(input_path):
     try:
-        # PDF 直接传给 PPStructureV3，让它内部处理渲染
-        if input_path.lower().endswith(".pdf"):
-            results = table_engine.predict(input_path)
-        else:
-            results = table_engine.predict(input_path)
+        results = table_engine.predict(input_path)
 
         all_grids = []
         all_errors = []
@@ -168,8 +197,11 @@ if __name__ == "__main__":
                         "rows": grid[1:]
                     })
 
-        output = {"grids": all_grids, "errors": all_errors}
-        print(json.dumps(output, ensure_ascii=False))
-
+        return {"grids": all_grids, "errors": all_errors}
     except Exception as e:
-        print(json.dumps({"grids": [], "errors": [{"msg": str(e)}]}))
+        return {"grids": [], "errors": [{"msg": str(e)}]}
+
+
+# 保留单次命令行入口，方便独立排查脚本问题。
+if __name__ == "__main__":
+    print(json.dumps(recognize(sys.argv[1]), ensure_ascii=False))

@@ -41,7 +41,7 @@ RUN python3 -m venv /app/src/main/python/.venv && \
     ln -sf /app/src/main/python/.venv/bin/pip3 /app/src/main/python/.venv/Scripts/pip3.exe
 
 # 5. 安装 Python 依赖 —— pip 使用阿里云镜像源（paddlepaddle 官方 CPU 站保留为 extra-index）
-COPY src/main/python/requirements.txt /tmp/
+COPY src/main/python/requirements*.txt /tmp/
 RUN /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ --upgrade pip && \
     /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ \
     --extra-index-url https://www.paddlepaddle.org.cn/packages/stable/cpu/ \
