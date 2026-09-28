@@ -20,6 +20,8 @@ venv/
 __pycache__/
 *.py[cod]
 
+# 后端运行数据
+storage/
 # 系统文件
 .DS_Store
 Thumbs.db
