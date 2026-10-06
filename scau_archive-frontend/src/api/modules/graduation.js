@@ -23,3 +23,9 @@ export function fetchDegrees() {
 export function fetchDestinations() {
   return request.get('/api/graduation/destinations')
 }
+
+export async function deleteGraduationBatch(ids) {
+  const res = await request.delete('/api/graduation/delete/batch', { data: ids })
+  if (res.data.code !== 200) throw new Error(res.data.msg || '批量删除失败')
+  return res.data.data.deletedCount
+}

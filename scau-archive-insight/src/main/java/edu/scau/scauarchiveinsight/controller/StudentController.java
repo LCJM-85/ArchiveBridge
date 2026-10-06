@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @Tag(name = "学籍数据", description = "学籍数据管理")
 @RestController
@@ -52,6 +53,17 @@ public class StudentController {
     public R<Void> update(@RequestBody StudentDTO dto) {
         studentService.update(dto);
         return R.ok(null, "更新成功");
+    }
+
+    @Operation(summary = "批量删除学籍记录")
+    @DeleteMapping("/delete/batch")
+    public R<Map<String, Integer>> deleteBatch(@RequestBody List<Long> ids) {
+        try {
+            int deletedCount = studentService.deleteBatch(ids);
+            return R.ok(Map.of("deletedCount", deletedCount), "批量删除完成");
+        } catch (IllegalArgumentException e) {
+            return R.error(400, e.getMessage());
+        }
     }
 
     @Operation(summary = "删除学籍记录")

@@ -17,6 +17,7 @@ import edu.scau.scauarchiveinsight.pojo.ProvinceDim;
 import edu.scau.scauarchiveinsight.vo.AdmissionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import edu.scau.scauarchiveinsight.util.BatchDeleteIds;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -71,6 +72,13 @@ public class AdmissionService {
         entity.setUpdateTime(LocalDateTime.now());
         admissionFactMapper.updateById(entity);
         cacheService.evictDashboard();
+    }
+
+    public int deleteBatch(List<Long> ids) {
+        List<Long> selectedIds = BatchDeleteIds.validate(ids);
+        int deletedCount = admissionFactMapper.deleteByIds(selectedIds);
+        cacheService.evictDashboard();
+        return deletedCount;
     }
 
     public void delete(Long id) {

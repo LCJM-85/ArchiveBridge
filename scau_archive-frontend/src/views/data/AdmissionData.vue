@@ -56,11 +56,13 @@
       <el-button :icon="Refresh" @click="handleSearch">刷新</el-button>
       <el-button @click="resetFilters">重置</el-button>
       <el-button type="primary" class="btn-gold" :icon="Plus" @click="openAddDialog">新增</el-button>
+      <el-button type="danger" plain :icon="Delete" :disabled="!selectedRows.length || loading || batchDeleting" :loading="batchDeleting" @click="handleBatchDelete">批量删除（{{ selectedRows.length }}）</el-button>
     </div>
 
     <!-- 数据表格 -->
     <el-card shadow="never" class="table-card">
-      <el-table :data="tableData" v-loading="loading" stripe border style="width:100%">
+      <el-table ref="tableRef" :data="tableData" v-loading="loading || batchDeleting" row-key="id" @selection-change="rows => selectedRows = rows" stripe border style="width:100%">
+        <el-table-column type="selection" width="48" fixed="left" :selectable="() => !loading && !batchDeleting" />
         <el-table-column prop="studentNo" label="学号" width="130" />
         <el-table-column prop="name" label="姓名" width="90" />
         <el-table-column prop="gender" label="性别" width="70" align="center">
@@ -207,7 +209,8 @@
 import { ref, onMounted, onActivated } from 'vue'
 import { Plus, Edit, Delete, Search, Refresh } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { fetchAdmissionPage, addAdmission, updateAdmission, deleteAdmission, fetchProvinces, fetchMajors, fetchDegrees } from '@/api/modules/admission'
+import { useBatchDelete } from '@/composables/useBatchDelete'
+import { fetchAdmissionPage, addAdmission, updateAdmission, deleteAdmission, deleteAdmissionBatch, fetchProvinces, fetchMajors, fetchDegrees } from '@/api/modules/admission'
 
 const tableData = ref([])
 const loading = ref(false)
@@ -225,7 +228,20 @@ const provinces = ref([])
 const degrees = ref([])
 const majors = ref([])
 
+const tableRef = ref(null)
+const { selectedRows, batchDeleting, handleBatchDelete } = useBatchDelete({
+  current, pageSize, total,
+  confirm: count => ElMessageBox.confirm(`确定删除已选中的 ${count} 条招生记录吗？此操作不可恢复。`, '批量删除', {
+    type: 'warning', confirmButtonText: '确定删除', cancelButtonText: '取消',
+  }),
+  deleteRecords: deleteAdmissionBatch,
+  reload: fetchPage,
+  notify: (type, message) => ElMessage[type](message),
+})
+
 async function fetchPage() {
+  selectedRows.value = []
+  tableRef.value?.clearSelection()
   loading.value = true
   try {
     const params = { current: current.value, size: pageSize.value }

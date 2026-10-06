@@ -72,6 +72,17 @@ public class AdmissionController {
         return R.ok(null, "更新成功");
     }
 
+    @Operation(summary = "批量删除招生记录")
+    @DeleteMapping("/delete/batch")
+    public R<Map<String, Integer>> deleteBatch(@RequestBody List<Long> ids) {
+        try {
+            int deletedCount = admissionService.deleteBatch(ids);
+            return R.ok(Map.of("deletedCount", deletedCount), "批量删除完成");
+        } catch (IllegalArgumentException e) {
+            return R.error(400, e.getMessage());
+        }
+    }
+
     @Operation(summary = "删除招生录取记录")
     @DeleteMapping("/delete/{id}")
     public R<Void> delete(@PathVariable Long id) {

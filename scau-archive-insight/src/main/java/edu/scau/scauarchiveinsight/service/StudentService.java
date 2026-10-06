@@ -9,6 +9,7 @@ import edu.scau.scauarchiveinsight.pojo.*;
 import edu.scau.scauarchiveinsight.vo.StudentVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import edu.scau.scauarchiveinsight.util.BatchDeleteIds;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -139,6 +140,13 @@ public class StudentService {
             cacheService.evictDashboard();
         }
         return major.getMajorId();
+    }
+
+    public int deleteBatch(List<Long> ids) {
+        List<Long> selectedIds = BatchDeleteIds.validate(ids);
+        int deletedCount = studentFactMapper.deleteByIds(selectedIds);
+        cacheService.evictDashboard();
+        return deletedCount;
     }
 
     public void delete(Long id) {

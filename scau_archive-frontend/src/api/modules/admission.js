@@ -79,3 +79,9 @@ export function downloadReportWord(year) {
   return request.get('/api/report/word', { params: { year }, responseType: 'blob' })
 }
 
+
+export async function deleteAdmissionBatch(ids) {
+  const res = await request.delete('/api/admission/delete/batch', { data: ids })
+  if (res.data.code !== 200) throw new Error(res.data.msg || '批量删除失败')
+  return res.data.data.deletedCount
+}
