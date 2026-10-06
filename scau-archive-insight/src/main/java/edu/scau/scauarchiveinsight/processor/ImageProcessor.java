@@ -116,6 +116,12 @@ public class ImageProcessor {
                                 new TypeReference<Map<String, Object>>() {});
                         @SuppressWarnings("unchecked")
                         List<Map<String, Object>> errs = new ArrayList<>((List<Map<String, Object>>) parsed.getOrDefault("errors", List.of()));
+                        errs.replaceAll(error -> {
+                            if (error.containsKey("message") || !error.containsKey("msg")) return error;
+                            Map<String, Object> normalized = new LinkedHashMap<>(error);
+                            normalized.put("message", error.get("msg"));
+                            return normalized;
+                        });
 
                         @SuppressWarnings("unchecked")
                         List<Map<String, Object>> grids = (List<Map<String, Object>>) parsed.get("grids");
@@ -174,9 +180,15 @@ public class ImageProcessor {
                         item.put("errors", errs);
 
                         if (dataList.isEmpty()) {
-                            storageService.failedFile(fileName, "未匹配到任何元数据字段");
+                            String reason = errs.stream()
+                                    .map(error -> error.get("message"))
+                                    .filter(Objects::nonNull)
+                                    .map(Object::toString)
+                                    .filter(message -> !message.isBlank())
+                                    .collect(java.util.stream.Collectors.joining("; "));
+                            storageService.failedFile(fileName,
+                                    reason.isBlank() ? "未匹配到任何元数据字段" : reason);
                         } else {
-                            Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
                             if (provinceName != null && !provinceName.isBlank()) {
                                 for (Map<String, String> record : dataList) {
                                     record.putIfAbsent("province_name", provinceName);
@@ -193,23 +205,22 @@ public class ImageProcessor {
                                 }
                             }
 
-                            for (Map<String, String> record : dataList) {
-                                dataPersistenceService.saveExtractedData(archiveType, record, fileId);
-                            }
+                            Integer fileId = dataPersistenceService.saveFileData(fileName, fileType, archiveType, dataList);
 
                             storageService.moveArchiveFile(fileName);
+
+                            if (!errs.isEmpty()) {
+                                ocrLogService.tryAddMappingIssues(fileId, fileName, fileType, errs);
+                            }
 
                             int scoreErrors = (int) errs.stream()
                                     .filter(e -> !String.valueOf(e.get("message")).startsWith("未匹配的列"))
                                     .count();
-                            qualityScoreService.scoreFile(fileId, archiveType, dataList, scoreErrors);
-
-                            if (!errs.isEmpty()) {
-                                StringBuilder sb = new StringBuilder("字段校验警告: ");
-                                for (Map<String, Object> e : errs) {
-                                    sb.append(e.get("message")).append("; ");
-                                }
-                                ocrLogService.addLog(fileId, fileName, fileType, "warning", sb.toString());
+                            try {
+                                qualityScoreService.scoreFile(fileId, archiveType, dataList, scoreErrors);
+                            } catch (Exception scoreError) {
+                                ocrLogService.tryAppendWarningMessages(fileId, fileName, fileType,
+                                        List.of("质量评分生成失败: " + scoreError.getMessage()));
                             }
                         }
                     } catch (Exception e) {

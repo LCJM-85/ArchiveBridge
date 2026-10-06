@@ -93,7 +93,7 @@ public class ExcelProcessor {
             }
         }
 
-        Map<String, Object> mapped = metaDataMappingService.process(rows);
+        Map<String, Object> mapped = metaDataMappingService.process(rows, provinceName, admissionDate, degreeName);
         String fileName = Paths.get(filePath).getFileName().toString();
 
         @SuppressWarnings("unchecked")
@@ -108,7 +108,6 @@ public class ExcelProcessor {
             List<Map<String, String>> mappedData = (List<Map<String, String>>) mapped.get("data");
             Integer fileId = null;
             if (mappedData != null) {
-                fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
                 if (provinceName != null && !provinceName.isBlank()) {
                     for (Map<String, String> record : mappedData) {
                         record.putIfAbsent("province_name", provinceName);
@@ -125,23 +124,27 @@ public class ExcelProcessor {
                     }
                 }
 
-                for (Map<String, String> record : mappedData) {
-                    dataPersistenceService.saveExtractedData(archiveType, record, fileId);
-                }
+                fileId = dataPersistenceService.saveFileData(fileName, fileType, archiveType, mappedData);
             }
             try {
                 storageService.moveArchiveFile(fileName);
 
-                // 质量评分
-                int errCount = errors != null ? errors.size() : 0;
-                if (mappedData != null) {
-                    qualityScoreService.scoreFile(fileId, archiveType, mappedData, errCount);
+                if (errors != null && !errors.isEmpty() && fileId != null) {
+                    ocrLogService.tryAddMappingIssues(fileId, fileName, fileType, errors);
                 }
 
-                if (errors != null && !errors.isEmpty() && fileId != null) {
-                    ocrLogService.addLog(fileId, fileName, fileType, "warning", errors.toString());
+                int errCount = errors != null ? errors.size() : 0;
+                if (mappedData != null) {
+                    try {
+                        qualityScoreService.scoreFile(fileId, archiveType, mappedData, errCount);
+                    } catch (Exception scoreError) {
+                        ocrLogService.tryAppendWarningMessages(fileId, fileName, fileType,
+                                List.of("质量评分生成失败: " + scoreError.getMessage()));
+                    }
                 }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+                throw new IllegalStateException("Excel 文件归档失败", e);
+            }
         }
 
         return mapped;

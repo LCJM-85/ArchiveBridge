@@ -41,7 +41,7 @@ public class DashboardService {
 
     public Map<String, Object> getStats() {
         Map<String, Object> cached = cacheService.get(CacheService.DASHBOARD_KEY, new TypeReference<>() {});
-        if (cached != null) return cached;
+        if (cached != null && "all".equals(cached.get("majorDistributionScope"))) return cached;
 
         Map<String, Object> result = new HashMap<>();
 
@@ -52,22 +52,12 @@ public class DashboardService {
         result.put("degreeDistribution", admissionFactMapper.degreeDistribution());
 
         // 趋势
-        result.put("trend", admissionFactMapper.yearlyAdmissionCounts());
+        List<Map<String, Object>> trend = admissionFactMapper.yearlyAdmissionCounts();
+        result.put("trend", trend);
 
-        // 专业分布
-        List<Map<String, Object>> majors = new ArrayList<>();
-        for (int year = 2020; year <= 2025; year++) {
-            majors.addAll(admissionFactMapper.reportMajorDist(year));
-        }
-        Map<String, Integer> merged = new LinkedHashMap<>();
-        for (Map<String, Object> m : majors) {
-            String name = (String) m.get("name");
-            int count = ((Number) m.get("count")).intValue();
-            merged.merge(name, count, Integer::sum);
-        }
-        result.put("majorDistribution", merged.entrySet().stream()
-                .map(e -> { Map<String, Object> item = new HashMap<>(); item.put("name", e.getKey()); item.put("count", e.getValue()); return item; })
-                .collect(Collectors.toList()));
+        // 全部年份一次聚合，不遗漏早期、新年份或日期缺失的数据。
+        result.put("majorDistribution", admissionFactMapper.dashboardMajorDistribution());
+        result.put("majorDistributionScope", "all");
 
         // 系统概览：档案总存储（统计 storage/archive/ 下实际归档的文件数）
         result.put("totalFiles", countArchiveFiles());

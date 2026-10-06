@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @TableName("ocr_log_dim")
@@ -34,6 +35,10 @@ public class OCRLogDim {
 
     @TableField("error_message")
     private String errorMessage;
+
+    /** 由 error_message 解析出的结构化问题，不对应数据库字段。 */
+    @TableField(exist = false)
+    private List<ProcessingIssue> issues;
 
     @TableField("message")
     private String message;

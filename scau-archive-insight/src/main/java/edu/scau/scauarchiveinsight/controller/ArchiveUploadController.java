@@ -86,6 +86,7 @@ public class ArchiveUploadController {
     private void processFile(Integer logId, String storedName, String path, String ext, String archiveType,
                              String provinceName, String admissionDate, String degreeName, boolean useLlm) {
         try {
+            ocrTaskManager.checkCancelled();
             switch (ext) {
                 case "csv" -> {
                     ocrLogService.updateMessage(logId, "解析 CSV 文件");
@@ -118,7 +119,10 @@ public class ArchiveUploadController {
                 }
             }
             ocrLogService.updateMessage(logId, "确认处理结果");
-            ocrLogService.syncTodayLogs();
+            String status = storageService.getProcessedStatus(path);
+            if (status == null) throw new IllegalStateException("处理结束但未生成归档或失败结果");
+            if ("failed".equals(status)) ocrLogService.markFailed(logId, storageService.getFailureReason(path));
+            else ocrLogService.finishProcessing(logId, storedName);
         } catch (Exception e) {
             ocrLogService.markFailed(logId, e.getMessage());
             try { storageService.failedFile(storedName, e.getMessage()); } catch (Exception ignored) {}

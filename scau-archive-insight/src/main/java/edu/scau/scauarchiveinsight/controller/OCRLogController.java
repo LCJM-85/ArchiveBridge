@@ -68,10 +68,9 @@ public class OCRLogController {
     @Operation(summary = "取消正在处理的 OCR/LLM 任务")
     @PostMapping("/{logId}/cancel")
     public R<Void> cancel(@PathVariable Integer logId) {
-        if (!ocrLogService.markCancelled(logId)) {
-            return R.error(400, "任务不存在或已结束");
+        if (!ocrTaskManager.cancel(logId, () -> ocrLogService.markCancelled(logId))) {
+            return R.error(400, "任务已进入入库阶段，或不存在、已结束，无法取消");
         }
-        ocrTaskManager.cancel(logId);
         OCRLogDim log = ocrLogService.getById(logId);
         if (log != null && log.getFileName() != null) {
             try { storageService.failedFile(log.getFileName(), "用户已取消"); } catch (Exception ignored) {}

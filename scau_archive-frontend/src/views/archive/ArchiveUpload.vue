@@ -256,7 +256,7 @@ import {
 } from '@element-plus/icons-vue'
 
 const fileTypes = [
-  { key: 'image', label: '图片文件', hint: '.jpg / .png / .tiff', icon: Picture, accept: '.jpg,.jpeg,.png,.tif,.tiff,.bmp', acceptLabel: '.jpg / .png / .tiff 等图片文件', bg: 'rgba(91, 141, 239, 0.12)', color: '#5b8def' },
+  { key: 'image', label: '图片文件', hint: '.jpg / .png / .tiff', icon: Picture, accept: '.jpg,.jpeg,.png,.tiff,.bmp,.gif,.webp', acceptLabel: '.jpg / .png / .tiff / .bmp / .gif / .webp（不支持 .tif）', bg: 'rgba(91, 141, 239, 0.12)', color: '#5b8def' },
   { key: 'pdf', label: 'PDF文件', hint: '.pdf', icon: DocumentCopy, accept: '.pdf', acceptLabel: '.pdf 文件', bg: 'rgba(201, 164, 92, 0.14)', color: '#c9a45c' },
   { key: 'excel', label: 'Excel', hint: '.xls / .xlsx', icon: Grid, accept: '.xls,.xlsx', acceptLabel: '.xls / .xlsx 文件', bg: 'rgba(14, 138, 95, 0.12)', color: '#0e8a5f' },
   { key: 'csv', label: 'CSV', hint: '.csv', icon: List, accept: '.csv', acceptLabel: '.csv 文件', bg: 'rgba(138, 99, 210, 0.12)', color: '#8a63d2' },
@@ -352,7 +352,10 @@ function addFiles(newFiles) {
   const acceptList = currentType.value.accept.split(',')
   for (const f of newFiles) {
     const ext = '.' + f.name.split('.').pop().toLowerCase()
-    if (!acceptList.includes(ext)) continue
+    if (!acceptList.includes(ext)) {
+      ElMessage.warning(`不支持该文件格式：${f.name}`)
+      continue
+    }
     if (files.some((existing) => existing.name === f.name && existing.size === f.size)) continue
     files.push({
       uid: ++uidCounter.value,
@@ -375,7 +378,7 @@ function clearAll() {
 
 function fileIcon(f) {
   const ext = f.name.split('.').pop().toLowerCase()
-  const imgExts = ['jpg', 'jpeg', 'png', 'tif', 'tiff', 'bmp']
+  const imgExts = ['jpg', 'jpeg', 'png', 'tiff', 'bmp', 'gif', 'webp']
   if (['pdf'].includes(ext)) return DocumentCopy
   if (imgExts.includes(ext)) return Picture
   if (['xls', 'xlsx'].includes(ext)) return Grid
@@ -385,7 +388,7 @@ function fileIcon(f) {
 
 function fileIconColor(f) {
   const ext = f.name.split('.').pop().toLowerCase()
-  const imgExts = ['jpg', 'jpeg', 'png', 'tif', 'tiff', 'bmp']
+  const imgExts = ['jpg', 'jpeg', 'png', 'tiff', 'bmp', 'gif', 'webp']
   if (ext === 'pdf') return '#c9a45c'
   if (imgExts.includes(ext)) return '#5b8def'
   if (['xls', 'xlsx'].includes(ext)) return '#0e8a5f'

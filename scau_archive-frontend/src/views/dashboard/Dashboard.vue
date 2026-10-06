@@ -41,7 +41,7 @@
       </el-card>
       <el-card shadow="never">
         <template #header>
-          <span>专业招生规模 <span class="scope-note">人数前 8 · 含硕博</span></span>
+          <span>专业招生规模 <span class="scope-note">全部年份 · 人数前 8 · 含硕博</span></span>
         </template>
         <div class="chart-frame"><div ref="majorChartRef" class="chart-body"></div><div v-if="!dashboardData?.majorDistribution?.length" class="chart-empty">{{ loading ? '正在读取数据…' : '暂无专业分布数据' }}</div></div>
       </el-card>

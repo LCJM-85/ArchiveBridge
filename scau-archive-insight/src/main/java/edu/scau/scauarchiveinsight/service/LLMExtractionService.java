@@ -17,6 +17,9 @@ import java.util.*;
 @Service
 public class LLMExtractionService {
 
+    public record ExtractionResult(List<Map<String, Object>> data,
+                                   List<Map<String, Object>> errors) {}
+
     private static final Logger log = LoggerFactory.getLogger(LLMExtractionService.class);
 
     @Autowired
@@ -37,6 +40,10 @@ public class LLMExtractionService {
     private String model;
 
     public List<Map<String, Object>> extract(String imagePath) {
+        return extractWithIssues(imagePath).data();
+    }
+
+    public ExtractionResult extractWithIssues(String imagePath) {
         String json = runPython(imagePath);
         try {
             Map<String, Object> parsed = objectMapper.readValue(json,
@@ -44,14 +51,27 @@ public class LLMExtractionService {
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> data = (List<Map<String, Object>>) parsed.getOrDefault("data", List.of());
             @SuppressWarnings("unchecked")
-            List<Object> errors = (List<Object>) parsed.getOrDefault("errors", List.of());
+            List<Object> rawErrors = (List<Object>) parsed.getOrDefault("errors", List.of());
+            List<Map<String, Object>> errors = new ArrayList<>();
+            for (Object rawError : rawErrors) {
+                if (rawError instanceof Map<?, ?> map) {
+                    Map<String, Object> normalized = new LinkedHashMap<>();
+                    map.forEach((key, value) -> normalized.put(String.valueOf(key), value));
+                    if (!normalized.containsKey("message") && normalized.containsKey("msg")) {
+                        normalized.put("message", normalized.get("msg"));
+                    }
+                    errors.add(normalized);
+                } else if (rawError != null) {
+                    errors.add(Map.of("message", rawError.toString()));
+                }
+            }
             if (!errors.isEmpty()) {
                 log.warn("LLM 提取返回错误: {} (图片: {})", errors, imagePath);
             }
             if (data.isEmpty() && errors.isEmpty()) {
                 log.warn("LLM 提取结果为空且无错误信息，LLM 可能认为图片无有效数据 (图片: {})", imagePath);
             }
-            return data;
+            return new ExtractionResult(data, errors);
         } catch (Exception e) {
             throw new RuntimeException("LLM 提取结果解析失败: " + e.getMessage(), e);
         }

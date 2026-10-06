@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class StorageService {
 
     private static final Map<String, Set<String>> ALLOWED_EXTENSIONS_BY_TYPE = Map.of(
-            "image", Set.of("jpg", "jpeg", "png", "bmp", "gif", "tif", "tiff", "webp"),
+            "image", Set.of("jpg", "jpeg", "png", "bmp", "gif", "tiff", "webp"),
             "pdf", Set.of("pdf"),
             "excel", Set.of("xls", "xlsx"),
             "csv", Set.of("csv")
@@ -50,6 +50,31 @@ public class StorageService {
      */
     public int getProcessingCount() {
         return processingCount.get();
+    }
+
+    /** 根据原上传路径查询结果，保留上传日期，不受跨零点影响。 */
+    public String getProcessedStatus(String uploadPath) {
+        Path source = Paths.get(uploadPath).toAbsolutePath().normalize();
+        if (!source.startsWith(storageRoot)) return null;
+        Path relative = storageRoot.relativize(source);
+        if (Files.isRegularFile(archiveRoot.resolve(relative))) return "success";
+        if (Files.isRegularFile(failedRoot.resolve(relative))) return "failed";
+        return null;
+    }
+
+    public String getFailureReason(String uploadPath) {
+        Path source = Paths.get(uploadPath).toAbsolutePath().normalize();
+        if (source.startsWith(storageRoot)) {
+            Path file = failedRoot.resolve(storageRoot.relativize(source));
+            Path error = file.resolveSibling(file.getFileName() + ".error.json");
+            try {
+                if (Files.isRegularFile(error)) {
+                    String message = new ObjectMapper().readTree(Files.readString(error)).path("message").asText();
+                    if (!message.isBlank()) return message;
+                }
+            } catch (IOException ignored) {}
+        }
+        return "文件处理失败，未生成可入库数据";
     }
 
     public Map<String, Object> saveFiles(List<MultipartFile> files, String type) {

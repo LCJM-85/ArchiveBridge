@@ -146,6 +146,11 @@ public interface AdmissionFactMapper extends BaseMapper<AdmissionFact> {
             "GROUP BY m.major_name ORDER BY count DESC")
     List<Map<String, Object>> reportMajorDist(@Param("year") int year);
 
+    @Select("SELECT m.major_name AS name, COUNT(*)::int AS count " +
+            "FROM admission_fact f JOIN major_dim m ON f.major_id = m.major_id " +
+            "GROUP BY m.major_name ORDER BY count DESC")
+    List<Map<String, Object>> dashboardMajorDistribution();
+
     @Select("SELECT COALESCE(p.province_name, '未知') AS name, COUNT(*)::int AS count " +
             "FROM admission_fact f LEFT JOIN province_dim p ON f.province_id = p.province_id " +
             "WHERE EXTRACT(YEAR FROM COALESCE(f.admission_date, f.create_time::date))::int = #{year} " +

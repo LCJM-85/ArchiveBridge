@@ -216,6 +216,7 @@ const defaultForm = {
 const form = ref({ ...defaultForm })
 
 const rules = {
+  sourceField: [{ required: true, whitespace: true, message: '请输入来源字段', trigger: 'blur' }],
   fieldCode: [{ required: true, message: '请输入字段编码', trigger: 'blur' }],
   fieldName: [{ required: true, message: '请输入字段名称', trigger: 'blur' }],
   fieldType: [{ required: true, message: '请选择字段类型', trigger: 'change' }],

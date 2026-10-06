@@ -27,10 +27,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -61,6 +65,8 @@ public class DataPersistenceService {
     private DestinationDimMapper destinationDimMapper;
     @Autowired
     private CacheService cacheService;
+    @Autowired
+    private OCRTaskManager ocrTaskManager;
 
 /**
      * 持久化提取的结构化数据
@@ -75,6 +81,47 @@ public class DataPersistenceService {
             saveGraduationData(data, fileId);
             cacheService.evictDashboard();
         }
+    }
+
+    /**
+     * 同一文件的档案记录和全部业务数据在一个数据库事务中提交。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Integer saveFileData(String fileName, String fileType, String archiveType,
+                                List<Map<String, String>> records) {
+        ocrTaskManager.beginPersistence();
+        if (records == null || records.isEmpty()) {
+            throw new IllegalArgumentException("文件没有可入库的数据");
+        }
+        if (!"admission".equals(archiveType) && !"graduation".equals(archiveType)) {
+            throw new IllegalArgumentException("不支持的档案类型: " + archiveType);
+        }
+
+        Integer fileId = saveArchiveFileDimData(fileName, fileType);
+        for (Map<String, String> record : records) {
+            ocrTaskManager.checkCancelled();
+            // 清洗仅作用于数据库副本，原始 OCR 数据继续用于质量评分。
+            Map<String, String> databaseRecord = new LinkedHashMap<>(record);
+            if ("admission".equals(archiveType)) {
+                saveAdmissionData(databaseRecord, fileId);
+            } else {
+                saveGraduationData(databaseRecord, fileId);
+            }
+        }
+        ocrTaskManager.checkCancelled();
+        cacheService.evictDashboard();
+        if (TransactionSynchronizationManager.isActualTransactionActive()
+                && TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    // 提交前重新缓存的旧查询结果也必须失效；回滚不触发此回调。
+                    cacheService.evictAllDimensions();
+                    cacheService.evictDashboard();
+                }
+            });
+        }
+        return fileId;
     }
 
     // ===================== 招生档案：admission_fact + student_fact 去重持久化 =====================
@@ -141,6 +188,7 @@ public class DataPersistenceService {
 
         if (existingStudent != null) {
             // 更新已有记录
+            mergeMissingStudentFields(studentFact, existingStudent);
             studentFact.setId(existingStudent.getId());
             studentFact.setCreateTime(existingStudent.getCreateTime());
             studentFact.setUpdateTime(now);
@@ -175,6 +223,7 @@ public class DataPersistenceService {
         }
 
         if (existingAdmission != null) {
+            mergeMissingAdmissionFields(admissionFact, existingAdmission);
             admissionFact.setId(existingAdmission.getId());
             admissionFact.setCreateTime(existingAdmission.getCreateTime());
             admissionFact.setUpdateTime(now);
@@ -231,6 +280,7 @@ public class DataPersistenceService {
         }
 
         if (existing != null) {
+            mergeMissingGraduationFields(graduationFact, existing);
             graduationFact.setId(existing.getId());
             graduationFact.setCreateTime(existing.getCreateTime());
             graduationFact.setUpdateTime(now);
@@ -243,6 +293,46 @@ public class DataPersistenceService {
 
         // 同步标记 student_fact 为已毕业
         markStudentGraduated(studentNo, data.get("id_card"), now);
+    }
+
+    private void mergeMissingStudentFields(StudentFact incoming, StudentFact existing) {
+        incoming.setStudentNo(preferIncoming(incoming.getStudentNo(), existing.getStudentNo()));
+        incoming.setName(preferIncoming(incoming.getName(), existing.getName()));
+        incoming.setIdCard(preferIncoming(incoming.getIdCard(), existing.getIdCard()));
+        incoming.setGender(preferIncoming(incoming.getGender(), existing.getGender()));
+        if (incoming.getDegreeId() == null) incoming.setDegreeId(existing.getDegreeId());
+        if (incoming.getMajorId() == null) incoming.setMajorId(existing.getMajorId());
+        if (incoming.getClassId() == null) incoming.setClassId(existing.getClassId());
+        if (incoming.getProvinceId() == null) incoming.setProvinceId(existing.getProvinceId());
+        if (incoming.getAdmissionDate() == null) incoming.setAdmissionDate(existing.getAdmissionDate());
+        if (incoming.getGraduated() == null) incoming.setGraduated(existing.getGraduated());
+    }
+
+    private void mergeMissingAdmissionFields(AdmissionFact incoming, AdmissionFact existing) {
+        incoming.setStudentNo(preferIncoming(incoming.getStudentNo(), existing.getStudentNo()));
+        incoming.setExamNo(preferIncoming(incoming.getExamNo(), existing.getExamNo()));
+        incoming.setName(preferIncoming(incoming.getName(), existing.getName()));
+        incoming.setIdCard(preferIncoming(incoming.getIdCard(), existing.getIdCard()));
+        incoming.setGender(preferIncoming(incoming.getGender(), existing.getGender()));
+        if (incoming.getDegreeId() == null) incoming.setDegreeId(existing.getDegreeId());
+        if (incoming.getProvinceId() == null) incoming.setProvinceId(existing.getProvinceId());
+        if (incoming.getMajorId() == null) incoming.setMajorId(existing.getMajorId());
+        if (incoming.getAdmissionDate() == null) incoming.setAdmissionDate(existing.getAdmissionDate());
+        if (incoming.getAdmissionScore() == null) incoming.setAdmissionScore(existing.getAdmissionScore());
+    }
+
+    private void mergeMissingGraduationFields(GraduationFact incoming, GraduationFact existing) {
+        incoming.setStudentNo(preferIncoming(incoming.getStudentNo(), existing.getStudentNo()));
+        incoming.setName(preferIncoming(incoming.getName(), existing.getName()));
+        incoming.setIdCard(preferIncoming(incoming.getIdCard(), existing.getIdCard()));
+        incoming.setGender(preferIncoming(incoming.getGender(), existing.getGender()));
+        if (incoming.getDegreeId() == null) incoming.setDegreeId(existing.getDegreeId());
+        if (incoming.getDestId() == null) incoming.setDestId(existing.getDestId());
+        if (incoming.getGraduationDate() == null) incoming.setGraduationDate(existing.getGraduationDate());
+    }
+
+    private String preferIncoming(String incoming, String existing) {
+        return incoming == null || incoming.isBlank() ? existing : incoming.trim();
     }
 
     /**

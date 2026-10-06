@@ -57,11 +57,14 @@ public class MetaDataController {
     @Operation(summary = "添加元数据")
     @PostMapping("/add")
     public R<Void> add(@RequestBody MetaDataDTO dto) {
+        if (dto.getSourceField() == null || dto.getSourceField().isBlank()) {
+            return R.error(400, "来源字段不能为空");
+        }
         MetaDataStandard entity = new MetaDataStandard();
         entity.setFieldCode(dto.getFieldCode());
         entity.setFieldName(dto.getFieldName());
         entity.setFieldType(dto.getFieldType());
-        entity.setSourceField(dto.getSourceField());
+        entity.setSourceField(dto.getSourceField().trim());
         entity.setTransformType(dto.getTransformType());
         entity.setTransformRule(dto.getTransformRule());
         entity.setIsRequired(dto.getIsRequired());
@@ -72,12 +75,15 @@ public class MetaDataController {
     @Operation(summary = "更新元数据")
     @PutMapping("/update")
     public R<Void> update(@RequestBody MetaDataDTO dto) {
+        if (dto.getSourceField() == null || dto.getSourceField().isBlank()) {
+            return R.error(400, "来源字段不能为空");
+        }
         MetaDataStandard entity = new MetaDataStandard();
         entity.setMetadataId(dto.getMetadataId());
         entity.setFieldCode(dto.getFieldCode());
         entity.setFieldName(dto.getFieldName());
         entity.setFieldType(dto.getFieldType());
-        entity.setSourceField(dto.getSourceField());
+        entity.setSourceField(dto.getSourceField().trim());
         entity.setTransformType(dto.getTransformType());
         entity.setTransformRule(dto.getTransformRule());
         entity.setIsRequired(dto.getIsRequired());

@@ -25,7 +25,21 @@ public class MetaDataMappingService {
      * @return 包含 "data"（映射后数据）和 "errors"（校验错误）的 Map
      */
     public Map<String, Object> process(List<Map<String, String>> rawRows) {
+        return process(rawRows, null, null, null);
+    }
+
+    public Map<String, Object> process(List<Map<String, String>> rawRows, String provinceName,
+                                      String admissionDate, String degreeName) {
         List<MetaDataStandard> rules = metaDataService.list();
+        for (MetaDataStandard rule : rules) {
+            if (rule.getSourceField() == null || rule.getSourceField().isBlank()) {
+                throw new IllegalStateException("元数据配置错误：字段 " + rule.getFieldCode() + " 的来源字段不能为空");
+            }
+        }
+        Map<String, String> defaults = new LinkedHashMap<>();
+        defaults.put("province_name", provinceName);
+        defaults.put("admission_date", admissionDate);
+        defaults.put("degree_name", degreeName);
         List<Map<String, String>> mappedRows = new ArrayList<>();
         List<Map<String, Object>> errors = new ArrayList<>();
 
@@ -37,6 +51,10 @@ public class MetaDataMappingService {
             for (MetaDataStandard rule : rules) {
                 String rawValue = findValue(raw, rule);
                 String fieldCode = rule.getFieldCode();
+                String fallback = defaults.get(fieldCode);
+                if ((rawValue == null || rawValue.isBlank()) && fallback != null && !fallback.isBlank()) {
+                    rawValue = fallback.trim();
+                }
 
                 // 必填校验
                 if (Boolean.TRUE.equals(rule.getIsRequired()) && (rawValue == null || rawValue.isEmpty())) {
@@ -54,6 +72,9 @@ public class MetaDataMappingService {
                 mapped.put(fieldCode, rawValue != null ? rawValue : "");
             }
 
+            defaults.forEach((key, value) -> {
+                if (value != null && !value.isBlank()) mapped.putIfAbsent(key, value.trim());
+            });
             mappedRows.add(mapped);
 
             if (!rowErrors.isEmpty()) {

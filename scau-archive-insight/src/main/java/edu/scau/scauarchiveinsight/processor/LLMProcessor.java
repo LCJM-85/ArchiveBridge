@@ -57,11 +57,12 @@ public class LLMProcessor {
             List<Map<String, Object>> allErrors = new ArrayList<>();
 
             try {
-                List<Map<String, Object>> data = llmExtractionService.extract(imagePath);
+                LLMExtractionService.ExtractionResult extraction = llmExtractionService.extractWithIssues(imagePath);
+                List<Map<String, Object>> data = extraction.data();
+                allErrors.addAll(extraction.errors());
 
                 if (!data.isEmpty()) {
-                    Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
-
+                    List<Map<String, String>> stringData = new ArrayList<>();
                     for (Map<String, Object> record : data) {
                         Map<String, String> flatRecord = new LinkedHashMap<>();
                         for (Map.Entry<String, Object> entry : record.entrySet()) {
@@ -78,30 +79,25 @@ public class LLMProcessor {
                         if (degreeName != null && !degreeName.isBlank()) {
                             flatRecord.putIfAbsent("degree_name", degreeName);
                         }
-                        dataPersistenceService.saveExtractedData(archiveType, flatRecord, fileId);
+                        stringData.add(flatRecord);
                     }
 
-                    List<Map<String, String>> stringData = new ArrayList<>();
-                    for (Map<String, Object> record : data) {
-                        Map<String, String> flat = new LinkedHashMap<>();
-                        for (Map.Entry<String, Object> e : record.entrySet()) {
-                            if (e.getValue() != null) flat.put(e.getKey(), e.getValue().toString());
-                        }
-                        stringData.add(flat);
-                    }
-                    qualityScoreService.scoreFile(fileId, archiveType, stringData, allErrors.size());
+                    Integer fileId = dataPersistenceService.saveFileData(fileName, fileType, archiveType, stringData);
                     storageService.moveArchiveFile(fileName);
 
                     if (!allErrors.isEmpty()) {
-                        StringBuilder sb = new StringBuilder("LLM 提取警告: ");
-                        for (Map<String, Object> e : allErrors) {
-                            sb.append(e.get("message")).append("; ");
-                        }
-                        ocrLogService.addLog(fileId, fileName, fileType, "warning", sb.toString());
+                        ocrLogService.tryAddMappingIssues(fileId, fileName, fileType, allErrors);
+                    }
+                    try {
+                        qualityScoreService.scoreFile(fileId, archiveType, stringData, allErrors.size());
+                    } catch (Exception scoreError) {
+                        ocrLogService.tryAppendWarningMessages(fileId, fileName, fileType,
+                                List.of("质量评分生成失败: " + scoreError.getMessage()));
                     }
                 } else {
                     log.warn("LLM 提取结果为空 (图片: {})", imagePath);
-                    storageService.failedFile(fileName, "LLM 未提取到有效数据");
+                    storageService.failedFile(fileName,
+                            summarizeIssues(allErrors, "LLM 未提取到有效数据"));
                 }
 
                 item.put("data", data);
@@ -132,6 +128,7 @@ public class LLMProcessor {
         try {
             // 1. 提取所有页面的数据
             List<Map<String, String>> allData = new ArrayList<>();
+            List<Map<String, Object>> pageIssues = new ArrayList<>();
             for (int pageIndex = 0; pageIndex < pagePaths.size(); pageIndex++) {
                 String pagePath = pagePaths.get(pageIndex);
                 Integer taskId = ocrTaskManager.getCurrentTaskId();
@@ -140,7 +137,13 @@ public class LLMProcessor {
                             "LLM：处理第 " + (pageIndex + 1) + "/" + pagePaths.size() + " 页");
                 }
                 try {
-                    List<Map<String, Object>> pageRecords = llmExtractionService.extract(pagePath);
+                    LLMExtractionService.ExtractionResult extraction = llmExtractionService.extractWithIssues(pagePath);
+                    List<Map<String, Object>> pageRecords = extraction.data();
+                    for (Map<String, Object> issue : extraction.errors()) {
+                        Map<String, Object> pageIssue = new LinkedHashMap<>(issue);
+                        pageIssue.putIfAbsent("row", pageIndex + 1);
+                        pageIssues.add(pageIssue);
+                    }
                     for (Map<String, Object> record : pageRecords) {
                         Map<String, String> flat = new LinkedHashMap<>();
                         for (Map.Entry<String, Object> e : record.entrySet()) {
@@ -159,26 +162,36 @@ public class LLMProcessor {
                     }
                 } catch (Exception e) {
                     log.warn("PDF 页面处理失败: {} - {}", pagePath, e.getMessage());
+                    pageIssues.add(Map.of(
+                            "row", pageIndex + 1,
+                            "message", "第 " + (pageIndex + 1) + " 页提取失败: " + e.getMessage()));
                 }
             }
 
             if (allData.isEmpty()) {
-                storageService.failedFile(pdfFileName, "LLM 未提取到有效数据");
-                results.add(Map.of("originalPath", pdfPath, "data", List.of(), "errors", List.of(Map.of("msg", "LLM 未提取到有效数据"))));
+                String reason = summarizeIssues(pageIssues, "LLM 未提取到有效数据");
+                storageService.failedFile(pdfFileName, reason);
+                results.add(Map.of("originalPath", pdfPath, "data", List.of(), "errors", List.of(Map.of("msg", reason))));
                 return results;
             }
 
             // 2. 以 PDF 名义创建一条归档记录
-            Integer fileId = dataPersistenceService.saveArchiveFileDimData(pdfFileName, "pdf-llm");
-            for (Map<String, String> record : allData) {
-                dataPersistenceService.saveExtractedData(archiveType, record, fileId);
+            Integer fileId = dataPersistenceService.saveFileData(pdfFileName, "pdf-llm", archiveType, allData);
+
+            // 3. 数据库提交成功后归档 PDF 原始文件（只减一次计数）
+            storageService.moveArchiveFile(pdfFileName);
+
+            if (!pageIssues.isEmpty()) {
+                ocrLogService.tryAddMappingIssues(fileId, pdfFileName, "pdf-llm", pageIssues);
             }
 
-            // 3. 一次质量评分
-            qualityScoreService.scoreFile(fileId, archiveType, allData, 0);
-
-            // 4. 归 PDF 原始文件（只减一次计数）
-            storageService.moveArchiveFile(pdfFileName);
+            // 4. 评分失败不回滚已确认的业务数据
+            try {
+                qualityScoreService.scoreFile(fileId, archiveType, allData, 0);
+            } catch (Exception scoreError) {
+                ocrLogService.tryAppendWarningMessages(fileId, pdfFileName, "pdf-llm",
+                        List.of("质量评分生成失败: " + scoreError.getMessage()));
+            }
 
             // 5. 删除临时页面图片（不影响计数）
             for (String pagePath : pagePaths) {
@@ -203,5 +216,14 @@ public class LLMProcessor {
         }
 
         return results;
+    }
+
+    private String summarizeIssues(List<Map<String, Object>> issues, String fallback) {
+        List<String> messages = new ArrayList<>();
+        for (Map<String, Object> issue : issues) {
+            Object raw = issue.containsKey("message") ? issue.get("message") : issue.get("msg");
+            if (raw != null && !raw.toString().isBlank()) messages.add(raw.toString());
+        }
+        return messages.isEmpty() ? fallback : String.join("; ", messages);
     }
 }

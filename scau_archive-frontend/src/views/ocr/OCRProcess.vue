@@ -65,7 +65,7 @@
             <el-icon :size="20"><WarningFilled /></el-icon>
           </div>
           <div class="sc-num"><span class="count" :data-to="stats.warning">{{ stats.warning }}</span></div>
-          <div class="sc-label">警告</div>
+          <div class="sc-label">数据提示</div>
         </div>
         <div class="stat-card sc-success">
           <div class="sc-icon">
@@ -104,17 +104,30 @@
         </el-table-column>
         <el-table-column label="质量评分" width="90" align="center">
           <template #default="{ row }">
-            <span v-if="scoresMap[row.fileId]" class="score-badge" :class="scoreClass(scoresMap[row.fileId].totalScore)">
-              {{ scoresMap[row.fileId].totalScore }}
-            </span>
+            <el-popover v-if="scoresMap[row.fileId]" placement="left" width="220" trigger="hover">
+              <template #reference>
+                <span class="score-badge" :class="scoreClass(scoresMap[row.fileId].totalScore)">
+                  {{ scoresMap[row.fileId].totalScore }}
+                </span>
+              </template>
+              <div class="score-detail">
+                <div><span>完整性</span><b>{{ scoresMap[row.fileId].completeness }}</b></div>
+                <div><span>字段内容</span><b>{{ scoresMap[row.fileId].accuracy }}</b></div>
+                <div><span>一致性</span><b>{{ scoresMap[row.fileId].consistency }}</b></div>
+              </div>
+            </el-popover>
             <span v-else style="color:var(--text-tertiary)">-</span>
           </template>
         </el-table-column>
         <el-table-column label="提示信息" min-width="300">
           <template #default="{ row }">
             <span v-if="row.recognizeStatus === 'processing' && row.message" style="color:var(--color-primary)">{{ row.message }}</span>
-            <span v-else-if="row.recognizeStatus === 'failed' && row.errorMessage" style="color:#f56c6c">{{ row.errorMessage }}</span>
-            <span v-else-if="row.recognizeStatus === 'warning' && row.errorMessage" style="color:#e6a23c">{{ row.errorMessage }}</span>
+            <div v-else-if="issueList(row).length" class="issue-summary">
+              <span :class="row.recognizeStatus === 'failed' ? 'issue-error' : 'issue-warning'">
+                {{ issueList(row)[0].message }}
+              </span>
+              <el-button link type="primary" @click="openIssues(row)">查看 {{ issueList(row).length }} 项</el-button>
+            </div>
             <span v-else-if="row.recognizeStatus === 'cancelled'">用户已取消</span>
             <span v-else style="color:var(--text-secondary)">-</span>
           </template>
@@ -150,16 +163,29 @@
         </el-table-column>
         <el-table-column label="质量评分" width="80" align="center">
           <template #default="{ row }">
-            <span v-if="scoresMap[row.fileId]" class="score-badge" :class="scoreClass(scoresMap[row.fileId].totalScore)">
-              {{ scoresMap[row.fileId].totalScore }}
-            </span>
+            <el-popover v-if="scoresMap[row.fileId]" placement="left" width="220" trigger="hover">
+              <template #reference>
+                <span class="score-badge" :class="scoreClass(scoresMap[row.fileId].totalScore)">
+                  {{ scoresMap[row.fileId].totalScore }}
+                </span>
+              </template>
+              <div class="score-detail">
+                <div><span>完整性</span><b>{{ scoresMap[row.fileId].completeness }}</b></div>
+                <div><span>字段内容</span><b>{{ scoresMap[row.fileId].accuracy }}</b></div>
+                <div><span>一致性</span><b>{{ scoresMap[row.fileId].consistency }}</b></div>
+              </div>
+            </el-popover>
             <span v-else style="color:var(--text-tertiary)">-</span>
           </template>
         </el-table-column>
         <el-table-column label="提示信息" min-width="250">
           <template #default="{ row }">
-            <span v-if="row.recognizeStatus === 'failed' && row.errorMessage" style="color:#f56c6c">{{ row.errorMessage }}</span>
-            <span v-else-if="row.recognizeStatus === 'warning' && row.errorMessage" style="color:#e6a23c">{{ row.errorMessage }}</span>
+            <div v-if="issueList(row).length" class="issue-summary">
+              <span :class="row.recognizeStatus === 'failed' ? 'issue-error' : 'issue-warning'">
+                {{ issueList(row)[0].message }}
+              </span>
+              <el-button link type="primary" @click="openIssues(row)">查看 {{ issueList(row).length }} 项</el-button>
+            </div>
             <span v-else style="color:var(--text-secondary)">-</span>
           </template>
         </el-table-column>
@@ -181,6 +207,26 @@
           @current-change="fetchHistory"
         />
       </div>
+    </el-dialog>
+
+    <el-dialog v-model="issuesVisible" title="问题详情" width="720px" append-to-body>
+      <div class="issue-file-name">{{ issueFileName }}</div>
+      <el-table :data="selectedIssues" border stripe max-height="460">
+        <el-table-column label="级别" width="80" align="center">
+          <template #default="{ row }">
+            <span :class="row.level === 'error' ? 'issue-error' : 'issue-warning'">
+              {{ row.level === 'error' ? '错误' : '提示' }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column label="位置" width="130">
+          <template #default="{ row }">{{ issueLocation(row) }}</template>
+        </el-table-column>
+        <el-table-column prop="message" label="说明" min-width="320" />
+      </el-table>
+      <template #footer>
+        <el-button type="primary" @click="issuesVisible = false">关闭</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -204,6 +250,9 @@ const historyRecords = ref([])
 const historyPage = ref(1)
 const historyPageSize = ref(15)
 const historyTotal = ref(0)
+const issuesVisible = ref(false)
+const selectedIssues = ref([])
+const issueFileName = ref('')
 
 const stats = computed(() => ({
   processing: processingCount.value,
@@ -228,7 +277,7 @@ function statusClass(status) {
 
 function statusText(status) {
   return status === 'processing' ? '处理中'
-       : status === 'warning'   ? '有警告'
+       : status === 'warning'   ? '有提示'
        : status === 'success'   ? '已完成'
        : status === 'cancelled' ? '已取消'
        : '处理失败'
@@ -263,13 +312,35 @@ async function syncAndRefresh() {
 
 async function fetchQualityScoresForLogs(logs) {
   const fileIds = logs.filter(l => l.fileId != null).map(l => l.fileId)
-  if (fileIds.length === 0) { scoresMap.value = {}; return }
+  if (fileIds.length === 0) return
   try {
     const res = await fetchQualityScores(fileIds)
-    scoresMap.value = res.data.data || {}
-  } catch {
-    scoresMap.value = {}
-  }
+    scoresMap.value = { ...scoresMap.value, ...(res.data.data || {}) }
+  } catch {}
+}
+
+function issueList(row) {
+  if (Array.isArray(row.issues) && row.issues.length) return row.issues
+  if (!row.errorMessage) return []
+  try {
+    const parsed = JSON.parse(row.errorMessage)
+    if (Array.isArray(parsed)) return parsed
+    if (parsed?.message) return [{ level: row.recognizeStatus === 'failed' ? 'error' : 'warning', message: parsed.message }]
+  } catch {}
+  return [{ level: row.recognizeStatus === 'failed' ? 'error' : 'warning', message: row.errorMessage }]
+}
+
+function openIssues(row) {
+  issueFileName.value = row.fileName
+  selectedIssues.value = issueList(row)
+  issuesVisible.value = true
+}
+
+function issueLocation(issue) {
+  const parts = []
+  if (issue.row && issue.row > 0) parts.push(`第 ${issue.row} 行`)
+  if (issue.field) parts.push(issue.field)
+  return parts.join(' · ') || '文件级'
 }
 
 async function pollProcessingCount() {
@@ -304,6 +375,7 @@ async function fetchHistory() {
     const d = res.data.data || {}
     historyRecords.value = d.records || []
     historyTotal.value = d.total || 0
+    await fetchQualityScoresForLogs(historyRecords.value)
   } catch {
     historyRecords.value = []
   } finally {
@@ -325,12 +397,14 @@ async function handleDeleteLog(logId) {
 
 async function handleCancelTask(logId) {
   try {
-    await ElMessageBox.confirm('确定取消该任务吗？', '提示', { type: 'warning' })
-    await cancelOcrTask(logId)
-    ElMessage.success('任务已取消')
+    await ElMessageBox.confirm('确定取消该任务吗？开始入库后无法取消。', '提示', { type: 'warning' })
+    const response = await cancelOcrTask(logId)
+    if (response.data?.code === 200) ElMessage.success('任务已取消')
+    else ElMessage.warning(response.data?.msg || '任务无法取消')
     await fetchToday()
-  } catch {
-    // cancelled or error
+  } catch (error) {
+    if (error === 'cancel' || error === 'close') return
+    ElMessage.error(error?.response?.data?.msg || error?.message || '取消任务失败')
   }
 }
 
@@ -545,6 +619,15 @@ onUnmounted(() => {
   font-weight: 600;
   text-align: center;
 }
+.score-detail { display: flex; flex-direction: column; gap: 8px; }
+.score-detail > div { display: flex; justify-content: space-between; color: var(--text-secondary); }
+.score-detail b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+
+.issue-summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.issue-summary > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.issue-error { color: #e64545; }
+.issue-warning { color: #d68910; }
+.issue-file-name { margin-bottom: 12px; color: var(--text-secondary); word-break: break-all; }
 .sb-good { color: #0e8a5f; background: var(--color-primary-light); }
 .sb-ok { color: #d68910; background: rgba(230, 162, 60, 0.12); }
 .sb-bad { color: #e64545; background: rgba(245, 108, 108, 0.12); }

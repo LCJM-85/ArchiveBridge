@@ -111,7 +111,10 @@ public class PDFProcessor {
             List<Map<String, Object>> errs = (List<Map<String, Object>>) parsed.get("errors");
             if (errs != null && !errs.isEmpty()) {
                 for (Map<String, Object> e : errs) {
-                    allErrors.add(String.valueOf(e.get("message")));
+                    Object message = e.containsKey("message") ? e.get("message") : e.get("msg");
+                    if (message != null && !message.toString().isBlank()) {
+                        allErrors.add(message.toString());
+                    }
                 }
             }
 
@@ -172,7 +175,6 @@ public class PDFProcessor {
         boolean processed = false;
         if (!allData.isEmpty()) {
             try {
-                Integer fileId = dataPersistenceService.saveArchiveFileDimData(fileName, fileType);
                 if (provinceName != null && !provinceName.isBlank()) {
                     for (Map<String, String> record : allData) {
                         record.putIfAbsent("province_name", provinceName);
@@ -189,21 +191,24 @@ public class PDFProcessor {
                     }
                 }
 
-                for (Map<String, String> record : allData) {
-                    dataPersistenceService.saveExtractedData(archiveType, record, fileId);
+                Integer fileId = dataPersistenceService.saveFileData(fileName, fileType, archiveType, allData);
+
+                storageService.moveArchiveFile(fileName);
+                processed = true;
+
+                if (!allErrors.isEmpty()) {
+                    ocrLogService.tryAddWarningMessages(fileId, fileName, fileType, allErrors);
                 }
 
                 int scoreErrors = (int) allErrors.stream()
                         .filter(e -> !e.startsWith("未匹配的列"))
                         .count();
-                qualityScoreService.scoreFile(fileId, archiveType, allData, scoreErrors);
-
-                if (!allErrors.isEmpty()) {
-                    ocrLogService.addLog(fileId, fileName, fileType, "warning", String.join("; ", allErrors));
+                try {
+                    qualityScoreService.scoreFile(fileId, archiveType, allData, scoreErrors);
+                } catch (Exception scoreError) {
+                    ocrLogService.tryAppendWarningMessages(fileId, fileName, fileType,
+                            List.of("质量评分生成失败: " + scoreError.getMessage()));
                 }
-
-                storageService.moveArchiveFile(fileName);
-                processed = true;
                 log.info("PDF 处理完成并归档: {}", fileName);
             } catch (Exception e) {
                 log.error("PDF 数据处理失败: {}", fileName, e);
@@ -213,7 +218,14 @@ public class PDFProcessor {
         }
 
         if (!processed) {
-            String reason = allData.isEmpty() ? "PDF 所有页面表格识别失败" : "数据处理异常";
+            String reason;
+            if (allData.isEmpty()) {
+                reason = allErrors.isEmpty()
+                        ? "PDF 所有页面表格识别失败"
+                        : String.join("; ", allErrors);
+            } else {
+                reason = "数据处理异常";
+            }
             handleFailed(fileName, reason);
         }
 
