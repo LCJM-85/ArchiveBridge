@@ -31,8 +31,11 @@ SYSTEM_PROMPT = """你是华南农业大学档案管理系统的 AI 数据分析
 - 用户问具体年份 → 调工具时带上 year 参数
 - “今年/去年/前年”以本次请求日期为准，不能用数据库最新年份替代今年。年份缺失的录取档案不能按上传年份计算。
 - 最新用户消息优先于历史回答和知识库。用户纠正年份或质疑上一轮时，先回应纠正，再按新口径重新查询；不得复制上一轮回答或沿用旧统计数字。
+- 若上一轮把旧年份说成今年，先承认上一轮口径有误（例如“你说得对，今年是2026年，我刚才误用了2024年的数据”），再给重新查询结果。不要不回应纠正就重说统计。
+- 回答中非当前年份不得称为“今年”；指定2025年就说“2025年”，不能说“今年”。
 - 用户只纠正时间时，结合上一轮用户问题理解要重新查的指标，不能把自己的旧回答当作事实依据。
 - 查询为空时说“系统未找到该年份相关档案，无法判断”，不能改查旧年份冒充今年，也不能断言现实录取人数为0。
+- 没有档案只能陈述查询范围和未找到记录，不得猜测未录入、正在整理或其他缺失原因，也不需要建议用户等待。简短回应纠正和查询结果即可。
 - 多年比较分别查询各年。未指定年份时遵守各工具说明，全部年份合计不能当成某一年。
 - 有数据就说数据，不确定就说"数据里没找到相关信息"
 - 数字带单位（人、分、%）
@@ -67,7 +70,7 @@ def raw_user_question(question):
 def resolve_query_year(question, today):
     """仅约束明确的单年请求；多年份/范围/否定年份留给模型澄清或分别查询。"""
     question = raw_user_question(question)
-    if re.search(r'近.{0,3}年|过去.{0,3}年|历年|同比|环比|至|到|—|~', question):
+    if re.search(r'近.{0,3}年|过去.{0,3}年|历年|同比|环比|(?:\d{4}年?|今年|去年|前年)\s*(?:至|到|—|~|-)\s*(?:\d{4}|今年|去年|前年)', question):
         return None
     years = {int(y) for y in re.findall(r'(?<!\d)((?:19|20)\d{2})(?!\d)', question)}
     relative = {today.year + offset for word, offset in [('今年', 0), ('去年', -1), ('前年', -2)] if word in question}
@@ -78,6 +81,17 @@ def resolve_query_year(question, today):
     return next(iter(years)) if len(years) == 1 else None
 
 
+def is_year_correction(question, year):
+    return year is not None and bool(re.search(r'不对|不是|错误|有误|纠正|重新查|问的是', raw_user_question(question)))
+
+
+def format_query_answer(question, answer, today):
+    year = resolve_query_year(question, today)
+    if is_year_correction(question, year):
+        return f'按你的纠正，本轮以{year}年为准。\n\n{answer.strip()}'
+    return answer
+
+
 def build_query_messages(question, history):
     today = current_date()
     year = resolve_query_year(question, today)
@@ -85,12 +99,19 @@ def build_query_messages(question, history):
                '按最新用户问题回答；纠正上一轮时必须重新查询，不得复用历史回答的数字。')
     if year is not None:
         context += f'本轮明确的单年查询目标为{year}年；查询为空也不得切换其他年份。'
+    correction = is_year_correction(question, year)
     messages = [SystemMessage(content=context)]
-    for msg in history[-20:]:
+    recent = history[-20:]
+    disputed_index = next((i for i in range(len(recent) - 1, -1, -1) if recent[i].get('role') == 'assistant'), None)
+    for i, msg in enumerate(recent):
         if msg.get('role') == 'user':
             messages.append(HumanMessage(content=msg.get('content', '')))
         elif msg.get('role') == 'assistant':
-            messages.append(AIMessage(content=msg.get('content', '')))
+            # 只隔离本轮明确纠正的上一条模型回答；保留之前用户问的指标。
+            content = '(上一轮回答的年份口径已被用户质疑，需重新查询。)' if correction and i == disputed_index else msg.get('content', '')
+            messages.append(AIMessage(content=content))
+    if correction:
+        messages.append(SystemMessage(content=f'用户正在纠正上一轮年份。回应用户纠正，再重新查询上一轮用户所问指标的{year}年数据。结果明确写“{year}年”，不要沿用“今年”；不得推测档案为什么缺失。'))
     messages.append(HumanMessage(content=question))
     return messages
 
@@ -128,7 +149,9 @@ class QueryYearGuard(AgentMiddleware):
                 return result
             return result.model_copy(update={'content': json.dumps({
                 'queried_year': request.tool_call['args']['year'], 'data': data,
-                'scope': '仅代表该年份系统已入库档案；空结果不能证明现实人数为0，不能用其他年份替代。'
+                'scope': '仅代表该年份系统已入库档案，不能用其他年份替代。',
+                'record_note': ('该年份查询未找到记录，无法判断所问结果；不能证明现实人数为0。' if data == [] else '请依据返回的统计直接回答。')
+                    + '本工具不提供档案完整性或缺失原因信息，不能推断未录入、整理中、暂无录取等原因。'
             }, ensure_ascii=False)})
         return result
 
@@ -148,7 +171,7 @@ async def run_agent(agent, question: str, history: list):
 
     for m in reversed(result.get("messages", [])):
         if isinstance(m, AIMessage) and m.content and not m.tool_calls:
-            return m.content
+            return format_query_answer(question, m.content, date.fromisoformat(messages[0].content[7:17]))
     return "抱歉，无法获取回答"
 
 
@@ -185,7 +208,7 @@ async def run_agent_stream(agent, question: str, history: list):
             final_answer = last.content
 
     if final_answer:
-        yield {"type": "token", "content": final_answer}
+        yield {"type": "token", "content": format_query_answer(question, final_answer, date.fromisoformat(messages[0].content[7:17]))}
     else:
         yield {"type": "token", "content": "抱歉，无法获取回答"}
 
