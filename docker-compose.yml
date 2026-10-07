@@ -11,12 +11,12 @@ services:
       TZ: Asia/Shanghai
       POSTGRES_DB: scau_archive
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?请在 .env 设置 DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scau-archive-insight/sql:/docker-entrypoint-initdb.d
+      - ./scau-archive-insight/sql:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -55,11 +55,11 @@ services:
       DB_PORT: ${DB_PORT:-5432}
       DB_NAME: ${DB_NAME:-scau_archive}
       DB_USER: ${DB_USER:-postgres}
-      DB_PASS: ${DB_PASSWORD}
+      DB_PASS: ${DB_PASSWORD:?请在 .env 设置 DB_PASSWORD}
       GLM_API_KEY: ${GLM_API_KEY:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-https://open.bigmodel.cn/api/paas/v4}
       LLM_MODEL: ${LLM_MODEL:-glm-4v-plus-0111}
-      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET:?请在 .env 设置 JWT_SECRET}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
@@ -67,7 +67,7 @@ services:
       OCR_DEVICE: ${OCR_DEVICE:-auto}
       # 后端不发布到宿主机，仅信任 Compose 私网中的反向代理来源
       TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-10.0.0.0/8,172.16.0.0/12,192.168.0.0/16}
-      python.venv-path: /app/src/main/python/.venv/bin/python3
+      PYTHON_VENV_PATH: /app/src/main/python/.venv/bin/python3
     volumes:
       # 文件上传存储（Docker 命名卷，换机器自动创建）
       - storage_data:/app/storage

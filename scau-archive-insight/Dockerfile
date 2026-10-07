@@ -52,6 +52,9 @@ RUN /app/src/main/python/.venv/bin/pip3 install --no-cache-dir -i https://mirror
 # 构建期验证 Playwright 包、浏览器和系统依赖能够共同工作
 RUN /app/src/main/python/.venv/bin/python3 -c "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); browser = p.chromium.launch(headless=True); page = browser.new_page(); page.set_content('<title>ArchiveBridge</title>'); assert page.title() == 'ArchiveBridge'; browser.close(); p.stop()"
 
+# 验证新 Agent 中间件 API 可导入；不请求数据库/AI 接口，也不需要真实密钥。
+RUN /app/src/main/python/.venv/bin/python3 -c "import sys; sys.path.insert(0, '/app/src/main/python/ai_assistant'); from agent import QueryYearGuard; from langchain.agents import create_agent; assert QueryYearGuard is not None"
+
 # 6. 创建 models 目录（PaddlePaddle 模型缓存）
 RUN mkdir -p models/.paddlex
 ENV HOME=/app/models
