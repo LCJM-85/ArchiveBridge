@@ -2,7 +2,7 @@ package edu.scau.scauarchiveinsight.processor;
 
 import edu.scau.scauarchiveinsight.mapper.ProvinceDimMapper;
 import edu.scau.scauarchiveinsight.pojo.MetaDataStandard;
-import edu.scau.scauarchiveinsight.service.DataPersistenceService;
+import edu.scau.scauarchiveinsight.service.ReviewDraftService;
 import edu.scau.scauarchiveinsight.service.FieldCorrectionService;
 import edu.scau.scauarchiveinsight.service.MetaDataMappingService;
 import edu.scau.scauarchiveinsight.service.MetaDataService;
@@ -37,7 +37,7 @@ class ImageProcessorFallbackTest {
         OCRLogService logs = mock(OCRLogService.class);
         QualityScoreService quality = mock(QualityScoreService.class);
         StorageService storage = mock(StorageService.class);
-        DataPersistenceService persistence = mock(DataPersistenceService.class);
+        ReviewDraftService persistence = mock(ReviewDraftService.class);
         ImageProcessor processor = new ImageProcessor(
                 openCV, ocr, mapping, metadata, correction, provinces,
                 logs, quality, storage, persistence);
@@ -68,7 +68,6 @@ class ImageProcessorFallbackTest {
                     ? List.of(Map.of("name", "张三"))
                     : List.of();
         });
-        when(persistence.saveArchiveFileDimData("original.png", "picture")).thenReturn(1);
 
         List<Map<String, Object>> result = processor.process(List.of(original), "admission");
 

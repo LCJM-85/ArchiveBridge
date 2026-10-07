@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.JsonParser;
 import edu.scau.scauarchiveinsight.pojo.MetaDataStandard;
 import edu.scau.scauarchiveinsight.pojo.ProvinceDim;
-import edu.scau.scauarchiveinsight.service.DataPersistenceService;
+import edu.scau.scauarchiveinsight.service.ReviewDraftService;
 import edu.scau.scauarchiveinsight.service.FieldCorrectionService;
 import edu.scau.scauarchiveinsight.service.MetaDataMappingService;
 import edu.scau.scauarchiveinsight.service.MetaDataService;
@@ -36,7 +36,7 @@ public class ImageProcessor {
     private final OCRLogService ocrLogService;
     private final QualityScoreService qualityScoreService;
     private final StorageService storageService;
-    private final DataPersistenceService dataPersistenceService;
+    private final ReviewDraftService reviewDraftService;
     private final ObjectMapper objectMapper = JsonMapper.builder()
             .enable(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER)
             .enable(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS)
@@ -48,7 +48,7 @@ public class ImageProcessor {
                           FieldCorrectionService fieldCorrectionService,
                           ProvinceDimMapper provinceDimMapper,
                           OCRLogService ocrLogService, QualityScoreService qualityScoreService,
-                          StorageService storageService, DataPersistenceService dataPersistenceService) {
+                          StorageService storageService, ReviewDraftService reviewDraftService) {
         this.openCVService = openCVService;
         this.ppStructureService = ppStructureService;
         this.metaDataMappingService = metaDataMappingService;
@@ -58,7 +58,7 @@ public class ImageProcessor {
         this.ocrLogService = ocrLogService;
         this.qualityScoreService = qualityScoreService;
         this.storageService = storageService;
-        this.dataPersistenceService = dataPersistenceService;
+        this.reviewDraftService = reviewDraftService;
     }
 
     private static boolean isEnhanceFailed(String enhancedPath) {
@@ -205,23 +205,7 @@ public class ImageProcessor {
                                 }
                             }
 
-                            Integer fileId = dataPersistenceService.saveFileData(fileName, fileType, archiveType, dataList);
-
-                            storageService.moveArchiveFile(fileName);
-
-                            if (!errs.isEmpty()) {
-                                ocrLogService.tryAddMappingIssues(fileId, fileName, fileType, errs);
-                            }
-
-                            int scoreErrors = (int) errs.stream()
-                                    .filter(e -> !String.valueOf(e.get("message")).startsWith("未匹配的列"))
-                                    .count();
-                            try {
-                                qualityScoreService.scoreFile(fileId, archiveType, dataList, scoreErrors);
-                            } catch (Exception scoreError) {
-                                ocrLogService.tryAppendWarningMessages(fileId, fileName, fileType,
-                                        List.of("质量评分生成失败: " + scoreError.getMessage()));
-                            }
+                            reviewDraftService.stage(fileName, fileType, archiveType, dataList, errs);
                         }
                     } catch (Exception e) {
                         item.put("data", Map.of());

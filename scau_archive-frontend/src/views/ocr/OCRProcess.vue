@@ -53,6 +53,13 @@
 
       <!-- 状态统计卡 -->
       <div class="stat-cards">
+        <div class="stat-card sc-review">
+          <div class="sc-icon">
+            <el-icon :size="20"><DocumentChecked /></el-icon>
+          </div>
+          <div class="sc-num">{{ todayLogs.filter(f => f.recognizeStatus === 'pending_review').length }}</div>
+          <div class="sc-label">待审查</div>
+        </div>
         <div class="stat-card sc-processing">
           <div class="sc-icon">
             <el-icon :size="20"><Loading /></el-icon>
@@ -95,7 +102,7 @@
             <span class="cell-muted">{{ row.recognizeTime }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="recognizeStatus" label="状态" width="110" align="center">
+        <el-table-column prop="recognizeStatus" label="状态" width="120" align="center">
           <template #default="{ row }">
             <span class="status-pill" :class="statusClass(row.recognizeStatus)">
               {{ statusText(row.recognizeStatus) }}
@@ -121,7 +128,7 @@
         </el-table-column>
         <el-table-column label="提示信息" min-width="300">
           <template #default="{ row }">
-            <span v-if="row.recognizeStatus === 'processing' && row.message" style="color:var(--color-primary)">{{ row.message }}</span>
+            <span v-if="['processing','pending_review','discarded'].includes(row.recognizeStatus) && row.message" style="color:var(--color-primary)">{{ row.message }}</span>
             <div v-else-if="issueList(row).length" class="issue-summary">
               <span :class="row.recognizeStatus === 'failed' ? 'issue-error' : 'issue-warning'">
                 {{ issueList(row)[0].message }}
@@ -132,10 +139,11 @@
             <span v-else style="color:var(--text-secondary)">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120" align="center">
+        <el-table-column label="操作" width="190" align="center">
           <template #default="{ row }">
             <el-button v-if="row.recognizeStatus === 'processing'" size="small" type="warning" text @click="handleCancelTask(row.logId)">取消</el-button>
-            <el-button size="small" class="op-danger-round" :icon="Delete" circle @click="handleDeleteLog(row.logId)" />
+            <el-button v-if="row.recognizeStatus === 'pending_review'" link type="primary" @click="openReview(row.logId)">入库审查</el-button>
+              <el-button v-else size="small" class="op-danger-round" :icon="Delete" circle @click="handleDeleteLog(row.logId)" />
           </template>
         </el-table-column>
       </el-table>
@@ -154,7 +162,7 @@
             <span class="cell-muted">{{ row.recognizeTime }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="recognizeStatus" label="状态" width="90" align="center">
+        <el-table-column prop="recognizeStatus" label="状态" width="120" align="center">
           <template #default="{ row }">
             <span class="status-pill" :class="statusClass(row.recognizeStatus)">
               {{ statusText(row.recognizeStatus) }}
@@ -189,10 +197,11 @@
             <span v-else style="color:var(--text-secondary)">-</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="80" align="center">
+        <el-table-column label="操作" width="160" align="center">
           <template #default="{ row }">
             <div style="display:flex;justify-content:center">
-              <el-button size="small" class="op-danger-round" :icon="Delete" circle @click="handleDeleteLog(row.logId)" />
+              <el-button v-if="row.recognizeStatus === 'pending_review'" link type="primary" @click="openReview(row.logId)">入库审查</el-button>
+              <el-button v-else size="small" class="op-danger-round" :icon="Delete" circle @click="handleDeleteLog(row.logId)" />
             </div>
           </template>
         </el-table-column>
@@ -233,8 +242,10 @@
 
 <script setup>
 import { ref, computed, onMounted, onActivated, onUnmounted } from 'vue'
-import { Refresh, Monitor, Timer, Delete, Loading, WarningFilled, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
+import { Refresh, Monitor, Timer, Delete, Loading, DocumentChecked, WarningFilled, CircleCheckFilled, CircleCloseFilled } from '@element-plus/icons-vue'
 import { syncOcrLogs, fetchTodayOcrLogs, fetchOcrLogHistory, deleteOcrLog, fetchQualityScores, fetchProcessingCount, cancelOcrTask } from '@/api/modules/ocr'
+import { useTabStore } from '@/store/tab'
+import { useReviewStore } from '@/store/review'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const loading = ref(false)
@@ -261,22 +272,33 @@ const stats = computed(() => ({
   error: todayLogs.value.filter(f => f.recognizeStatus === 'failed').length,
 }))
 
+function openReview(logId) {
+  useReviewStore().logId = logId
+  useTabStore().addTab('review', '入库审查')
+}
+
 function statusTag(status) {
-  return status === 'processing' ? 'warning'
+  return status === 'pending_review' ? 'info'
+       : status === 'discarded' ? 'info'
+       : status === 'processing' ? 'warning'
        : status === 'warning'   ? 'warning'
        : status === 'success'   ? 'success'
        : 'danger'
 }
 
 function statusClass(status) {
-  return status === 'processing' ? 'sp-processing'
+  return status === 'pending_review' ? 'sp-processing'
+       : status === 'discarded' ? 'sp-warning'
+       : status === 'processing' ? 'sp-processing'
        : status === 'warning'   ? 'sp-warning'
        : status === 'success'   ? 'sp-success'
        : 'sp-danger'
 }
 
 function statusText(status) {
-  return status === 'processing' ? '处理中'
+  return status === 'pending_review' ? '待审查'
+       : status === 'discarded' ? '已放弃'
+       : status === 'processing' ? '处理中'
        : status === 'warning'   ? '有提示'
        : status === 'success'   ? '已完成'
        : status === 'cancelled' ? '已取消'
@@ -385,13 +407,21 @@ async function fetchHistory() {
 
 async function handleDeleteLog(logId) {
   try {
-    await ElMessageBox.confirm('确定删除该日志吗？', '提示', { type: 'warning' })
-    await deleteOcrLog(logId)
-    ElMessage.success('删除成功')
+    await ElMessageBox.confirm('将永久删除该识别日志、关联审查记录和原文件（包括已保存的修正内容），无法恢复。已入库的业务数据不会删除，但将无法查看该原文件。确定继续吗？', '删除记录及原文件', {
+      type: 'warning', confirmButtonText: '确认删除', cancelButtonText: '取消'
+    })
+  } catch { return }
+  try {
+    const response = await deleteOcrLog(logId)
+    if (response.data?.code !== 200) {
+      ElMessage.warning(response.data?.msg || '无法删除该日志')
+      return
+    }
+    ElMessage.success('识别日志、关联审查记录及原文件已删除')
     await fetchToday()
     if (historyVisible.value) await fetchHistory()
-  } catch {
-    // cancelled or error
+  } catch (error) {
+    ElMessage.error(error.response?.data?.msg || error.message || '删除失败，请重试')
   }
 }
 
@@ -510,11 +540,12 @@ onUnmounted(() => {
 /* ===== 状态统计卡 ===== */
 .stat-cards {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 14px;
 }
 .stat-card {
+  min-width: 0;
   position: relative;
   overflow: hidden;
   border-radius: 14px;
@@ -564,12 +595,16 @@ onUnmounted(() => {
   color: var(--text-secondary);
   letter-spacing: 1px;
 }
+.sc-review     { --sc1: #7893a1; --sc2: #506b78; --sc-sd: rgba(80, 107, 120, 0.22); --sc-main: #506b78; }
 .sc-processing { --sc1: #c9a45c; --sc2: #9a7a3c; --sc-sd: rgba(201, 164, 92, 0.3); --sc-main: var(--color-gold-dark); }
 .sc-warning   { --sc1: #e6a23c; --sc2: #b97e1e; --sc-sd: rgba(230, 162, 60, 0.3); --sc-main: #d68910; }
 .sc-success   { --sc1: #14a06f; --sc2: #0b5c40; --sc-sd: rgba(20, 160, 111, 0.3); --sc-main: var(--color-primary); }
 .sc-danger    { --sc1: #f56c6c; --sc2: #c94f4f; --sc-sd: rgba(245, 108, 108, 0.3); --sc-main: #e64545; }
 @media (max-width: 900px) {
-  .stat-cards { grid-template-columns: repeat(2, 1fr); }
+  .stat-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .stat-cards { grid-template-columns: 1fr; }
 }
 
 /* ===== 表格 ===== */
@@ -597,9 +632,14 @@ onUnmounted(() => {
 }
 
 .status-pill {
-  display: inline-block;
-  min-width: 56px;
-  padding: 2px 10px;
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  min-width: 76px;
+  min-height: 30px;
+  padding: 3px 12px;
+  white-space: nowrap;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 500;

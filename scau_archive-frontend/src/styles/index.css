@@ -683,7 +683,11 @@ body {
 }
 .content .page-hero::after, .content .ph-art, .content .ph-rule { display: none; }
 .content .ph-kicker { color: var(--color-gold); font-size: 10px; letter-spacing: 1.5px; }
-.content .ph-left h2 { font-family: var(--font-display); font-size: 28px; font-weight: 400; letter-spacing: 1px; }
+/* 中文页面主标题优先使用完整本机宋体，避免远程分片字体未加载时单字混用。 */
+.content .page-hero .ph-left h2 {
+  font-family: 'SimSun', 'Songti SC', 'STSong', var(--font-display);
+  font-size: 28px; font-weight: 400; letter-spacing: 1px;
+}
 .content .ph-count-num { color: var(--text-primary); font-size: 28px; text-shadow: none; }
 .content .ph-count-label { color: var(--text-secondary); }
 .content .filter-bar {
@@ -706,6 +710,9 @@ body {
 button, input, textarea, select { font-family: var(--font-body); }
 :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; }
 .el-button { font-weight: 500; }
+.data-row-tools { display: flex; align-items: center; justify-content: center; gap: 10px; }
+.data-row-tools .el-checkbox { margin-right: 0; }
+.data-row-tools .row-menu-button { width: 26px; height: 26px; padding: 0; }
 .el-card__header { font-size: 14px; }
 .card-header-left { display: flex; align-items: center; gap: 10px; }
 .card-header-left > span { font-size: 16px; font-weight: 600; color: var(--text-primary); }
@@ -752,7 +759,9 @@ button, input, textarea, select { font-family: var(--font-body); }
 }
 
 /* Paper-toned workspace with distinct navigation, content and accent layers. */
-.app-layout .el-button--primary, .el-dialog .el-button--primary {
+/* 浅色文字只用于实心按钮，透明/描边按钮保留组件自身的深色文字。 */
+.app-layout .el-button--primary:not(.is-link):not(.is-text):not(.is-plain):not(.is-dashed),
+.el-dialog .el-button--primary:not(.is-link):not(.is-text):not(.is-plain):not(.is-dashed) {
   --el-button-bg-color: var(--color-primary);
   --el-button-border-color: var(--color-primary);
   --el-button-text-color: #fffaf0;

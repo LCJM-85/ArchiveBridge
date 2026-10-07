@@ -24,13 +24,19 @@ public class OCRTaskManager {
     private final ThreadLocal<TaskState> currentState = new ThreadLocal<>();
 
     private static class TaskState {
+        String originalName;
         boolean running;
         boolean cancelled;
         boolean persisting;
     }
 
     public void submit(Integer logId, Runnable task) {
+        submit(logId, null, task);
+    }
+
+    public void submit(Integer logId, String originalName, Runnable task) {
         TaskState state = new TaskState();
+        state.originalName = originalName;
         FutureTask<Void> future = new FutureTask<>(() -> {
             synchronized (state) {
                 if (state.cancelled) return;
@@ -55,6 +61,11 @@ public class OCRTaskManager {
 
     public Integer getCurrentTaskId() {
         return currentTaskId.get();
+    }
+
+    public String getCurrentOriginalName() {
+        TaskState state = currentState.get();
+        return state == null ? null : state.originalName;
     }
 
     public void registerProcess(Process process) {

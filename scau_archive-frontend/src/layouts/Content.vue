@@ -16,6 +16,7 @@ import TabBar from '@/layouts/TabBar.vue'
 import Dashboard from '@/views/dashboard/Dashboard.vue'
 import ArchiveUpload from '@/views/archive/ArchiveUpload.vue'
 import OCRProcess from '@/views/ocr/OCRProcess.vue'
+import ArchiveReview from '@/views/review/ArchiveReview.vue'
 import ReportGenerate from '@/views/report/ReportGenerate.vue'
 import AdmissionData from '@/views/data/AdmissionData.vue'
 import StudentStatusData from '@/views/data/StudentStatusData.vue'
@@ -38,6 +39,7 @@ const componentMap = {
   dashboard: Dashboard,
   upload: ArchiveUpload,
   process: OCRProcess,
+  review: ArchiveReview,
   report: ReportGenerate,
   admission: AdmissionData,
   studentstatus: StudentStatusData,
@@ -59,6 +61,7 @@ const keyToName = {
   dashboard: 'Dashboard',
   upload: 'ArchiveUpload',
   process: 'OCRProcess',
+  review: 'ArchiveReview',
   report: 'ReportGenerate',
   admission: 'AdmissionData',
   studentstatus: 'StudentStatusData',

@@ -21,7 +21,7 @@ def _get_pool():
     if _pool is None:
         with _pool_lock:
             if _pool is None:
-                _pool = pool.SimpleConnectionPool(1, 10, **DB_CONFIG)
+                _pool = pool.ThreadedConnectionPool(1, 10, **DB_CONFIG)
     return _pool
 
 

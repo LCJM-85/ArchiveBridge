@@ -75,11 +75,11 @@ public class ArchiveUploadController {
             String ext = getExtension(originalName).toLowerCase();
             Integer logId = ocrLogService.createProcessingLog(storedName, ext);
             tasks.add(Map.of("taskId", logId, "fileName", originalName));
-            ocrTaskManager.submit(logId, () -> processFile(logId, storedName, path, ext, archiveType,
+            ocrTaskManager.submit(logId, originalName, () -> processFile(logId, storedName, path, ext, archiveType,
                     provinceName, admissionDate, degreeName, useLlm));
         }
         result.put("tasks", tasks);
-        result.put("message", "文件已上传，正在后台处理");
+        result.put("message", "文件已上传，后台解析完成后进入入库审查");
         return ResponseEntity.ok(result);
     }
 
@@ -118,6 +118,9 @@ public class ArchiveUploadController {
                     return;
                 }
             }
+            var log = ocrLogService.getById(logId);
+            // 草稿可能已被快速确认或放弃，解析线程不能覆盖后续审查终态。
+            if (log != null && !"processing".equals(log.getRecognizeStatus())) return;
             ocrLogService.updateMessage(logId, "确认处理结果");
             String status = storageService.getProcessedStatus(path);
             if (status == null) throw new IllegalStateException("处理结束但未生成归档或失败结果");

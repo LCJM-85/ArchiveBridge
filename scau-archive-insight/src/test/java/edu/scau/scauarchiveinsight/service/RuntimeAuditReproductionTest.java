@@ -74,8 +74,7 @@ class RuntimeAuditReproductionTest {
         }
         when(metadata.list()).thenReturn(rules);
         ReflectionTestUtils.setField(mapping, "metaDataService", metadata);
-        DataPersistenceService persistence = mock(DataPersistenceService.class);
-        when(persistence.saveFileData(anyString(), anyString(), anyString(), anyList())).thenReturn(1);
+        ReviewDraftService persistence = mock(ReviewDraftService.class);
         CSVProcessor processor = new CSVProcessor(mock(StorageService.class), mapping,
                 mock(OCRLogService.class), mock(QualityScoreService.class), persistence);
         Map<String, Object> result = "csv".equals(extension)
@@ -84,7 +83,7 @@ class RuntimeAuditReproductionTest {
                         mock(QualityScoreService.class), persistence)
                         .process(input.toString(), "admission", "广东省", "2024-09-01", "学士");
         ArgumentCaptor<List> records = ArgumentCaptor.forClass(List.class);
-        verify(persistence).saveFileData(eq("defaults." + extension), anyString(), eq("admission"), records.capture());
+        verify(persistence).stage(eq("defaults." + extension), anyString(), eq("admission"), records.capture(), anyList());
         Map<String, String> saved = (Map<String, String>) records.getValue().get(0);
         assertEquals("广东省", saved.get("province_name"));
         assertEquals("2024-09-01", saved.get("admission_date"));

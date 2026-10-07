@@ -17,7 +17,8 @@ import java.util.concurrent.TimeUnit;
 public class PythonProcessManager implements InitializingBean {
 
     private static final Logger log = LoggerFactory.getLogger(PythonProcessManager.class);
-    private Process pythonProcess;
+    private volatile Process pythonProcess;
+    private volatile Thread watchdogThread;
 
     @Value("${python.venv-path:}")
     private String customVenvPath;
@@ -53,7 +54,8 @@ public class PythonProcessManager implements InitializingBean {
         startWatchdog();
     }
 
-    private void startPythonProcess() {
+    private synchronized void startPythonProcess() {
+        if (!running || (pythonProcess != null && pythonProcess.isAlive())) return;
         String userDir = System.getProperty("user.dir");
         File scriptInSub = new File(userDir + "/src/main/python/ai_assistant/main.py");
         File scriptInRoot = new File(userDir + "/scau-archive-insight/src/main/python/ai_assistant/main.py");
@@ -83,17 +85,18 @@ public class PythonProcessManager implements InitializingBean {
         pb.environment().put("DB_PASS", dbPass);
 
         try {
-            pythonProcess = pb.start();
-            log.info("AI 助手 Python 服务启动中 (pid={})...", pythonProcess.pid());
+            final Process startedProcess = pb.start();
+            pythonProcess = startedProcess;
+            log.info("AI 助手 Python 服务启动中 (pid={})...", startedProcess.pid());
 
             Thread reader = new Thread(() -> {
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(pythonProcess.getInputStream()))) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(startedProcess.getInputStream()))) {
                     String line;
                     while ((line = br.readLine()) != null) {
                         if (line.contains("Error") || line.contains("ERROR") || line.contains("Traceback")) {
                             log.error("[AI Python] {}", line);
                         } else if (line.contains("Uvicorn running")) {
-                            log.info("AI 助手 Python 服务已启动 (pid={})", pythonProcess.pid());
+                            log.info("AI 助手 Python 服务已启动 (pid={})", startedProcess.pid());
                         } else {
                             log.debug("[AI Python] {}", line);
                         }
@@ -144,7 +147,8 @@ public class PythonProcessManager implements InitializingBean {
         }
     }
 
-    private void startWatchdog() {
+    private synchronized void startWatchdog() {
+        if (!running || (watchdogThread != null && watchdogThread.isAlive())) return;
         Thread watchdog = new Thread(() -> {
             while (running) {
                 try {
@@ -161,12 +165,16 @@ public class PythonProcessManager implements InitializingBean {
             }
         }, "python-watchdog");
         watchdog.setDaemon(true);
+        watchdogThread = watchdog;
         watchdog.start();
         log.debug("AI 助手 watchdog 已启动（每 30 秒检查一次）");
     }
 
     @PreDestroy
-    public void destroy() {
+    public synchronized void destroy() {
+        // 必须先关闭监控；否则 DevTools 重启后的旧实例会反复拉起并清理新进程。
+        running = false;
+        if (watchdogThread != null) watchdogThread.interrupt();
         if (pythonProcess != null && pythonProcess.isAlive()) {
             try {
                 // Windows 上 venv 的 python.exe 是 stub，会再派生一个 base python 子进程；

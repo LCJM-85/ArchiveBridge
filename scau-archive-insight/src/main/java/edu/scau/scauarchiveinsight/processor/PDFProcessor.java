@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.scau.scauarchiveinsight.pojo.MetaDataStandard;
-import edu.scau.scauarchiveinsight.service.DataPersistenceService;
+import edu.scau.scauarchiveinsight.service.ReviewDraftService;
 import edu.scau.scauarchiveinsight.service.FieldCorrectionService;
 import edu.scau.scauarchiveinsight.service.MetaDataMappingService;
 import edu.scau.scauarchiveinsight.service.MetaDataService;
@@ -39,7 +39,7 @@ public class PDFProcessor {
     private final OCRLogService ocrLogService;
     private final QualityScoreService qualityScoreService;
     private final StorageService storageService;
-    private final DataPersistenceService dataPersistenceService;
+    private final ReviewDraftService reviewDraftService;
     private final ObjectMapper objectMapper = new ObjectMapper()
             .configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
 
@@ -49,7 +49,7 @@ public class PDFProcessor {
                         FieldCorrectionService fieldCorrectionService,
                         ProvinceDimMapper provinceDimMapper,
                         OCRLogService ocrLogService, QualityScoreService qualityScoreService,
-                        StorageService storageService, DataPersistenceService dataPersistenceService) {
+                        StorageService storageService, ReviewDraftService reviewDraftService) {
         this.ppStructureService = ppStructureService;
         this.metaDataMappingService = metaDataMappingService;
         this.metaDataService = metaDataService;
@@ -58,7 +58,7 @@ public class PDFProcessor {
         this.ocrLogService = ocrLogService;
         this.qualityScoreService = qualityScoreService;
         this.storageService = storageService;
-        this.dataPersistenceService = dataPersistenceService;
+        this.reviewDraftService = reviewDraftService;
     }
 
     public List<Map<String, Object>> process(String pdfPath, String archiveType) {
@@ -191,25 +191,9 @@ public class PDFProcessor {
                     }
                 }
 
-                Integer fileId = dataPersistenceService.saveFileData(fileName, fileType, archiveType, allData);
-
-                storageService.moveArchiveFile(fileName);
+                reviewDraftService.stage(fileName, fileType, archiveType, allData, allErrors);
                 processed = true;
-
-                if (!allErrors.isEmpty()) {
-                    ocrLogService.tryAddWarningMessages(fileId, fileName, fileType, allErrors);
-                }
-
-                int scoreErrors = (int) allErrors.stream()
-                        .filter(e -> !e.startsWith("未匹配的列"))
-                        .count();
-                try {
-                    qualityScoreService.scoreFile(fileId, archiveType, allData, scoreErrors);
-                } catch (Exception scoreError) {
-                    ocrLogService.tryAppendWarningMessages(fileId, fileName, fileType,
-                            List.of("质量评分生成失败: " + scoreError.getMessage()));
-                }
-                log.info("PDF 处理完成并归档: {}", fileName);
+                log.info("PDF 解析完成，等待审查: {}", fileName);
             } catch (Exception e) {
                 log.error("PDF 数据处理失败: {}", fileName, e);
             }

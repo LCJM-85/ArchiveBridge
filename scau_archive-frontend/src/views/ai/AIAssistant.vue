@@ -35,7 +35,7 @@
           <div class="avatar" :class="msg.role"><el-icon :size="18"><component :is="msg.role === 'user' ? UserFilled : Reading" /></el-icon></div>
           <div class="bubble" v-html="renderMarkdown(msg.content)"></div>
         </div>
-        <div v-if="loading" class="message-row assistant">
+        <div v-if="loading && !answerStarted" class="message-row assistant">
           <div class="avatar assistant"><el-icon :size="18"><Reading /></el-icon></div>
           <div class="bubble loading">
             <span class="typing-dots"><i></i><i></i><i></i></span>
@@ -77,6 +77,7 @@ import { sendChatMessageStream, checkAiStatus } from '@/api/modules/ai'
 const messages = ref([])
 const question = ref('')
 const loading = ref(false)
+const answerStarted = ref(false)
 const statusText = ref('')
 const aiOnline = ref(null)
 const messageListRef = ref(null)
@@ -130,6 +131,7 @@ async function sendMessage() {
   messages.value.push({ role: 'user', content: q })
   question.value = ''
   loading.value = true
+  answerStarted.value = false
   statusText.value = '正在分析问题...'
   scrollToBottom()
 
@@ -144,6 +146,7 @@ async function sendMessage() {
         scrollToBottom()
       },
       onToken(text) {
+        answerStarted.value = true
         if (msgIdx === -1) {
           // 第一个 token，创建 assistant 消息
           msgIdx = messages.value.length
@@ -155,6 +158,7 @@ async function sendMessage() {
       },
       onDone() {
         loading.value = false
+        streamController = null
         statusText.value = ''
         scrollToBottom()
       },
@@ -163,6 +167,7 @@ async function sendMessage() {
           messages.value.push({ role: 'assistant', content: msg })
         }
         loading.value = false
+        streamController = null
         statusText.value = ''
         scrollToBottom()
       },

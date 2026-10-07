@@ -67,6 +67,14 @@ public class QualityScoreService {
      */
     public void scoreFile(Integer fileId, String archiveType,
                           List<Map<String, String>> records, int errorCount) {
+        QualityScoreDim score = evaluate(archiveType, records);
+        score.setFileId(fileId);
+        qualityScoreDimMapper.insert(score);
+        cacheService.evictDashboard();
+    }
+
+    /** 审查预览只计算，不写正式评分表或业务统计。 */
+    public QualityScoreDim evaluate(String archiveType, List<Map<String, String>> records) {
         List<String> fields = fieldsFor(archiveType);
         int completeness = calcCompleteness(records, fields);
         int accuracy = calcValidity(records, fields);
@@ -76,7 +84,6 @@ public class QualityScoreService {
                 completeness * 0.50 + accuracy * 0.30 + consistency * 0.20));
 
         QualityScoreDim score = new QualityScoreDim();
-        score.setFileId(fileId);
         score.setCompleteness(completeness);
         score.setConsistency(consistency);
         score.setAccuracy(accuracy);
@@ -84,8 +91,7 @@ public class QualityScoreService {
         score.setTotalScore(total);
         score.setCheckTime(LocalDateTime.now());
 
-        qualityScoreDimMapper.insert(score);
-        cacheService.evictDashboard();
+        return score;
     }
 
     /**

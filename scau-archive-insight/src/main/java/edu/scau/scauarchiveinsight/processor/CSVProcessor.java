@@ -1,6 +1,6 @@
 package edu.scau.scauarchiveinsight.processor;
 
-import edu.scau.scauarchiveinsight.service.DataPersistenceService;
+import edu.scau.scauarchiveinsight.service.ReviewDraftService;
 import edu.scau.scauarchiveinsight.service.MetaDataMappingService;
 import edu.scau.scauarchiveinsight.service.OCRLogService;
 import edu.scau.scauarchiveinsight.service.QualityScoreService;
@@ -19,16 +19,16 @@ public class CSVProcessor {
     private final MetaDataMappingService metaDataMappingService;
     private final OCRLogService ocrLogService;
     private final QualityScoreService qualityScoreService;
-    private final DataPersistenceService dataPersistenceService;
+    private final ReviewDraftService reviewDraftService;
 
     public CSVProcessor(StorageService storageService, MetaDataMappingService metaDataMappingService,
                         OCRLogService ocrLogService, QualityScoreService qualityScoreService,
-                        DataPersistenceService dataPersistenceService) {
+                        ReviewDraftService reviewDraftService) {
         this.storageService = storageService;
         this.metaDataMappingService = metaDataMappingService;
         this.ocrLogService = ocrLogService;
         this.qualityScoreService = qualityScoreService;
-        this.dataPersistenceService = dataPersistenceService;
+        this.reviewDraftService = reviewDraftService;
     }
 
     public Map<String, Object> process(String filePath, String archiveType) {
@@ -101,7 +101,6 @@ public class CSVProcessor {
         } else {
             @SuppressWarnings("unchecked")
             List<Map<String, String>> mappedData = (List<Map<String, String>>) mapped.get("data");
-            Integer fileId = null;
             if (mappedData != null) {
                 if (provinceName != null && !provinceName.isBlank()) {
                     for (Map<String, String> record : mappedData) {
@@ -118,27 +117,7 @@ public class CSVProcessor {
                         record.putIfAbsent("degree_name", degreeName);
                     }
                 }
-                fileId = dataPersistenceService.saveFileData(fileName, fileType, archiveType, mappedData);
-            }
-            try {
-                storageService.moveArchiveFile(fileName);
-
-                if (errors != null && !errors.isEmpty() && fileId != null) {
-                    ocrLogService.tryAddMappingIssues(fileId, fileName, fileType, errors);
-                }
-
-                // 评分属于派生结果，失败只增加提示，不撤销业务数据。
-                int errCount = errors != null ? errors.size() : 0;
-                if (mappedData != null) {
-                    try {
-                        qualityScoreService.scoreFile(fileId, archiveType, mappedData, errCount);
-                    } catch (Exception scoreError) {
-                        ocrLogService.tryAppendWarningMessages(fileId, fileName, fileType,
-                                List.of("质量评分生成失败: " + scoreError.getMessage()));
-                    }
-                }
-            } catch (Exception e) {
-                throw new IllegalStateException("CSV 文件归档失败", e);
+                reviewDraftService.stage(fileName, fileType, archiveType, mappedData, errors);
             }
         }
 

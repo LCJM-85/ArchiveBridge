@@ -31,6 +31,10 @@
         <span>OCR识别进程</span>
       </el-menu-item>
 
+      <el-menu-item index="review">
+        <el-icon><Document /></el-icon>
+        <span>入库审查</span>
+      </el-menu-item>
       <el-sub-menu index="data">
         <template #title>
           <el-icon><DataBoard /></el-icon>

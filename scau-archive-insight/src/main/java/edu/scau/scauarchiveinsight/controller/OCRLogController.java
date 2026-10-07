@@ -61,7 +61,8 @@ public class OCRLogController {
     @Operation(summary = "删除 OCR 日志")
     @DeleteMapping("/delete/{logId}")
     public R<Void> delete(@PathVariable Integer logId) {
-        ocrLogService.removeById(logId);
+        try { ocrLogService.removeById(logId); }
+        catch (IllegalStateException ex) { return R.error(400, ex.getMessage()); }
         return R.ok(null, "删除成功");
     }
 

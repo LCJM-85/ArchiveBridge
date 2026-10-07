@@ -66,21 +66,25 @@ public class AIAssistantClient {
                 try {
                     HttpResponse<java.io.InputStream> response = httpClient.send(request,
                             HttpResponse.BodyHandlers.ofInputStream());
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(response.body(), "UTF-8"));
-
+                    try (BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(response.body(), "UTF-8"))) {
+                    if (response.statusCode() < 200 || response.statusCode() >= 300)
+                        throw new java.io.IOException("AI 服务响应状态: " + response.statusCode());
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (!line.startsWith("data: ")) continue;
 
                         String data = line.substring(6);
-                        if (data.contains("\"type\": \"done\"")) {
+                        emitter.send(SseEmitter.event().data(data));
+                        if ("done".equals(objectMapper.readTree(data).path("type").asText())) {
                             emitter.complete();
                             return;
                         }
-                        emitter.send(SseEmitter.event().data(data));
                     }
+                    // 上游正常关闭但没发done时，也向前端明确结束。
+                    emitter.send(SseEmitter.event().data("{\"type\":\"done\"}"));
                     emitter.complete();
+                    }
                 } catch (Exception e) {
                     log.warn("AI 流式调用失败: {}", e.getMessage());
                     try {

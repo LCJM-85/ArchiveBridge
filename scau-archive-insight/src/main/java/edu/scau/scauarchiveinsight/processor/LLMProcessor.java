@@ -16,20 +16,20 @@ public class LLMProcessor {
     private static final Logger log = LoggerFactory.getLogger(LLMProcessor.class);
 
     private final LLMExtractionService llmExtractionService;
-    private final DataPersistenceService dataPersistenceService;
+    private final ReviewDraftService reviewDraftService;
     private final OCRLogService ocrLogService;
     private final QualityScoreService qualityScoreService;
     private final StorageService storageService;
     private final OCRTaskManager ocrTaskManager;
 
     public LLMProcessor(LLMExtractionService llmExtractionService,
-                        DataPersistenceService dataPersistenceService,
+                        ReviewDraftService reviewDraftService,
                         OCRLogService ocrLogService,
                         QualityScoreService qualityScoreService,
                         StorageService storageService,
                         OCRTaskManager ocrTaskManager) {
         this.llmExtractionService = llmExtractionService;
-        this.dataPersistenceService = dataPersistenceService;
+        this.reviewDraftService = reviewDraftService;
         this.ocrLogService = ocrLogService;
         this.qualityScoreService = qualityScoreService;
         this.storageService = storageService;
@@ -82,18 +82,7 @@ public class LLMProcessor {
                         stringData.add(flatRecord);
                     }
 
-                    Integer fileId = dataPersistenceService.saveFileData(fileName, fileType, archiveType, stringData);
-                    storageService.moveArchiveFile(fileName);
-
-                    if (!allErrors.isEmpty()) {
-                        ocrLogService.tryAddMappingIssues(fileId, fileName, fileType, allErrors);
-                    }
-                    try {
-                        qualityScoreService.scoreFile(fileId, archiveType, stringData, allErrors.size());
-                    } catch (Exception scoreError) {
-                        ocrLogService.tryAppendWarningMessages(fileId, fileName, fileType,
-                                List.of("质量评分生成失败: " + scoreError.getMessage()));
-                    }
+                    reviewDraftService.stage(fileName, fileType, archiveType, stringData, allErrors);
                 } else {
                     log.warn("LLM 提取结果为空 (图片: {})", imagePath);
                     storageService.failedFile(fileName,
@@ -175,23 +164,7 @@ public class LLMProcessor {
                 return results;
             }
 
-            // 2. 以 PDF 名义创建一条归档记录
-            Integer fileId = dataPersistenceService.saveFileData(pdfFileName, "pdf-llm", archiveType, allData);
-
-            // 3. 数据库提交成功后归档 PDF 原始文件（只减一次计数）
-            storageService.moveArchiveFile(pdfFileName);
-
-            if (!pageIssues.isEmpty()) {
-                ocrLogService.tryAddMappingIssues(fileId, pdfFileName, "pdf-llm", pageIssues);
-            }
-
-            // 4. 评分失败不回滚已确认的业务数据
-            try {
-                qualityScoreService.scoreFile(fileId, archiveType, allData, 0);
-            } catch (Exception scoreError) {
-                ocrLogService.tryAppendWarningMessages(fileId, pdfFileName, "pdf-llm",
-                        List.of("质量评分生成失败: " + scoreError.getMessage()));
-            }
+            reviewDraftService.stage(pdfFileName, "pdf-llm", archiveType, allData, pageIssues);
 
             // 5. 删除临时页面图片（不影响计数）
             for (String pagePath : pagePaths) {

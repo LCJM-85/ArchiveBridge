@@ -1,4 +1,11 @@
 --------windows环境--------
+新增入库审查模块：
+1. 新环境：使用 init.sql（psql执行）或 parts/schema.sql 创建表，草稿表已包含在 schema.sql。
+2. 已有环境：执行 parts/schema.sql 末尾的“入库前审查草稿”建表及建索引语句；不要执行 init.sql 的演示数据。
+3. 审查表 SQL 直接维护在原 parts/schema.sql，不另建迁移文件。建表和建索引均可重复执行。
+4. 必须先升级数据库，再启动新版后端。Docker 已有数据卷不会自动应用新增表语句。
+5. 仅新增 archive_review_draft 及索引；不更改原业务表、ocr_log_dim，也不回迁已入库记录。
+6. 原文件仍使用 storage 目录。迁移环境时须同时迁移数据库和 storage（草稿采用相对路径）。
 安装pgsql数据库时需要勾选postGIS扩展，安装完成后
 进入pgvector_file文件夹，复制所有文件直接粘贴进pgsql安装目录，点击替换目标文件。
 然后依次运行schema.sql、province-geo.sql.seed-data.sql中的sql语句。

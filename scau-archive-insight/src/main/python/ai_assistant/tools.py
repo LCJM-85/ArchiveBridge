@@ -16,7 +16,11 @@ def _query(sql, params=None, fetchone=False):
                 return cur.fetchone()
             return cur.fetchall()
     finally:
-        put_conn(conn)
+        try:
+            # 查询不留下事务；失败的 SQL 也不能污染下一次工具调用。
+            conn.rollback()
+        finally:
+            put_conn(conn)
 
 
 @tool
@@ -25,10 +29,10 @@ def get_admission_stats(year: int = None) -> str:
     if year:
         sql = """
         SELECT
-            (SELECT COUNT(*) FROM admission_fact WHERE EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s) AS total_admissions,
-            (SELECT COUNT(DISTINCT major_id) FROM admission_fact WHERE major_id IS NOT NULL AND EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s) AS major_count,
-            (SELECT ROUND(AVG(admission_score))::int FROM admission_fact WHERE admission_score IS NOT NULL AND EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s AND EXISTS (SELECT 1 FROM degree_dim deg WHERE admission_fact.degree_id = deg.degree_id AND deg.degree_name LIKE '%%学士%%')) AS avg_score,
-            (SELECT COUNT(DISTINCT province_id) FROM admission_fact WHERE province_id IS NOT NULL AND EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s) AS province_count
+            (SELECT COUNT(*) FROM admission_fact WHERE EXTRACT(YEAR FROM admission_date)::int = %s) AS total_admissions,
+            (SELECT COUNT(DISTINCT major_id) FROM admission_fact WHERE major_id IS NOT NULL AND EXTRACT(YEAR FROM admission_date)::int = %s) AS major_count,
+            (SELECT ROUND(AVG(admission_score))::int FROM admission_fact WHERE admission_score IS NOT NULL AND EXTRACT(YEAR FROM admission_date)::int = %s AND EXISTS (SELECT 1 FROM degree_dim deg WHERE admission_fact.degree_id = deg.degree_id AND deg.degree_name LIKE '%%学士%%')) AS avg_score,
+            (SELECT COUNT(DISTINCT province_id) FROM admission_fact WHERE province_id IS NOT NULL AND EXTRACT(YEAR FROM admission_date)::int = %s) AS province_count
         """
         row = _query(sql, (year, year, year, year), fetchone=True)
     else:
@@ -50,10 +54,10 @@ def get_admission_stats(year: int = None) -> str:
 @tool
 def get_admission_trend(year: int = None) -> str:
     """获取招生趋势数据（按年份分组）。可指定年份查询单年数据，不指定则返回全部年份"""
-    year_filter = "WHERE EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s" if year else ""
+    year_filter = "WHERE EXTRACT(YEAR FROM admission_date)::int = %s" if year else ""
     params = (year,) if year else None
     rows = _query(f"""
-        SELECT EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int AS year,
+        SELECT EXTRACT(YEAR FROM admission_date)::int AS year,
                COUNT(*)::int AS count
         FROM admission_fact
         {year_filter}
@@ -65,7 +69,7 @@ def get_admission_trend(year: int = None) -> str:
 @tool
 def get_major_distribution(year: int = None) -> str:
     """获取各专业录取人数分布。可指定年份，不指定则返回全部年份合计"""
-    year_filter = "AND EXTRACT(YEAR FROM COALESCE(f.admission_date, f.create_time::date))::int = %s" if year else ""
+    year_filter = "AND EXTRACT(YEAR FROM f.admission_date)::int = %s" if year else ""
     params = (year,) if year else None
 
     sql = f"""
@@ -82,7 +86,7 @@ def get_major_distribution(year: int = None) -> str:
 @tool
 def get_province_distribution(year: int = None) -> str:
     """获取各省份录取人数分布。可指定年份，不指定则返回全部年份合计"""
-    year_filter = "AND EXTRACT(YEAR FROM COALESCE(f.admission_date, f.create_time::date))::int = %s" if year else ""
+    year_filter = "AND EXTRACT(YEAR FROM f.admission_date)::int = %s" if year else ""
     params = (year,) if year else None
     sql = f"""
         SELECT COALESCE(p.province_name, '未知') AS name, COUNT(*)::int AS count
@@ -102,7 +106,7 @@ def get_score_stats(year: int = None) -> str:
         row = _query("""
             SELECT AVG(admission_score)::int, MAX(admission_score)::int, MIN(admission_score)::int
             FROM admission_fact
-            WHERE EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s
+            WHERE EXTRACT(YEAR FROM admission_date)::int = %s
               AND admission_score IS NOT NULL
               AND EXISTS (SELECT 1 FROM degree_dim deg WHERE admission_fact.degree_id = deg.degree_id AND deg.degree_name LIKE '%%学士%%')
         """, (year,), fetchone=True)
@@ -118,7 +122,7 @@ def get_score_stats(year: int = None) -> str:
 @tool
 def get_gender_distribution(year: int = None) -> str:
     """获取录取学生性别比例。可指定年份，不指定则返回全部年份合计"""
-    year_filter = "AND EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s" if year else ""
+    year_filter = "AND EXTRACT(YEAR FROM admission_date)::int = %s" if year else ""
     params = (year,) if year else None
     rows = _query(f"""
         SELECT COALESCE(gender, '未知') AS gender, COUNT(*)::int AS count
@@ -180,7 +184,7 @@ def get_sankey_degree_dest(year: int = None) -> str:
 @tool
 def get_student_count() -> str:
     """获取当前在籍学生总数"""
-    row = _query("SELECT COUNT(*)::int FROM student_fact", fetchone=True)
+    row = _query("SELECT COUNT(*)::int FROM student_fact WHERE graduated IS FALSE", fetchone=True)
     return json.dumps({"student_count": row[0]}, ensure_ascii=False)
 
 
@@ -209,12 +213,12 @@ def get_student_count_by_degree(degree: str = None) -> str:
             master = _query("""
                 SELECT COUNT(*)::int FROM student_fact s
                 LEFT JOIN degree_dim deg ON s.degree_id = deg.degree_id
-                WHERE deg.degree_name LIKE '%%硕士%%'
+                WHERE s.graduated IS FALSE AND deg.degree_name LIKE '%%硕士%%'
             """, fetchone=True)[0]
             doctor = _query("""
                 SELECT COUNT(*)::int FROM student_fact s
                 LEFT JOIN degree_dim deg ON s.degree_id = deg.degree_id
-                WHERE deg.degree_name LIKE '%%博士%%'
+                WHERE s.graduated IS FALSE AND deg.degree_name LIKE '%%博士%%'
             """, fetchone=True)[0]
             return json.dumps({
                 "degree": degree,
@@ -226,13 +230,14 @@ def get_student_count_by_degree(degree: str = None) -> str:
             row = _query("""
                 SELECT COUNT(*)::int FROM student_fact s
                 LEFT JOIN degree_dim deg ON s.degree_id = deg.degree_id
-                WHERE deg.degree_name LIKE %s
+                WHERE s.graduated IS FALSE AND deg.degree_name LIKE %s
             """, (f'%{norm}%',), fetchone=True)
             return json.dumps({"degree": degree, "student_count": row[0]}, ensure_ascii=False)
     rows = _query("""
         SELECT COALESCE(deg.degree_name, '未知') AS degree, COUNT(*)::int AS count
         FROM student_fact s
         LEFT JOIN degree_dim deg ON s.degree_id = deg.degree_id
+        WHERE s.graduated IS FALSE
         GROUP BY deg.degree_name ORDER BY count DESC
     """)
     return json.dumps([{"degree": r[0], "count": r[1]} for r in rows], ensure_ascii=False)
@@ -241,7 +246,7 @@ def get_student_count_by_degree(degree: str = None) -> str:
 @tool
 def get_admission_count_by_degree(degree: str = None, year: int = None) -> str:
     """按培养层次统计录取人数。degree 传层次名（如 学士、硕士、博士、本科生、研究生等），year 可选年份；degree 为空时返回各层次完整分布"""
-    year_filter = "AND EXTRACT(YEAR FROM COALESCE(f.admission_date, f.create_time::date))::int = %s" if year else ""
+    year_filter = "AND EXTRACT(YEAR FROM f.admission_date)::int = %s" if year else ""
     year_params = (year,) if year else ()
     if degree:
         norm = _normalize_degree(degree)
@@ -308,19 +313,21 @@ def get_graduation_count_by_degree(degree: str = None, year: int = None) -> str:
 
 @tool
 def get_prediction_data(year: int = None) -> str:
-    """获取招生预测数据。可指定年份查询单年数据，不指定则返回最近3年趋势"""
+    """仅获取招生历史实际记录，供分析参考，不计算预测。可指定年份，不指定返回最近3个有记录的年份；0表示未查询到记录，不代表预测为0。"""
     if year:
         row = _query("""
             SELECT COUNT(*)::int FROM admission_fact
-            WHERE EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s
+            WHERE EXTRACT(YEAR FROM admission_date)::int = %s
         """, (year,), fetchone=True)
-        return json.dumps({"year": year, "count": row[0]}, ensure_ascii=False)
+        return json.dumps({"year": year, "count": row[0], "data_kind": "historical_actual",
+                           "is_prediction": False, "note": "数据库实际记录数，非预测；无记录不代表未来录取人数为0"}, ensure_ascii=False)
     rows = _query("""
-        SELECT EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int AS year,
+        SELECT EXTRACT(YEAR FROM admission_date)::int AS year,
                COUNT(*)::int AS count
         FROM admission_fact GROUP BY year ORDER BY year DESC LIMIT 3
     """)
-    return json.dumps([{"year": r[0], "count": r[1]} for r in rows], ensure_ascii=False)
+    return json.dumps({"data_kind": "historical_actual", "is_prediction": False,
+                       "records": [{"year": r[0], "count": r[1]} for r in rows]}, ensure_ascii=False)
 
 
 @tool
@@ -328,15 +335,15 @@ def get_year_over_year(year: int = None) -> str:
     """获取招生数据同比对比。指定年份则与该年与前一年对比，不指定则用最近两年"""
     if year:
         rows = _query("""
-            SELECT EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int AS yr,
+            SELECT EXTRACT(YEAR FROM admission_date)::int AS yr,
                    COUNT(*)::int AS cnt
             FROM admission_fact
-            WHERE EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int IN (%s, %s)
+            WHERE EXTRACT(YEAR FROM admission_date)::int IN (%s, %s)
             GROUP BY yr ORDER BY yr DESC
         """, (year, year - 1))
     else:
         rows = _query("""
-            SELECT EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int AS yr,
+            SELECT EXTRACT(YEAR FROM admission_date)::int AS yr,
                    COUNT(*)::int AS cnt
             FROM admission_fact GROUP BY yr ORDER BY yr DESC LIMIT 2
         """)
@@ -354,7 +361,7 @@ def get_year_over_year(year: int = None) -> str:
 @tool
 def get_college_admission_stats(year: int = None) -> str:
     """获取各学院录取人数统计。可指定年份，不指定则返回全部年份合计"""
-    year_filter = "AND EXTRACT(YEAR FROM COALESCE(f.admission_date, f.create_time::date))::int = %s" if year else ""
+    year_filter = "AND EXTRACT(YEAR FROM f.admission_date)::int = %s" if year else ""
     params = (year,) if year else None
     rows = _query(f"""
         SELECT COALESCE(c.college_name, '未知') AS college,
@@ -372,7 +379,7 @@ def get_college_admission_stats(year: int = None) -> str:
 @tool
 def get_score_distribution(year: int = None) -> str:
     """获取录取分数段分布。可指定年份，不指定则返回全部年份合计。注意：仅统计学士（本科生）群体，不含硕士/博士"""
-    year_filter = "AND EXTRACT(YEAR FROM COALESCE(admission_date, create_time::date))::int = %s" if year else ""
+    year_filter = "AND EXTRACT(YEAR FROM admission_date)::int = %s" if year else ""
     params = (year,) if year else None
     rows = _query(f"""
         SELECT
@@ -404,10 +411,10 @@ def get_graduation_count(year: int = None) -> str:
 
 @tool
 def search_student(keyword: str) -> str:
-    """按姓名或学号搜索学生，在招生表、学籍表、毕业表中联合查找（最多10条）"""
+    """按姓名、学号等搜索三类档案。按学号去重，展示最多10名，同时返回匹配总数与截断标志；无学号记录不在此搜索范围，不能称为全部档案。"""
     # 从三张表分别搜索，合并结果
     sql = """
-        SELECT DISTINCT student_no, name FROM (
+        WITH matched AS (
             SELECT student_no, name FROM admission_fact
                 WHERE name ILIKE %s OR student_no ILIKE %s OR id_card ILIKE %s OR exam_no ILIKE %s
             UNION
@@ -416,17 +423,23 @@ def search_student(keyword: str) -> str:
             UNION
             SELECT student_no, name FROM graduation_fact
                 WHERE name ILIKE %s OR student_no ILIKE %s OR id_card ILIKE %s
-        ) AS candidates ORDER BY student_no LIMIT 10
+        ), candidates AS (
+            SELECT student_no, MIN(NULLIF(name, '')) AS name FROM matched
+            WHERE student_no IS NOT NULL AND student_no <> '' GROUP BY student_no
+        )
+        SELECT student_no, name, COUNT(*) OVER () AS total_matches
+        FROM candidates ORDER BY student_no LIMIT 10
     """
     params = (f'%{keyword}%',) * 9
     candidates = _query(sql, params)
     if not candidates:
-        return json.dumps({"message": "未找到匹配的学生"}, ensure_ascii=False)
+        return json.dumps({"message": "未找到有学号的匹配学生", "students": [],
+                           "total_matches": 0, "returned_count": 0, "limit": 10,
+                           "truncated": False, "scope": "有学号的学生，按学号去重"}, ensure_ascii=False)
 
     # 获取每个候选学生的完整信息
-    student_nos = tuple(r[0] for r in candidates)
     result = []
-    for sno in student_nos:
+    for sno, candidate_name, total in candidates:
         detail = _query("""
             SELECT a.name, a.gender, COALESCE(p.province_name, '') AS province,
                    COALESCE(m.major_name, '') AS major, a.admission_score,
@@ -438,23 +451,28 @@ def search_student(keyword: str) -> str:
             WHERE a.student_no = %s
         """, (sno,), fetchone=True)
 
-        has_student = _query("SELECT 1 FROM student_fact WHERE student_no = %s", (sno,), fetchone=True)
+        has_student = _query("SELECT graduated FROM student_fact WHERE student_no = %s", (sno,), fetchone=True)
         has_grad = _query("SELECT 1 FROM graduation_fact WHERE student_no = %s", (sno,), fetchone=True)
+        in_school = (has_student[0] is False) if has_student and has_student[0] is not None else None
+        graduated = bool(has_grad) or bool(has_student and has_student[0] is True)
 
         if detail:
             result.append({
                 "student_no": sno, "name": detail[0], "gender": detail[1],
                 "province": detail[2], "major": detail[3], "admission_score": detail[4],
-                "degree": detail[5], "in_school": bool(has_student), "graduated": bool(has_grad),
+                "degree": detail[5], "in_school": in_school, "graduated": graduated,
             })
         else:
             result.append({
-                "student_no": sno, "name": "（仅毕业记录）", "gender": "",
+                "student_no": sno, "name": candidate_name, "gender": "",
                 "province": "", "major": "", "admission_score": None,
-                "in_school": bool(has_student), "graduated": bool(has_grad),
+                "in_school": in_school, "graduated": graduated,
             })
 
-    return json.dumps(result, ensure_ascii=False)
+    return json.dumps({"students": result, "total_matches": candidates[0][2],
+                       "returned_count": len(result), "limit": 10,
+                       "truncated": candidates[0][2] > len(result),
+                       "scope": "有学号的学生，按学号去重"}, ensure_ascii=False)
 
 
 @tool
@@ -488,13 +506,13 @@ def get_student_detail(student_no: str) -> str:
         result["admission_degree"] = admission[9]
     else:
         result["student_no"] = student_no
-        result["name"] = "（无招生记录）"
+        result["name"] = None
     # 学籍信息
     student = _query("""
         SELECT s.graduated, s.create_time,
                COALESCE(m.major_name, '') AS cur_major,
                COALESCE(c.class_name, '') AS cur_class,
-               COALESCE(deg.degree_name, '') AS cur_degree
+               COALESCE(deg.degree_name, '') AS cur_degree, s.name
         FROM student_fact s
         LEFT JOIN major_dim m ON s.major_id = m.major_id
         LEFT JOIN class_dim c ON s.class_id = c.class_id
@@ -502,7 +520,9 @@ def get_student_detail(student_no: str) -> str:
         WHERE s.student_no = %s
     """, (student_no,), fetchone=True)
     if student:
-        result["student_status"] = "在籍" if not student[0] else "已毕业"
+        result["student_status"] = "在籍" if student[0] is False else ("已毕业" if student[0] is True else "状态未知")
+        if not result.get("name"):
+            result["name"] = student[5]
         result["student_created"] = str(student[1]) if student[1] else None
         result["current_major"] = student[2]
         result["current_class"] = student[3]
@@ -514,17 +534,23 @@ def get_student_detail(student_no: str) -> str:
     grad = _query("""
         SELECT g.graduation_date,
                COALESCE(deg.degree_name, '') AS degree,
-               COALESCE(d.dest_name, '') AS destination
+               COALESCE(d.dest_name, '') AS destination, g.name
         FROM graduation_fact g
         LEFT JOIN degree_dim deg ON g.degree_id = deg.degree_id
         LEFT JOIN destination_dim d ON g.dest_id = d.dest_id
         WHERE g.student_no = %s
     """, (student_no,), fetchone=True)
     if grad:
+        if not result.get("name"):
+            result["name"] = grad[3]
         result["graduation_date"] = str(grad[0]) if grad[0] else None
         result["degree"] = grad[1]
         result["destination"] = grad[2]
 
+    result["record_sources"] = {"admission": bool(admission), "student": bool(student), "graduation": bool(grad)}
+    if not (admission and student and grad):
+        result["missing_record_reason"] = "unknown"
+        result["record_note"] = "未找到某类记录仅表示本系统未查到，缺失原因未知；不能推断是迁移、其他毕业途径等原因。"
     return json.dumps(result, ensure_ascii=False)
 
 

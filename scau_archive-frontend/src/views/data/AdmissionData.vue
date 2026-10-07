@@ -62,7 +62,25 @@
     <!-- 数据表格 -->
     <el-card shadow="never" class="table-card">
       <el-table ref="tableRef" :data="tableData" v-loading="loading || batchDeleting" row-key="id" @selection-change="rows => selectedRows = rows" stripe border style="width:100%">
-        <el-table-column type="selection" width="48" fixed="left" :selectable="() => !loading && !batchDeleting" />
+        <el-table-column type="selection" width="88" fixed="left" :selectable="() => !loading && !batchDeleting">
+          <template #default="{ row }">
+            <div class="data-row-tools">
+              <el-checkbox :model-value="selectedRows.some(item => item.id === row.id)"
+                :disabled="loading || batchDeleting" :aria-label="'选择记录：' + (row.name || row.id)"
+                @click.stop @change="checked => tableRef?.toggleRowSelection(row, checked)" />
+            <el-dropdown trigger="click">
+              <el-button size="small" class="row-menu-button" :icon="Edit" :disabled="loading || batchDeleting"
+                :aria-label="'编辑或删除记录：' + (row.name || row.id)" title="编辑或删除" @click.stop />
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item :icon="Edit" @click="openEditDialog(row)">编辑</el-dropdown-item>
+                  <el-dropdown-item :icon="Delete" divided @click="handleDelete(row.id)">删除</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="studentNo" label="学号" width="130" />
         <el-table-column prop="name" label="姓名" width="90" />
         <el-table-column prop="gender" label="性别" width="70" align="center">
@@ -85,7 +103,7 @@
             <span class="score-num">{{ row.admissionScore ?? '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="来源文件" width="160">
+        <el-table-column label="来源文件" width="200" show-overflow-tooltip>
           <template #default="{ row }">
             <span class="cell-muted">{{ row.fileName || '-' }}</span>
           </template>
@@ -98,12 +116,6 @@
         <el-table-column prop="updateTime" label="更新时间" width="175" align="center">
           <template #default="{ row }">
             <span class="cell-muted">{{ row.updateTime ? row.updateTime.replace('T', ' ').split('.')[0] : '-' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="170" align="center" fixed="right">
-          <template #default="{ row }">
-            <el-button size="small" class="op-btn" :icon="Edit" @click="openEditDialog(row)">编辑</el-button>
-            <el-button size="small" class="op-btn op-danger" :icon="Delete" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>

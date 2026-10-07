@@ -443,7 +443,7 @@ async function handleUpload() {
     })
 
     if (data.success) {
-      ElMessage.success(`已上传 ${data.uploaded.length} 个文件，正在后台处理，可在 OCR 识别进程中查看`)
+      ElMessage.success(`已上传 ${data.uploaded.length} 个文件，后台解析后进入入库审查，确认前不会入库`)
       setTimeout(() => clearAll(), 1500)
     } else {
       ElNotification.warning({

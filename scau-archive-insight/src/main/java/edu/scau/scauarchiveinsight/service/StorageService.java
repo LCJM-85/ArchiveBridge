@@ -29,7 +29,7 @@ public class StorageService {
     private final Path archiveRoot;
     private final Path failedRoot;
 
-    private final AtomicInteger processingCount = new AtomicInteger(0);
+    private final Set<String> processingFiles = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
     @Autowired
     private CacheService cacheService;
@@ -48,8 +48,37 @@ public class StorageService {
     /**
      * 当前处理中的文件数
      */
+
+    public void markProcessingFinished(String fileName) {
+        processingFiles.remove(fileName);
+    }
+
+    public String reviewSourcePath(String fileName) {
+        try (var files = Files.walk(storageRoot)) {
+            Path file = files.filter(Files::isRegularFile)
+                .filter(p -> p.getFileName().toString().equals(fileName)).findFirst()
+                .orElseThrow(() -> new IllegalStateException("审查原文件不存在"));
+            return storageRoot.relativize(file).toString().replace('\\', '/');
+        } catch (IOException ex) { throw new IllegalStateException("审查原文件无法读取",ex); }
+    }
+
+    public Path resolveReviewSource(String relative) {
+        Path part=Paths.get(relative);
+        if (part.isAbsolute() || part.normalize().startsWith(".."))
+            throw new IllegalArgumentException("原文件路径无效");
+        for (Path root : List.of(storageRoot,archiveRoot,failedRoot)) {
+            Path candidate=root.resolve(part).normalize();
+            if (candidate.startsWith(root) && Files.isRegularFile(candidate)) return candidate;
+        }
+        throw new IllegalStateException("审查原文件不存在");
+    }
+
+    public boolean isReviewTemporary(Path path) {
+        return path.toAbsolutePath().normalize().startsWith(storageRoot);
+    }
+
     public int getProcessingCount() {
-        return processingCount.get();
+        return processingFiles.size();
     }
 
     /** 根据原上传路径查询结果，保留上传日期，不受跨零点影响。 */
@@ -125,7 +154,7 @@ public class StorageService {
             }
         }
 
-        processingCount.addAndGet(uploaded.size());
+        for (var info : uploaded) processingFiles.add(Paths.get(info.get("path")).getFileName().toString());
         return uploadResult(uploaded, errors);
     }
 
@@ -175,7 +204,7 @@ public class StorageService {
                     .findFirst();
             if (matched.isPresent()) {
                 Files.deleteIfExists(matched.get());
-                processingCount.decrementAndGet();
+                processingFiles.remove(fileName);
             }
         }
     }
@@ -187,7 +216,7 @@ public class StorageService {
      * @return 归档后的完整路径
      * @throws IOException 文件未找到或移动失败时抛出
      */
-    public String moveArchiveFile(String fileName) throws IOException {
+    public synchronized String moveArchiveFile(String fileName) throws IOException {
         // 递归搜索 storage/temp 下匹配的文件
         try (var stream = Files.walk(storageRoot)) {
             Optional<Path> matched = stream
@@ -195,6 +224,16 @@ public class StorageService {
                     .filter(p -> p.getFileName().toString().equals(fileName))
                     .findFirst();
 
+            if (matched.isEmpty() && Files.isDirectory(archiveRoot)) {
+                try (var archived = Files.walk(archiveRoot)) {
+                    var existing = archived.filter(Files::isRegularFile)
+                        .filter(p -> p.getFileName().toString().equals(fileName)).findFirst();
+                    if (existing.isPresent()) {
+                        processingFiles.remove(fileName);
+                        return existing.get().toString();
+                    }
+                }
+            }
             Path source = matched.orElseThrow(
                     () -> new IOException("文件未找到: " + fileName)
             );
@@ -206,15 +245,10 @@ public class StorageService {
             // 创建目标目录
             Files.createDirectories(target.getParent());
 
-            // 如果目标文件已存在，先删除
-            if (Files.exists(target)) {
-                Files.delete(target);
-            }
-
-            // 移动文件
+            // 不覆盖已存在的目标，防止并发重试删除唯一原文件。
             Files.move(source, target);
 
-            processingCount.decrementAndGet();
+            processingFiles.remove(fileName);
 
             cacheService.evictDashboard();
 
@@ -254,7 +288,7 @@ public class StorageService {
 
             Files.move(source, target);
 
-            processingCount.decrementAndGet();
+            processingFiles.remove(fileName);
 
             cacheService.evictDashboard();
 

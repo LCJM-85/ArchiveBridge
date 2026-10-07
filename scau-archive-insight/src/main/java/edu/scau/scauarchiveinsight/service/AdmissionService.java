@@ -30,6 +30,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 public class AdmissionService {
 
     @Autowired
+    private SourceFileNameService sourceFileNameService;
+
+    @Autowired
     private AdmissionFactMapper admissionFactMapper;
 
     @Autowired
@@ -56,7 +59,10 @@ public class AdmissionService {
         wrapper.orderByDesc(AdmissionFact::getAdmissionDate);
 
         IPage<AdmissionFact> result = admissionFactMapper.selectPage(page, wrapper);
-        return result.convert(this::toVO);
+        IPage<AdmissionVO> view = result.convert(this::toVO);
+        var names = sourceFileNameService.originalNames(view.getRecords().stream().map(AdmissionVO::getFileId).toList());
+        view.getRecords().forEach(vo -> vo.setFileName(sourceFileNameService.displayName(vo.getFileId(), vo.getFileName(), names)));
+        return view;
     }
 
     public void add(AdmissionDTO dto) {

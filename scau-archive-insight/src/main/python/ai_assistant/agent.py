@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
+import re
+import json
+from datetime import datetime, date, timezone, timedelta
 from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain.agents.middleware import AgentMiddleware
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
 from tools import tools
 
 SYSTEM_PROMPT = """你是华南农业大学档案管理系统的 AI 数据分析助手，负责帮用户分析招生、学籍、毕业数据。
@@ -16,15 +20,27 @@ SYSTEM_PROMPT = """你是华南农业大学档案管理系统的 AI 数据分析
 说话自然一点，像在跟同事聊天一样，不用太正经。数据就摆数据，分析就讲分析，别绕弯子。
 
 规则：
+- 数据库中的人数、姓名、状态、分数必须调用相应数据库工具后回答；知识库、历史对话和联网信息不能代替当前数据库查询。
+- 只回答工具实际支持的筛选口径；多个独立统计不能拼成联合条件结果。工具不支持或执行失败时明确说明，不能猜数字。
+- 在籍仅指学籍记录 graduated=false；有学籍记录不等于在籍，null 表示未知。没有招生记录也不等于姓名未知。
+- 搜索必须说明 total_matches、returned_count 与 truncated；截断时不能声称列出了全部学生。遵守 scope，无学号档案未纳入搜索。
+- 截断只影响名单展示，不影响已返回的范围内总数。工具返回 total_matches 时，可以确定 scope 内总数；不要同时说“无法确定总人数”。“姓名含王”不等于“姓王”。
+- 不要猜测档案缺失的原因，也不要凭空推断学生通过其他途径毕业。仅陈述已找到和未找到哪些记录。
+- 历史实际记录不是预测。get_prediction_data 不计算预测，缺少未来年份记录不代表未来录取人数为0。
+- 所有统计仅代表本系统已入库档案，不代表学校现实全量人数；缺失值不等于0。
 - 用户问具体年份 → 调工具时带上 year 参数
-- 不传 year 返回的是全部年份合计，别当成某一年数据
+- “今年/去年/前年”以本次请求日期为准，不能用数据库最新年份替代今年。年份缺失的录取档案不能按上传年份计算。
+- 最新用户消息优先于历史回答和知识库。用户纠正年份或质疑上一轮时，先回应纠正，再按新口径重新查询；不得复制上一轮回答或沿用旧统计数字。
+- 用户只纠正时间时，结合上一轮用户问题理解要重新查的指标，不能把自己的旧回答当作事实依据。
+- 查询为空时说“系统未找到该年份相关档案，无法判断”，不能改查旧年份冒充今年，也不能断言现实录取人数为0。
+- 多年比较分别查询各年。未指定年份时遵守各工具说明，全部年份合计不能当成某一年。
 - 有数据就说数据，不确定就说"数据里没找到相关信息"
 - 数字带单位（人、分、%）
 - 数据多就用表格展示，看着清楚
-- 多展开讲讲数据背后的意思，别只报数字"""
+- 事实查询简洁回答；只有用户要求分析时才展开，分析必须区分证据与推测"""
 
 
-def _build_llm(temperature=0.7):
+def _build_llm(temperature=0.1):
     return ChatOpenAI(
         model="glm-4-plus",
         openai_api_key=os.getenv("GLM_API_KEY"),
@@ -35,35 +51,110 @@ def _build_llm(temperature=0.7):
 
 def create_agent_executor():
     llm = _build_llm()
-    return create_agent(model=llm, tools=tools, system_prompt=SYSTEM_PROMPT)
+    return create_agent(model=llm, tools=tools, system_prompt=SYSTEM_PROMPT,
+                        middleware=[QueryYearGuard()])
+
+
+def current_date():
+    return datetime.now(timezone(timedelta(hours=8))).date()
+
+
+def raw_user_question(question):
+    # RAG 文档里的历史年份不能变成用户的查询条件。
+    return question.rsplit('【用户问题】', 1)[-1].strip()
+
+
+def resolve_query_year(question, today):
+    """仅约束明确的单年请求；多年份/范围/否定年份留给模型澄清或分别查询。"""
+    question = raw_user_question(question)
+    if re.search(r'近.{0,3}年|过去.{0,3}年|历年|同比|环比|至|到|—|~', question):
+        return None
+    years = {int(y) for y in re.findall(r'(?<!\d)((?:19|20)\d{2})(?!\d)', question)}
+    relative = {today.year + offset for word, offset in [('今年', 0), ('去年', -1), ('前年', -2)] if word in question}
+    # “今年不是2026吗”是对当前年份的追问；“不是2024年”则不能强制查2024。
+    if not relative and re.search(r'(?:不是|不要|不查|非)\s*(?:19|20)\d{2}', question):
+        return None
+    years |= relative
+    return next(iter(years)) if len(years) == 1 else None
+
+
+def build_query_messages(question, history):
+    today = current_date()
+    year = resolve_query_year(question, today)
+    context = (f'[请求日期] {today.isoformat()}（北京时间）；今年={today.year}，去年={today.year - 1}。'
+               '按最新用户问题回答；纠正上一轮时必须重新查询，不得复用历史回答的数字。')
+    if year is not None:
+        context += f'本轮明确的单年查询目标为{year}年；查询为空也不得切换其他年份。'
+    messages = [SystemMessage(content=context)]
+    for msg in history[-20:]:
+        if msg.get('role') == 'user':
+            messages.append(HumanMessage(content=msg.get('content', '')))
+        elif msg.get('role') == 'assistant':
+            messages.append(AIMessage(content=msg.get('content', '')))
+    messages.append(HumanMessage(content=question))
+    return messages
+
+
+class QueryYearGuard(AgentMiddleware):
+    """拦截单年错查，并给工具结果附真实查询年份；状态仅来自本次请求。"""
+    def _prepare(self, request):
+        fields = getattr(getattr(request.tool, 'args_schema', None), 'model_fields', {})
+        if 'year' not in fields:
+            return request, None
+        messages = request.state.get('messages', [])
+        question = next((m.content for m in reversed(messages) if isinstance(m, HumanMessage)), '')
+        today = current_date()
+        for message in messages:
+            if isinstance(message, SystemMessage):
+                match = re.search(r'\[请求日期\] (\d{4}-\d{2}-\d{2})', message.content)
+                if match:
+                    today = date.fromisoformat(match.group(1))
+        expected = resolve_query_year(question, today)
+        args = dict(request.tool_call['args'])
+        supplied = args.get('year')
+        if expected is not None and supplied is not None and str(supplied) != str(expected):
+            return request, ToolMessage(content=f'查询被拦截：本轮用户要求{expected}年，不是{supplied}年。请重新以year={expected}调用此工具；不得使用旧年份结果。',
+                tool_call_id=request.tool_call['id'], status='error')
+        if expected is not None and supplied is None:
+            args['year'] = expected
+            request = request.override(tool_call={**request.tool_call, 'args': args})
+        return request, None
+
+    def _annotate(self, request, result):
+        if isinstance(result, ToolMessage) and result.status != 'error' and request.tool_call['args'].get('year') is not None:
+            try:
+                data = json.loads(result.content)
+            except (ValueError, TypeError):
+                return result
+            return result.model_copy(update={'content': json.dumps({
+                'queried_year': request.tool_call['args']['year'], 'data': data,
+                'scope': '仅代表该年份系统已入库档案；空结果不能证明现实人数为0，不能用其他年份替代。'
+            }, ensure_ascii=False)})
+        return result
+
+    def wrap_tool_call(self, request, handler):
+        request, error = self._prepare(request)
+        return error if error is not None else self._annotate(request, handler(request))
+
+    async def awrap_tool_call(self, request, handler):
+        request, error = self._prepare(request)
+        return error if error is not None else self._annotate(request, await handler(request))
 
 
 async def run_agent(agent, question: str, history: list):
-    messages = []
-    for msg in history[-20:]:
-        if msg.get("role") == "user":
-            messages.append(HumanMessage(content=msg.get("content", "")))
-        elif msg.get("role") == "assistant":
-            messages.append(AIMessage(content=msg.get("content", "")))
-    messages.append(("human", question))
+    messages = build_query_messages(question, history)
 
     result = await agent.ainvoke({"messages": messages})
 
     for m in reversed(result.get("messages", [])):
-        if isinstance(m, AIMessage) and m.content:
+        if isinstance(m, AIMessage) and m.content and not m.tool_calls:
             return m.content
     return "抱歉，无法获取回答"
 
 
 async def run_agent_stream(agent, question: str, history: list):
     """流式运行 agent，逐步 yield 状态事件和最终结果。"""
-    messages = []
-    for msg in history[-20:]:
-        if msg.get("role") == "user":
-            messages.append(HumanMessage(content=msg.get("content", "")))
-        elif msg.get("role") == "assistant":
-            messages.append(AIMessage(content=msg.get("content", "")))
-    messages.append(("human", question))
+    messages = build_query_messages(question, history)
 
     yield {"type": "status", "content": "正在分析问题..."}
 
@@ -90,7 +181,7 @@ async def run_agent_stream(agent, question: str, history: list):
                 yield {"type": "status", "content": f"正在查询{name}..."}
 
         # 记录最终 AI 回复
-        if isinstance(last, AIMessage) and last.content:
+        if isinstance(last, AIMessage) and last.content and not last.tool_calls:
             final_answer = last.content
 
     if final_answer:

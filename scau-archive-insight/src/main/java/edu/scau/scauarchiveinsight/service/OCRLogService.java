@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +38,8 @@ import java.util.stream.Stream;
 
 @Service
 public class OCRLogService {
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate reviewJdbc;
 
     private static final Logger log = LoggerFactory.getLogger(OCRLogService.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -308,32 +313,68 @@ public class OCRLogService {
         return hydrateIssues(ocrLogDimMapper.selectById(logId));
     }
 
+    @Transactional
     public void removeById(Integer logId) {
-        // 查出日志记录，获取文件名
-        OCRLogDim log = ocrLogDimMapper.selectById(logId);
-        if (log != null && log.getFileName() != null) {
-            deleteStorageFile(log.getFileName());
+        // 与确认入库保持相同锁顺序，避免删除和确认同时修改草稿。
+        reviewJdbc.queryForList("SELECT draft_id FROM archive_review_draft WHERE log_id=? FOR UPDATE", logId);
+        reviewJdbc.queryForList("SELECT log_id FROM ocr_log_dim WHERE log_id=? FOR UPDATE", logId);
+        OCRLogDim record = ocrLogDimMapper.selectById(logId);
+        if (record != null && "processing".equals(record.getRecognizeStatus())) {
+            throw new IllegalStateException("任务仍在处理中，请先取消或等待处理结束再删除");
         }
+        reviewJdbc.update("DELETE FROM archive_review_draft WHERE log_id=?", logId);
         ocrLogDimMapper.deleteById(logId);
+        if (record != null && record.getFileName() != null) stageStorageFile(record.getFileName());
         cacheService.evictDashboard();
     }
 
     /**
-     * 在 storage 目录中递归查找并删除文件及侧边文件
+     * 先移出扫描目录，数据库事务失败时恢复；提交后清理暂存文件。
      */
-    private void deleteStorageFile(String fileName) {
-        Path storageDir = Paths.get(System.getProperty("user.dir"), "storage");
-        try (Stream<Path> stream = Files.walk(storageDir)) {
-            stream.filter(Files::isRegularFile)
-                  .filter(p -> p.getFileName().toString().equals(fileName)
-                          || p.getFileName().toString().equals(fileName + ".error.json")
-                          || p.getFileName().toString().equals(fileName + ".warn.json"))
-                  .forEach(p -> {
-                      try {
-                          Files.deleteIfExists(p);
-                      } catch (IOException ignored) {}
-                  });
-        } catch (IOException ignored) {}
+    private void stageStorageFile(String fileName) {
+        Path root = Paths.get(System.getProperty("user.dir"), "storage").toAbsolutePath().normalize();
+        if (!Files.exists(root)) return;
+        List<Path> targets;
+        try (Stream<Path> stream = Files.walk(root)) {
+            targets = stream.filter(Files::isRegularFile)
+                .filter(p -> root.relativize(p).getName(0).toString().matches("archive|failed|temp"))
+                .filter(p -> p.getFileName().toString().equals(fileName)
+                    || p.getFileName().toString().equals(fileName + ".error.json")
+                    || p.getFileName().toString().equals(fileName + ".warn.json")).toList();
+        } catch (IOException ex) { throw new IllegalStateException("无法读取原文件，未删除记录", ex); }
+        if (targets.isEmpty()) return;
+        if (!TransactionSynchronizationManager.isSynchronizationActive())
+            throw new IllegalStateException("删除原文件必须处于数据库事务中");
+        var moved = new java.util.LinkedHashMap<Path, Path>();
+        Path staging;
+        try { staging = Files.createTempDirectory(root, ".delete-"); }
+        catch (IOException ex) { throw new IllegalStateException("无法暂存原文件，未删除记录", ex); }
+        try {
+            for (Path original : targets) {
+                Path staged = staging.resolve(Integer.toString(moved.size()));
+                Files.move(original, staged);
+                moved.put(original, staged);
+            }
+        } catch (IOException ex) {
+            finishFileDeletion(staging, moved, false);
+            throw new IllegalStateException("原文件暂存失败，未删除记录", ex);
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override public void afterCompletion(int status) {
+                finishFileDeletion(staging, moved, status == STATUS_COMMITTED);
+            }
+        });
+    }
+
+    private void finishFileDeletion(Path staging, Map<Path, Path> moved, boolean committed) {
+        for (var entry : moved.entrySet()) {
+            try {
+                if (committed) Files.deleteIfExists(entry.getValue());
+                else Files.move(entry.getValue(), entry.getKey());
+            } catch (IOException ex) { log.error("删除暂存文件清理或恢复失败：{}", entry.getValue(), ex); }
+        }
+        try { Files.deleteIfExists(staging); }
+        catch (IOException ex) { log.error("删除暂存目录清理失败：{}", staging, ex); }
     }
 
     /**

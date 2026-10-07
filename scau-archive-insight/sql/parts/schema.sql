@@ -361,3 +361,29 @@ CREATE TABLE IF NOT EXISTS public.knowledge_chunks (
 -- 索引
 CREATE INDEX IF NOT EXISTS idx_kb_chunks_kb_id ON public.knowledge_chunks (kb_id);
 CREATE INDEX IF NOT EXISTS idx_kb_status ON public.knowledge_base (status);
+
+-- 入库前审查草稿；不修改现有业务表及 OCR 日志表。
+CREATE TABLE IF NOT EXISTS public.archive_review_draft (
+    draft_id BIGSERIAL PRIMARY KEY,
+    log_id INTEGER UNIQUE REFERENCES public.ocr_log_dim(log_id) ON DELETE SET NULL,
+    original_file_name TEXT NOT NULL,
+    stored_file_name TEXT NOT NULL,
+    source_path TEXT NOT NULL,
+    file_type VARCHAR(50) NOT NULL,
+    archive_type VARCHAR(20) NOT NULL CHECK (archive_type IN ('admission', 'graduation')),
+    original_records JSONB NOT NULL CHECK (jsonb_typeof(original_records) = 'array'),
+    edited_records JSONB NOT NULL CHECK (jsonb_typeof(edited_records) = 'array'),
+    schema_snapshot JSONB NOT NULL CHECK (jsonb_typeof(schema_snapshot) = 'array'),
+    original_issues JSONB NOT NULL DEFAULT '[]'::jsonb,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending_review'
+        CHECK (status IN ('pending_review', 'imported', 'discarded')),
+    version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+    file_id INTEGER REFERENCES public.archive_file_dim(file_id) ON DELETE SET NULL,
+    last_error TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    confirmed_at TIMESTAMP,
+    CHECK (status <> 'imported' OR confirmed_at IS NOT NULL)
+);
+CREATE INDEX IF NOT EXISTS idx_review_draft_status_created
+    ON public.archive_review_draft(status, created_at DESC);
