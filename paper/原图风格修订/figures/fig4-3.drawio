@@ -23,7 +23,7 @@
         <mxCell id="mi1" value="仪表盘" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#1B4F72;strokeColor=none;strokeWidth=1.5;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
           <mxGeometry x="35" y="151" width="180" height="39" as="geometry" />
         </mxCell>
-        <mxCell id="mi2" value="档案上传与任务" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#EBF5FB;strokeColor=none;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
+        <mxCell id="mi2" value="档案上传 / 任务 / 入库审查" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#EBF5FB;strokeColor=none;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=20;fontStyle=0;align=center;verticalAlign=middle;spacing=8;dashed=0;">
           <mxGeometry x="35" y="202" width="180" height="39" as="geometry" />
         </mxCell>
         <mxCell id="mi3" value="数据管理" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#1B4F72;strokeColor=none;strokeWidth=1;fontColor=#FFFFFF;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">

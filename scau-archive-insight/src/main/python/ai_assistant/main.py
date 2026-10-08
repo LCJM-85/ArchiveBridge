@@ -16,7 +16,7 @@ from rag.path_security import resolve_rag_file
 from rag.url_security import validate_public_http_url
 from rag.text_splitter import split_text
 from rag.embedding import get_embeddings_batch
-from rag.retriever import search_knowledge
+from rag.retriever import search_knowledge, search_knowledge_context
 
 agent = None
 report_chain = None
@@ -39,7 +39,7 @@ app = FastAPI(title="AI 助手服务", lifespan=lifespan)
 def _build_knowledge_context(question: str) -> str:
     """搜索知识库，返回知识上下文文本"""
     try:
-        results = search_knowledge(question, top_k=3)
+        results = search_knowledge_context(question, top_k=3)
         if not results:
             return ""
         context_parts = []

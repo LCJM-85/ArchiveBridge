@@ -42,6 +42,170 @@ SYSTEM_PROMPT = """你是华南农业大学档案管理系统的 AI 数据分析
 - 数据多就用表格展示，看着清楚
 - 事实查询简洁回答；只有用户要求分析时才展开，分析必须区分证据与推测"""
 
+SYSTEM_PROMPT += """
+- 知识库回答逐项对应用户问题，只能陈述资料明确支持的事实。可先摘录相关原句再作简短解释；找不到依据的部分明确说不能确定。
+- 不把相关但不同的操作混为一谈，例如文件改名不是图像标注或增强。原件、工作副本、提供副本的处理范围分别遵守原文，不能扩大允许修改的对象。
+- 不从历史档案数与预测值的差异推断档案不完整、模型错误或真实未来人数；这类原因必须有独立证据。
+- 记录存在、字段完整、人工核验、接收完成是不同事实；不得从三类记录存在推断其余状态。
+- 查询专业信息缺失时只能说专业未知，不得说该年的招生档案不存在。
+"""
+
+DATABASE_TOOL_NAMES = {t.name for t in tools if t.name not in {'web_search', 'web_fetch'}}
+QUERY_REQUIRED = '本轮没有取得有效的数据库查询依据，无法确认所问结果。请重新查询，不能沿用历史数字或把知识库规则当作统计值。'
+
+
+def database_subject(question, history):
+    """省略指标的时间追问只继承用户指标，不继承模型数字或旧年份。"""
+    raw = raw_user_question(question)
+    if resolve_query_year(raw, current_date()) is not None and not re.search(r'录取|招生|学籍|毕业|在籍|学号|专业|省份|分数', raw):
+        return next((m.get('content', '') for m in reversed(history) if m.get('role') == 'user'
+                     and re.search(r'录取|招生|学籍|毕业|在籍|学号|专业|省份|分数', m.get('content', ''))), raw)
+    return raw
+
+
+def requires_database_query(question, history):
+    subject = database_subject(question, history)
+    if re.search(r'依据知识库|依据.*资料|资料允许|资料规定|资料.*结论', subject):
+        return False
+    return bool(re.search(r'数据库|学号\s*\d|(?:录取|招生|在籍|学籍|毕业).*(?:人数|多少|数量|总数|分别|是否)|各(?:专业|省份).*录取', subject))
+
+
+def knowledge_lines(question):
+    """按来源拆出可直接引用的原文行，不把历史回答作为依据。"""
+    if '【知识库资料】' not in question or '【用户问题】' not in question:
+        return []
+    context = question.rsplit('【用户问题】', 1)[0].split('【知识库资料】', 1)[1]
+    matches = list(re.finditer(r'(?m)^\[([^\]\r\n]+)\]:\s*', context))
+    lines = []
+    for i, match in enumerate(matches):
+        end = matches[i + 1].start() if i + 1 < len(matches) else len(context)
+        for line in context[match.end():end].splitlines():
+            line = line.strip()
+            if line:
+                lines.append({'source': match[1], 'quote': line})
+    return lines
+
+
+def use_knowledge_evidence(question, history):
+    raw = raw_user_question(question)
+    # 明确要求联网/最新动态时仍走原工具流程；资料优先题只摘录当前资料。
+    wants_web = bool(re.search(r'请(?:联网|搜索)|最新(?:新闻|政策|消息)|今天.*新闻', raw))
+    return bool(knowledge_lines(question)) and not wants_web and not requires_database_query(question, history)
+
+
+def render_knowledge_evidence(question, payload):
+    """只显示程序逐字核实的完整原文行，拒绝模型自由增加理由和来源。"""
+    if not isinstance(payload, dict):
+        return '当前检索资料没有取得可核实的引用，无法确认答案。'
+    available = knowledge_lines(question)
+    requested = payload.get('quotes', [])
+    if not isinstance(requested, list):
+        requested = []
+    selected = []
+    for item in requested[:8]:
+        if not isinstance(item, dict):
+            continue
+        # 不能截取句子的一部分，否则可能把“不能断言X”截成“X”。
+        if item in available and item not in selected:
+            selected.append(item)
+    if not selected:
+        return '当前检索资料没有取得与问题对应的可核实引用，无法确认答案；不能用推测补齐。'
+    return '与问题相关的资料原文如下（未写明的结论不能据此确定）：\n\n' + '\n\n'.join(
+        f"来源：{item['source']}\n> {item['quote']}" for item in selected)
+
+
+async def run_knowledge_answer(question):
+    lines = knowledge_lines(question)
+    prompt = ('你是资料摘录助手。根据用户问题，从给定的来源原文行中选择直接回答各个子问题的完整行。'
+              '只返回JSON对象，格式为 {"quotes":[{"source":"来源标题","quote":"完整原文行"}]}。'
+              'source和quote必须逐字复制；不能改写、不能省略行内条件或否定词，不能自行解释原因。'
+              '每个子问题选择必要的依据，最多8行；只相关但不能回答的行不要选。没有依据时返回空数组。')
+    response = await _build_llm().ainvoke([SystemMessage(content=prompt), HumanMessage(content=json.dumps({
+        'question': raw_user_question(question), 'source_lines': lines}, ensure_ascii=False))])
+    try:
+        text = response.content.strip()
+        if text.startswith('```'):
+            text = re.sub(r'^```(?:json)?\s*|\s*```$', '', text)
+        payload = json.loads(text)
+    except (ValueError, TypeError, AttributeError):
+        payload = None
+    return render_knowledge_evidence(question, payload)
+
+
+def database_evidence(messages):
+    return [m for m in messages if isinstance(m, ToolMessage)
+            and m.name in DATABASE_TOOL_NAMES and m.status != 'error']
+
+
+def grounded_database_answer(question, answer, evidence, history, today):
+    """常见事实题用本轮工具数值呈现，模型文字不能增加数字、状态或原因。"""
+    required = requires_database_query(question, history)
+    if not required:
+        return answer
+    subject = database_subject(question, history)
+    year = resolve_query_year(question, today)
+    records = []
+    for message in database_evidence(evidence):
+        try:
+            payload = json.loads(message.content)
+        except (TypeError, ValueError):
+            continue
+        if isinstance(payload, dict) and 'data' in payload and 'queried_year' in payload:
+            if year is not None and str(payload['queried_year']) != str(year):
+                continue
+            records.append((message.name, payload['data'], payload.get('tool_args', {})))
+        elif year is None:
+            records.append((message.name, payload, {}))
+    if not records:
+        return QUERY_REQUIRED
+    scope = f'{year}年' if year is not None else '本次查询范围内'
+    note = '\n\n以上仅代表本系统已入库档案，不代表学校现实全量人数。'
+    for name, data, args in reversed(records):
+        if name == 'get_student_detail' and re.search(r'在籍|是否毕业|是否.*毕业', subject):
+            number = re.search(r'学号\s*(\d+)', subject)
+            if number and str(data.get('student_no')) != number[1]:
+                return QUERY_REQUIRED
+            status = data.get('student_status', '状态未知')
+            status = '已毕业，不在籍' if status == '已毕业' else status
+            found = data.get('record_sources', {}).get('graduation')
+            graduation = '查到毕业记录' if found is True else '未查到毕业记录，不能据此断言未毕业'
+            return f"学号{data.get('student_no')}：学籍状态为{status}；{graduation}。\n\n记录存在不等于字段完整或验收完成，本次查询不能确定验收状态。"
+        distribution = {'get_major_distribution': ('专业', 'name'), 'get_province_distribution': ('省份', 'name')}
+        if name in distribution:
+            label, key = distribution[name]
+            if label not in subject or not re.search(r'各|分别|分布|最多', subject):
+                continue
+            if not data:
+                return f'{scope}本系统未找到该查询范围的录取记录，无法给出{label}分布；不能据此断言现实招生为0。'
+            rows = data
+            if '最多' in subject:
+                maximum = max(r['count'] for r in data)
+                rows = [r for r in data if r['count'] == maximum]
+            lines = [f'{scope}录取{label}统计：', f'\n| {label} | 人数 |', '|---|---:|']
+            lines.extend(f"| {r[key]} | {r['count']}人 |" for r in rows)
+            if name == 'get_major_distribution' and any(r['name'] == '未知' for r in data):
+                lines.append('\n“未知”表示专业未记录或未匹配，不能推断这些学生所属的具体专业。')
+            return '\n'.join(lines) + note
+        # 只接管单一人数/层次分布题；分数、趋势、多年比较继续由原流程回答。
+        if re.search(r'平均|分数|趋势|比较|对比|同比|环比|预测|各专业|各省份', subject):
+            continue
+        if name == 'get_admission_stats' and isinstance(data, dict) and 'total_admissions' in data:
+            count = data['total_admissions']
+            if count == 0:
+                return f'{scope}本系统未找到录取记录（已入库统计为0人）；不能据此断言现实招生为0。'
+            return f'{scope}本系统已入库录取人数为{count}人。' + note
+        if name == 'get_admission_count_by_degree':
+            if isinstance(data, list):
+                count = sum(r['count'] for r in data)
+                if not count:
+                    return f'{scope}本系统未找到录取记录（已入库统计为0人）；不能据此断言现实招生为0。'
+                return f'{scope}本系统已入库录取人数合计{count}人。\n\n' + '\n'.join(f"{r['degree']}：{r['count']}人。" for r in data) + note
+            if isinstance(data, dict):
+                count = data.get('admission_count', data.get('合计'))
+                if count is not None:
+                    return f"{scope}{data.get('degree', '')}已入库录取人数为{count}人。" + note
+    return answer
+
 
 def _build_llm(temperature=0.1):
     return ChatOpenAI(
@@ -142,15 +306,16 @@ class QueryYearGuard(AgentMiddleware):
         return request, None
 
     def _annotate(self, request, result):
-        if isinstance(result, ToolMessage) and result.status != 'error' and request.tool_call['args'].get('year') is not None:
+        if isinstance(result, ToolMessage) and result.status != 'error' and request.tool_call['name'] in DATABASE_TOOL_NAMES:
             try:
                 data = json.loads(result.content)
             except (ValueError, TypeError):
                 return result
             return result.model_copy(update={'content': json.dumps({
-                'queried_year': request.tool_call['args']['year'], 'data': data,
-                'scope': '仅代表该年份系统已入库档案，不能用其他年份替代。',
-                'record_note': ('该年份查询未找到记录，无法判断所问结果；不能证明现实人数为0。' if data == [] else '请依据返回的统计直接回答。')
+                'queried_year': request.tool_call['args'].get('year'), 'data': data,
+                'tool_args': request.tool_call['args'],
+                'scope': '仅代表本次查询范围内系统已入库档案，不能用其他年份替代。',
+                'record_note': ('本工具在当前筛选范围未找到结果；不代表该年份所有类型档案都不存在，也不能证明现实人数为0。' if data == [] else '请依据返回的统计直接回答。')
                     + '本工具不提供档案完整性或缺失原因信息，不能推断未录入、整理中、暂无录取等原因。'
             }, ensure_ascii=False)})
         return result
@@ -165,23 +330,35 @@ class QueryYearGuard(AgentMiddleware):
 
 
 async def run_agent(agent, question: str, history: list):
+    if use_knowledge_evidence(question, history):
+        return await run_knowledge_answer(question)
     messages = build_query_messages(question, history)
 
     result = await agent.ainvoke({"messages": messages})
+    evidence = database_evidence(result.get('messages', []))
+    if requires_database_query(question, history) and not evidence:
+        result = await agent.ainvoke({'messages': messages + [SystemMessage(content=QUERY_REQUIRED + '必须先调用相应数据库工具再回答。')]})
+        evidence = database_evidence(result.get('messages', []))
 
     for m in reversed(result.get("messages", [])):
         if isinstance(m, AIMessage) and m.content and not m.tool_calls:
-            return format_query_answer(question, m.content, date.fromisoformat(messages[0].content[7:17]))
+            today = date.fromisoformat(messages[0].content[7:17])
+            return format_query_answer(question, grounded_database_answer(question, m.content, evidence, history, today), today)
     return "抱歉，无法获取回答"
 
 
 async def run_agent_stream(agent, question: str, history: list):
     """流式运行 agent，逐步 yield 状态事件和最终结果。"""
+    if use_knowledge_evidence(question, history):
+        yield {'type': 'status', 'content': '正在核对资料原文...'}
+        yield {'type': 'token', 'content': await run_knowledge_answer(question)}
+        return
     messages = build_query_messages(question, history)
 
     yield {"type": "status", "content": "正在分析问题..."}
 
     final_answer = None
+    evidence = []
 
     async for state in agent.astream({"messages": messages}):
         # state 是 {node_name: {"messages": [...]}} 结构
@@ -193,6 +370,7 @@ async def run_agent_stream(agent, question: str, history: list):
                     break
         if not all_msgs:
             continue
+        evidence.extend(database_evidence(all_msgs))
 
         last = all_msgs[-1]
 
@@ -208,7 +386,14 @@ async def run_agent_stream(agent, question: str, history: list):
             final_answer = last.content
 
     if final_answer:
-        yield {"type": "token", "content": format_query_answer(question, final_answer, date.fromisoformat(messages[0].content[7:17]))}
+        if requires_database_query(question, history) and not evidence:
+            yield {'type': 'status', 'content': '正在补充数据库查询依据...'}
+            result = await agent.ainvoke({'messages': messages + [SystemMessage(content=QUERY_REQUIRED + '必须先调用相应数据库工具再回答。')]})
+            evidence = database_evidence(result.get('messages', []))
+            final_answer = next((m.content for m in reversed(result.get('messages', []))
+                                 if isinstance(m, AIMessage) and m.content and not m.tool_calls), final_answer)
+        today = date.fromisoformat(messages[0].content[7:17])
+        yield {"type": "token", "content": format_query_answer(question, grounded_database_answer(question, final_answer, evidence, history, today), today)}
     else:
         yield {"type": "token", "content": "抱歉，无法获取回答"}
 

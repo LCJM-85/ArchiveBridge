@@ -93,7 +93,7 @@
         <mxCell id="c2-i1" value="Spring Boot 业务服务" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#EBF5FB;strokeColor=#2E86AB;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;fontSize=23;align=center;verticalAlign=middle;fontStyle=1;spacing=8;dashed=0;">
           <mxGeometry x="372" y="148" width="367" height="56" as="geometry" />
         </mxCell>
-        <mxCell id="task" value="任务子进程&lt;br&gt;OCR / 视觉 / 预测" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F5EEF8;strokeColor=#14816B;strokeWidth=2;fontColor=#14816B;fontFamily=Microsoft YaHei;fontSize=18;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
+        <mxCell id="task" value="OCR 常驻工作进程&lt;br&gt;视觉 / 预测任务子进程" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=30;fillColor=#F5EEF8;strokeColor=#14816B;strokeWidth=2;fontColor=#14816B;fontFamily=Microsoft YaHei;fontSize=18;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
           <mxGeometry x="372" y="259" width="171" height="79" as="geometry" />
         </mxCell>
         <mxCell id="c4" value="FastAPI 进程&lt;br&gt;Agent / RAG" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#6C3483;strokeWidth=2;fontSize=20;fontFamily=Microsoft YaHei;fontStyle=0;align=center;verticalAlign=middle;spacing=8;fontColor=#6C3483;dashed=0;">

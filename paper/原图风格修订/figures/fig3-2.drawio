@@ -125,10 +125,10 @@
         <mxCell id="n3-mllm-detail" value="动态字段提示词&lt;br&gt;视觉模型生成 JSON" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#B95E00;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#B95E00;dashed=0;">
           <mxGeometry x="745" y="320" width="300" height="95" as="geometry" />
         </mxCell>
-        <mxCell id="n4" value="业务持久化：新增或更新匹配记录" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=23;fontStyle=1;spacing=8;dashed=0;">
+        <mxCell id="n4" value="保存原始记录与审查草稿&lt;br&gt;对照原件编辑 / 增删 / 校验" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=23;fontStyle=1;spacing=8;dashed=0;">
           <mxGeometry x="255" y="488" width="590" height="58" as="geometry" />
         </mxCell>
-        <mxCell id="n5" value="记录质量参考分、文件归档与任务终态" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=22;fontStyle=0;spacing=8;dashed=0;">
+        <mxCell id="n5" value="确认 → 事务入库 / 评分 / 归档&lt;br&gt;放弃 → 保留原件，不写业务表" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#EBF5FB;strokeColor=#1B4F72;strokeWidth=2;fontColor=#1B4F72;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=22;fontStyle=0;spacing=8;dashed=0;">
           <mxGeometry x="255" y="579" width="590" height="54" as="geometry" />
         </mxCell>
       </root>

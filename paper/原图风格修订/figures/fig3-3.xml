@@ -68,7 +68,7 @@
         <mxCell id="d1" value="college_dim / major_dim / class_dim&lt;br&gt;province_dim / degree_dim / destination_dim" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FFFFFF;strokeColor=#D35400;strokeWidth=2;fontColor=#B95E00;fontFamily=Microsoft YaHei;fontSize=20;align=center;verticalAlign=middle;fontStyle=0;spacing=8;dashed=0;">
           <mxGeometry x="40" y="60" width="650" height="65" as="geometry" />
         </mxCell>
-        <mxCell id="d-more" value="archive_file_dim&lt;br&gt;来源文件" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FDEBD0;strokeColor=#F5B041;strokeWidth=2;dashed=0;dashPattern=4 3;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#B95E00;">
+        <mxCell id="d-more" value="archive_file_dim 来源文件&lt;br&gt;archive_review_draft 审查草稿&lt;br&gt;关联 log_id / file_id；保存原始与编辑记录" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=10;fillColor=#FDEBD0;strokeColor=#F5B041;strokeWidth=2;dashed=0;dashPattern=4 3;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#B95E00;">
           <mxGeometry x="720" y="60" width="335" height="65" as="geometry" />
         </mxCell>
         <mxCell id="fact-title" value="业务事实记录" vertex="1" parent="1" style="text=1;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Microsoft YaHei;fontSize=22;fontStyle=1;fontColor=#1B4F72;whiteSpace=wrap;spacing=8;dashed=0;">

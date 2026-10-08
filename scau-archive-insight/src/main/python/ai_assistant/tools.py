@@ -68,7 +68,7 @@ def get_admission_trend(year: int = None) -> str:
 
 @tool
 def get_major_distribution(year: int = None) -> str:
-    """获取各专业录取人数分布。可指定年份，不指定则返回全部年份合计"""
+    """获取各专业录取人数分布，专业缺失归入未知，不能因此漏掉招生记录。可指定年份，不指定则返回全部年份合计"""
     year_filter = "AND EXTRACT(YEAR FROM f.admission_date)::int = %s" if year else ""
     params = (year,) if year else None
 
@@ -76,7 +76,7 @@ def get_major_distribution(year: int = None) -> str:
         SELECT COALESCE(m.major_name, '未知') AS name, COUNT(*)::int AS count
         FROM admission_fact f
         LEFT JOIN major_dim m ON f.major_id = m.major_id
-        WHERE f.major_id IS NOT NULL {year_filter}
+        WHERE 1=1 {year_filter}
         GROUP BY m.major_name ORDER BY count DESC
     """
     rows = _query(sql, params)
@@ -477,7 +477,7 @@ def search_student(keyword: str) -> str:
 
 @tool
 def get_student_detail(student_no: str) -> str:
-    """获取单个学生的完整信息（含招生、学籍、毕业全链路数据）"""
+    """查询单个学生的招生、学籍、毕业记录；记录存在不代表字段完整或已验收"""
     result = {}
 
     # 招生信息
@@ -548,9 +548,10 @@ def get_student_detail(student_no: str) -> str:
         result["destination"] = grad[2]
 
     result["record_sources"] = {"admission": bool(admission), "student": bool(student), "graduation": bool(grad)}
+    result["record_note"] = "record_sources只表示查到相应类型记录，不表示字段完整、已核验或已接收完成；本工具不查询验收状态。"
     if not (admission and student and grad):
         result["missing_record_reason"] = "unknown"
-        result["record_note"] = "未找到某类记录仅表示本系统未查到，缺失原因未知；不能推断是迁移、其他毕业途径等原因。"
+        result["record_note"] += "未找到某类记录仅表示本系统未查到，缺失原因未知；不能推断是迁移、其他毕业途径等原因。"
     return json.dumps(result, ensure_ascii=False)
 
 

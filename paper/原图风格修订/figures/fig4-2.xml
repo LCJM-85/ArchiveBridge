@@ -106,7 +106,7 @@
         <mxCell id="b3" value="资料标题与片段&lt;br&gt;拼接到用户问题" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#FFFFFF;strokeColor=#1B4F72;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#1B4F72;dashed=0;">
           <mxGeometry x="535" y="359" width="230" height="88" as="geometry" />
         </mxCell>
-        <mxCell id="b4" value="LangChain Agent&lt;br&gt;生成完整答案" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#E8F8F5;strokeColor=#1E8449;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#1B4F72;dashed=0;">
+        <mxCell id="b4" value="Agent / 请求日期与年份约束&lt;br&gt;纠正后重新查询 / 完整答案" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=12;fillColor=#E8F8F5;strokeColor=#1E8449;strokeWidth=2;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=21;fontStyle=0;spacing=8;fontColor=#1B4F72;dashed=0;">
           <mxGeometry x="805" y="359" width="250" height="88" as="geometry" />
         </mxCell>
         <mxCell id="retrieve-note" value="精确检索" vertex="1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;arcSize=8;fillColor=none;strokeColor=none;fontColor=#B95E00;fontFamily=Microsoft YaHei;align=center;verticalAlign=middle;fontSize=20;fontStyle=0;spacing=8;text=1;dashed=0;">
