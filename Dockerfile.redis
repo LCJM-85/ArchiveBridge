@@ -1,0 +1,8 @@
+# Redis 基础镜像 —— 与 Dockerfile.db 一样，只做一次「从加速器取官方镜像」，
+# 这样 compose 构建出的镜像名是 archivebridge-redis，而不是带加速器域名前缀的名字。
+# 换源方式（任选其一，无需改动本文件）：
+#   1) 根目录 .env 中设置 DOCKER_REGISTRY=<加速器域名>，docker compose 会自动传入；
+#   2) 手动构建时 --build-arg REGISTRY=<加速器域名>；官方源用 REGISTRY=docker.io。
+# 已实测可用：hub.rat.dev、dockerproxy.net
+ARG REGISTRY=hub.rat.dev
+FROM ${REGISTRY}/library/redis:7-alpine

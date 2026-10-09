@@ -1,13 +1,14 @@
-# 基础镜像源：默认走国内加速源（DaoCloud 公共镜像）。
+# 基础镜像源：默认走国内加速源。
 # 换源方式（任选其一，无需改动本文件）：
 #   1) 根目录 .env 中设置 DOCKER_REGISTRY=<加速器域名>，docker compose 会自动传入；
 #   2) 手动构建时 --build-arg REGISTRY=<加速器域名>；官方源用 REGISTRY=docker.io。
-# 已验证可用：docker.m.daocloud.io、dockerproxy.net、hub.rat.dev
-ARG REGISTRY=docker.m.daocloud.io
+# 已实测可用：hub.rat.dev、dockerproxy.net
+# （docker.m.daocloud.io 的部分层走 image-mirror.r2.daocloud.vip，国内部分网络连不上）
+ARG REGISTRY=hub.rat.dev
 FROM ${REGISTRY}/postgis/postgis:15-3.3
 
-# 安装 pgvector 扩展 —— 使用阿里云国内镜像（debian + PGDG），避免官方源在代理下 502
-RUN sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list && \
+# 安装 pgvector 扩展 —— Debian 走腾讯云、PGDG 走阿里云（PGDG 仅阿里云/清华有镜像），避免官方源在代理下 502
+RUN sed -i 's|http://deb.debian.org|https://mirrors.cloud.tencent.com|g' /etc/apt/sources.list && \
     echo 'deb [ signed-by=/usr/local/share/keyrings/postgres.gpg.asc ] https://mirrors.aliyun.com/postgresql/repos/apt/ bullseye-pgdg main' > /etc/apt/sources.list.d/pgdg.list && \
     apt-get update && apt-get install -y --no-install-recommends \
     postgresql-15-pgvector \
