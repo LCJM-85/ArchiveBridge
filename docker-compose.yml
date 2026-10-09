@@ -5,6 +5,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.db
+      args:
+        REGISTRY: ${DOCKER_REGISTRY:-docker.m.daocloud.io}
     container_name: scau-db
     restart: unless-stopped
     environment:
@@ -25,7 +27,7 @@ services:
 
   # Redis（验证码、限流和查询缓存）
   redis:
-    image: redis:7-alpine
+    image: ${DOCKER_REGISTRY:-docker.m.daocloud.io}/library/redis:7-alpine
     container_name: scau-redis
     restart: unless-stopped
     environment:
@@ -39,7 +41,10 @@ services:
 
   # Spring Boot 后端（含 Python+PaddlePaddle）
   backend:
-    build: ./scau-archive-insight
+    build:
+      context: ./scau-archive-insight
+      args:
+        REGISTRY: ${DOCKER_REGISTRY:-docker.m.daocloud.io}
     container_name: scau-backend
     restart: unless-stopped
     depends_on:
@@ -82,7 +87,10 @@ services:
 
   # Vue 3 前端（Nginx）
   frontend:
-    build: ./scau_archive-frontend
+    build:
+      context: ./scau_archive-frontend
+      args:
+        REGISTRY: ${DOCKER_REGISTRY:-docker.m.daocloud.io}
     container_name: scau-frontend
     restart: unless-stopped
     depends_on:

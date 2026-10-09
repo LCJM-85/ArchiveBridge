@@ -1,5 +1,12 @@
+# 基础镜像源：默认走国内加速源（DaoCloud 公共镜像）。
+# 换源方式（任选其一，无需改动本文件）：
+#   1) 根目录 .env 中设置 DOCKER_REGISTRY=<加速器域名>，docker compose 会自动传入；
+#   2) 手动构建时 --build-arg REGISTRY=<加速器域名>；官方源用 REGISTRY=docker.io。
+# 已验证可用：docker.m.daocloud.io、dockerproxy.net、hub.rat.dev
+ARG REGISTRY=docker.m.daocloud.io
+
 # ========== 构建阶段：编译 Spring Boot JAR ==========
-FROM maven:3.9-eclipse-temurin-21 AS builder
+FROM ${REGISTRY}/library/maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /build
 # 阿里云 Maven 镜像（国内加速）
 RUN mkdir -p /root/.m2 && \
@@ -12,8 +19,8 @@ RUN mvn package -DskipTests -B
 
 # ========== 运行阶段 ==========
 # 用 eclipse-temurin 提供 Java 21 运行时
-FROM eclipse-temurin:21-jre AS java-provider
-FROM python:3.12-slim
+FROM ${REGISTRY}/library/eclipse-temurin:21-jre AS java-provider
+FROM ${REGISTRY}/library/python:3.12-slim
 WORKDIR /app
 
 # 1. 从 java-provider 复制 Java 21 运行时
