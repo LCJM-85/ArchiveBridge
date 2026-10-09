@@ -2,9 +2,8 @@
 # 换源方式（任选其一，无需改动本文件）：
 #   1) 根目录 .env 中设置 DOCKER_REGISTRY=<加速器域名>，docker compose 会自动传入；
 #   2) 手动构建时 --build-arg REGISTRY=<加速器域名>；官方源用 REGISTRY=docker.io。
-# 已实测可用：hub.rat.dev、dockerproxy.net
-# （docker.m.daocloud.io 的部分层走 image-mirror.r2.daocloud.vip，国内部分网络连不上）
-ARG REGISTRY=hub.rat.dev
+# 备选：hub.rat.dev、dockerproxy.net（公共加速器会波动，拉不动时换一个重试即可）
+ARG REGISTRY=docker.m.daocloud.io
 
 # ========== 构建阶段：编译 Spring Boot JAR ==========
 FROM ${REGISTRY}/library/maven:3.9-eclipse-temurin-21 AS builder
